@@ -1,39 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { getTableByName } from 'dtable-utils';
 import PresetItem from './PresetItem/index';
-import stylesPresets from '../../styles/template-styles/PluginPresets.module.scss';
+import stylesPresets from '../../../styles/template-styles/PluginPresets.module.scss';
 import deepCopy from 'deep-copy';
-import icon from '../../plugin-config/icon.png';
-import Preset from '../../model/preset';
+import icon from '../../../plugin-config/icon.png';
+import Preset from '../../../model/preset';
 import {
   IPresetsProps,
   PresetSettings,
   PresetsArray,
-} from '../../utils/Interfaces/PluginPresets/Presets.interface';
+} from '../../../utils/Interfaces/template-interfaces/PluginPresets/Presets.interface';
 import {
   appendPresetSuffix,
   createDefaultPresetSettings,
   generatorPresetId,
   getActiveTableAndActiveView,
   isUniquePresetName,
-} from '../../utils/utils';
+} from '../../../utils/utils';
 import {
   DEFAULT_PLUGIN_DATA,
   PLUGIN_NAME,
   PresetHandleAction,
   TABLE_NAME,
-} from '../../utils/constants';
+} from '../../../utils/constants';
 import {
   IActiveTableAndView,
   TableArray,
   TableColumn,
-} from '../../utils/Interfaces/Table.interface';
+} from '../../../utils/Interfaces/template-interfaces/Table.interface';
 import PresetInput from './PresetInput';
-import useClickOut from '../../hooks/useClickOut';
-import { AppActiveState } from '../../utils/Interfaces/App.interface';
+import useClickOut from '../../../hooks/useClickOut';
+import { AppActiveState } from '../../../utils/Interfaces/template-interfaces/App.interface';
 import { HiOutlineChevronDoubleLeft } from 'react-icons/hi2';
 import intl from 'react-intl-universal';
-import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from '../../locale';
+import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from '../../../locale';
 const { [DEFAULT_LOCALE]: d } = AVAILABLE_LOCALES;
 
 const PluginPresets: React.FC<IPresetsProps> = ({

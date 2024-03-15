@@ -1,13 +1,16 @@
 import pluginContext from '../plugin-context';
-import { AppActiveState, IPluginDataStore } from './Interfaces/App.interface';
-import { PresetSettings, PresetsArray } from './Interfaces/PluginPresets/Presets.interface';
+import { AppActiveState, IPluginDataStore } from './Interfaces/template-interfaces/App.interface';
+import {
+  PresetSettings,
+  PresetsArray,
+} from './Interfaces/template-interfaces/PluginPresets/Presets.interface';
 import {
   IActiveTableAndView,
   Table,
   TableArray,
   TableRow,
   TableView,
-} from './Interfaces/Table.interface';
+} from './Interfaces/template-interfaces/Table.interface';
 import { DEFAULT_PLUGIN_DATA, PLUGIN_NAME, POSSIBLE, PresetHandleAction } from './constants';
 
 export const generatorBase64Code = (keyLength = 4) => {

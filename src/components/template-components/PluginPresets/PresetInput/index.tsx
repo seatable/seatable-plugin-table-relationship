@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import React, { useEffect, useRef, useState } from 'react';
-import styles2 from '../../../styles/template-styles/PluginPresets.module.scss';
-import { IPresetInput } from '../../../utils/Interfaces/PluginPresets/Input.interface';
-import { KeyDownActions } from '../../../utils/constants';
+import styles2 from '../../../../styles/template-styles/PluginPresets.module.scss';
+import { IPresetInput } from '../../../../utils/Interfaces/template-interfaces/PluginPresets/Input.interface';
+import { KeyDownActions } from '../../../../utils/constants';
 
 const PresetInput: React.FC<IPresetInput> = ({
   presetName,

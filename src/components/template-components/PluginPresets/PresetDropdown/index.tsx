@@ -1,10 +1,10 @@
 import React from 'react';
-import styles from '../../../styles/template-styles/Plugin.module.scss';
-import stylesPPresets from '../../../styles/template-styles/PluginPresets.module.scss';
-import { IPresetDropdownProps } from '../../../utils/Interfaces/PluginPresets/Dropdown.interface';
-import { PresetHandleAction } from '../../../utils/constants';
+import styles from '../../../../styles/template-styles/Plugin.module.scss';
+import stylesPPresets from '../../../../styles/template-styles/PluginPresets.module.scss';
+import { IPresetDropdownProps } from '../../../../utils/Interfaces/template-interfaces/PluginPresets/Dropdown.interface';
+import { PresetHandleAction } from '../../../../utils/constants';
 import intl from 'react-intl-universal';
-import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from '../../../locale';
+import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from '../../../../locale';
 const { [DEFAULT_LOCALE]: d } = AVAILABLE_LOCALES;
 
 const PresetDropdown: React.FC<IPresetDropdownProps> = ({
