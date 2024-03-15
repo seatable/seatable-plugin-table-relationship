@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import styles from '../../styles/template-styles/Plugin.module.scss';
-import { AVAILABLE_LOCALES } from '../../locale';
+import styles from '../../../styles/template-styles/Plugin.module.scss';
+import { AVAILABLE_LOCALES } from '../../../locale';
 
 const LanguageDropdown: React.FC<any> = (props) => {
   const { lang, updateLanguageAndIntl } = props;

@@ -3,17 +3,18 @@
 import React, { useEffect, useState } from 'react';
 import { FaPlus } from 'react-icons/fa6';
 // Import of Component
-import Header from './components/Header';
-import PluginSettings from './components/PluginSettings';
-import PluginPresets from './components/PluginPresets';
-import ResizableWrapper from './components/ResizableWrapper';
+import Header from './components/template-components/Header';
+import PluginSettings from './components/template-components/PluginSettings';
+import PluginPresets from './components/template-components/PluginPresets';
+import ResizableWrapper from './components/template-components/ResizableWrapper';
+import ERDPlugin from './components/custom-components/ERDPlugin';
 // Import of Interfaces
 import {
   AppActiveState,
   AppIsShowState,
   IAppProps,
   IPluginDataStore,
-} from './utils/Interfaces/App.interface';
+} from './utils/Interfaces/template-interfaces/App.interface';
 import {
   TableArray,
   TableViewArray,
@@ -22,9 +23,9 @@ import {
   TableRow,
   IActiveTableAndView,
   TableColumn,
-} from './utils/Interfaces/Table.interface';
-import { PresetsArray } from './utils/Interfaces/PluginPresets/Presets.interface';
-import { SelectOption } from './utils/Interfaces/PluginSettings.interface';
+} from './utils/Interfaces/template-interfaces/Table.interface';
+import { PresetsArray } from './utils/Interfaces/template-interfaces/PluginPresets/Presets.interface';
+import { SelectOption } from './utils/Interfaces/template-interfaces/PluginSettings.interface';
 // Import of CSS
 import styles from './styles/template-styles/Plugin.module.scss';
 import './assets/css/plugin-layout.css';
@@ -48,8 +49,6 @@ import {
 } from './utils/utils';
 import { SettingsOption } from './utils/types';
 import pluginContext from './plugin-context';
-
-import CustomPlugin from './CustomPlugin';
 
 const App: React.FC<IAppProps> = (props) => {
   const { isDevelopment, lang } = props;
@@ -467,7 +466,7 @@ const App: React.FC<IAppProps> = (props) => {
           style={{ height: '100%', width: '100%', backgroundColor: '#f5f5f5' }}>
           <div id={PLUGIN_ID} className={styles.body} style={{ padding: '10px', width: '100%' }}>
             {/* Note: The CustomPlugin component serves as a placeholder and should be replaced with your custom plugin component. */}
-            <CustomPlugin
+            <ERDPlugin
               pluginPresets={pluginPresets}
               appActiveState={appActiveState}
               activeViewRows={activeViewRows}

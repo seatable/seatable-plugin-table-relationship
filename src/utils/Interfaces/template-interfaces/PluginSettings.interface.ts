@@ -1,4 +1,4 @@
-import { SettingsOption } from '../types';
+import { SettingsOption } from '../../types';
 import { AppActiveState } from './App.interface';
 import { PresetSettings, PresetsArray } from './PluginPresets/Presets.interface';
 import { TableArray, TableViewArray } from './Table.interface';

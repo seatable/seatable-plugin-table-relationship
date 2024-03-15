@@ -3,19 +3,19 @@
 import React, { useEffect, useState } from 'react';
 import { BsThreeDots } from 'react-icons/bs';
 // External dependencies
-import useClickOut from '../../../hooks/useClickOut';
+import useClickOut from '../../../../hooks/useClickOut';
 // Internal dependencies
 import PresetDropdown from '../PresetDropdown';
 import PresetInput from '../PresetInput';
 // Constants
-import { PresetHandleAction } from '../../../utils/constants';
+import { PresetHandleAction } from '../../../../utils/constants';
 // Interfaces
-import { IPresetItemProps } from '../../../utils/Interfaces/PluginPresets/Item.interface';
+import { IPresetItemProps } from '../../../../utils/Interfaces/template-interfaces/PluginPresets/Item.interface';
 // Styles
-import styles from '../../../styles/template-styles/Plugin.module.scss';
-import '../../../assets/css/plugin-layout.css';
+import styles from '../../../../styles/template-styles/Plugin.module.scss';
+import '../../../../assets/css/plugin-layout.css';
 import intl from 'react-intl-universal';
-import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from '../../../locale';
+import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from '../../../../locale';
 const { [DEFAULT_LOCALE]: d } = AVAILABLE_LOCALES;
 
 const PresetItem: React.FC<IPresetItemProps> = ({

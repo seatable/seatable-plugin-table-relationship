@@ -37,7 +37,8 @@ class SeaTablePlugin {
   }
 
   static onClosePlugin(lang) {
-    const LanguageDropdown = require('./components/LanguageDropDown/index').default;
+    const LanguageDropdown =
+      require('./components/template-components/LanguageDropDown/index').default;
     const langDropElement = document.getElementById('language-dropdown');
 
     ReactDOM.render(
