@@ -1,40 +1,88 @@
 import * as d3 from 'd3';
-import { Rectangle } from './Interfaces/custom-interfaces/ERDPlugin';
 
-export function generateNonOverlappingRectangles(
-  count: number,
-  width: number,
-  height: number
-): Rectangle[] {
-  const rectangles: Rectangle[] = [];
+export function createNodeWithDrag(
+  svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
+  entities: any[]
+): d3.Selection<SVGGElement, unknown, null, undefined>[] {
+  const shapesGroupArray = entities.map((entity, index) => {
+    const shapeGroup = svg.append('g');
+    const nOfAttributes = Object.keys(entity.eAttributes).length;
 
-  // Function to check if a rectangle overlaps with any existing rectangle
-  function isOverlapping(rect: Rectangle): boolean {
-    return rectangles.some(
-      (r) =>
-        rect.x < r.x + r.width &&
-        rect.x + rect.width > r.x &&
-        rect.y < r.y + r.height &&
-        rect.y + rect.height > r.y
-    );
-  }
+    shapeGroup
+      .append('rect')
+      .attr('x', 30 + (index % 2) * 200)
+      .attr('y', 30)
+      .attr('width', 150)
+      .attr('height', nOfAttributes * 30 + 30)
+      .style('fill', 'none')
+      .style('stroke', 'black')
+      .style('stroke-width', '1px')
+      .attr('id', 'shapeGroupRect');
 
-  for (let i = 0; i < count; i++) {
-    let rect: Rectangle;
-    do {
-      // Generate random coordinates for the rectangle
-      rect = {
-        // x: Math.random() * width - 100,
-        // y: Math.random() * height - 200,
-        x: Math.random() * 500,
-        y: Math.random() * 500,
-        width: 70,
-        height: 100,
-      };
-    } while (isOverlapping(rect)); // Repeat until the rectangle doesn't overlap
+    shapeGroup
+      .append('rect')
+      .attr('x', 30 + (index % 2) * 200)
+      .attr('y', 30)
+      .attr('width', 150)
+      .attr('height', 30)
+      .style('stroke', 'black')
+      .style('stroke-width', '1px')
+      .style('fill', 'lightblue');
 
-    rectangles.push(rect);
-  }
+    shapeGroup
+      .append('text')
+      .attr('x', 60 + (index % 2) * 200)
+      .attr('y', 48)
+      .text(entity.eTitle)
+      .style('fill', 'black');
 
-  return rectangles;
+    shapeGroup
+      .append('rect')
+      .attr('x', 30 + (index % 2) * 200)
+      .attr('y', 60)
+      .attr('width', 150)
+      .attr('height', nOfAttributes * 30)
+      .style('fill', 'lightgray');
+
+    let yOffset = 80;
+    Object.entries(entity.eAttributes).forEach(([key, value]) => {
+      shapeGroup
+        .append('text')
+        .attr('x', 45 + (index % 2) * 200)
+        .attr('y', yOffset)
+        .text(`${key}:`)
+        .style('fill', 'black');
+
+      shapeGroup
+        .append('text')
+        .attr('x', 125 + (index % 2) * 200)
+        .attr('y', yOffset)
+        .text(String(value))
+        .style('fill', 'black');
+
+      yOffset += 30;
+
+      shapeGroup.call(
+        d3
+          .drag<any, unknown>()
+          .subject(function (event) {
+            const groupElement: SVGGElement = this;
+            const transform = groupElement.transform.baseVal.consolidate();
+            return { x: transform ? transform.matrix.e : 0, y: transform ? transform.matrix.f : 0 };
+          })
+          .on('drag', function (event) {
+            const groupElement: any = d3.select(this);
+            const newX = event.x;
+            const newY = event.y;
+
+            groupElement.attr('x', newX).attr('y', newY);
+            groupElement.attr('transform', `translate(${newX}, ${newY})`);
+          })
+      );
+    });
+
+    return shapeGroup;
+  });
+
+  return shapesGroupArray;
 }
