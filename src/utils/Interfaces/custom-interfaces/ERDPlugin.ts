@@ -3,6 +3,7 @@ import { PresetsArray } from '../template-interfaces/PluginPresets/Presets.inter
 import { TableRow } from '../template-interfaces/Table.interface';
 
 interface IERDPluginProps {
+  entities: Entity[];
   pluginPresets?: PresetsArray;
   appActiveState?: AppActiveState;
   activeViewRows?: TableRow[];
@@ -26,4 +27,9 @@ interface Rectangle {
   height: number;
 }
 
-export type { IERDPluginProps, Node, Link, Rectangle };
+interface Entity {
+  eTitle: string;
+  eAttributes: { [key: string]: string };
+}
+
+export type { IERDPluginProps, Node, Link, Rectangle, Entity };

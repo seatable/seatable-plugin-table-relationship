@@ -49,6 +49,7 @@ import {
 } from './utils/utils';
 import { SettingsOption } from './utils/types';
 import pluginContext from './plugin-context';
+import { ENTITIES } from './utils/customUtils/constants';
 
 const App: React.FC<IAppProps> = (props) => {
   const { isDevelopment, lang } = props;
@@ -466,7 +467,7 @@ const App: React.FC<IAppProps> = (props) => {
           style={{ height: '100%', width: '100%', backgroundColor: '#f5f5f5' }}>
           <div id={PLUGIN_ID} className={styles.body} style={{ padding: '10px', width: '100%' }}>
             {/* Note: The CustomPlugin component serves as a placeholder and should be replaced with your custom plugin component. */}
-            <ERDPlugin />
+            <ERDPlugin entities={ENTITIES} />
             <button className={styles.add_row} onClick={addRowItem}>
               <FaPlus size={30} color="#fff" />
               {isDevelopment && (
