@@ -32,4 +32,48 @@ interface Entity {
   eAttributes: { [key: string]: string };
 }
 
-export type { IERDPluginProps, Node, Link, Rectangle, Entity };
+interface Relationship {
+  id: string;
+  node1: {
+    title: string;
+    attrKey: string;
+  };
+  node2: {
+    title: string;
+    attrKey: string;
+  };
+}
+
+interface EntityCoordinates {
+  title: string;
+  attrKey: string;
+  x: number;
+  y: number;
+}
+
+interface LineCoordinate {
+  line_id: string;
+  node1: {
+    title: string;
+    attrKey: string;
+    x1: number;
+    y1: number;
+  };
+  node2: {
+    title: string;
+    attrKey: string;
+    x2: number;
+    y2: number;
+  };
+}
+
+export type {
+  IERDPluginProps,
+  Node,
+  Link,
+  Rectangle,
+  Entity,
+  Relationship,
+  EntityCoordinates,
+  LineCoordinate,
+};

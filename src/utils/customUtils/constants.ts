@@ -1,3 +1,7 @@
+import { Relationship } from '../Interfaces/custom-interfaces/ERDPlugin';
+import { generatorBase64Code } from '../utils';
+import { stringGeneratorBase64Code } from './ERDUtils';
+
 export const ENTITIES: any = [
   {
     eTitle: 'order_items',
@@ -6,7 +10,6 @@ export const ENTITIES: any = [
       product_id: 109123986,
       quantity: 10,
     },
-    links: { eTitle: 'orders', orders_id: 2 },
   },
   {
     eTitle: 'orders',
@@ -18,7 +21,6 @@ export const ENTITIES: any = [
       r: '2024-12-12',
       4: '2024-12-12',
     },
-    links: { eTitle: 'order_items', order_id: 11 },
   },
   // {
   //   eTitle: 'products',
@@ -47,4 +49,28 @@ export const ENTITIES: any = [
   //   },
   //   links: {}, // This user is not linked to any other entity in this example
   // },
+];
+export const RELATIONSHIPS: Relationship[] = [
+  {
+    id: 'aaa',
+    node1: {
+      title: 'order_items',
+      attrKey: 'order_id',
+    },
+    node2: {
+      title: 'orders',
+      attrKey: 'user_id',
+    },
+  },
+  {
+    id: 'bbb',
+    node1: {
+      title: 'orders',
+      attrKey: 'id',
+    },
+    node2: {
+      title: 'order_items',
+      attrKey: 'quantity',
+    },
+  },
 ];
