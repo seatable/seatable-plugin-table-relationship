@@ -5,6 +5,8 @@ import {
   LineCoordinate,
   Relationship,
 } from '../Interfaces/custom-interfaces/ERDPlugin';
+import { useState } from 'react';
+import useCoordinatesMap from './customHooks';
 
 export const stringGeneratorBase64Code = (keyLength = 4) => {
   let key = '';
@@ -16,7 +18,7 @@ export const stringGeneratorBase64Code = (keyLength = 4) => {
   return key;
 };
 
-export function createNodeWithDrag(
+export function CreateNodeWithDrag(
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
   entities: any[]
 ): any {
@@ -39,7 +41,7 @@ export function createNodeWithDrag(
       .attr('width', nodeWidth)
       .attr('height', nOfAttributes * 30 + 30)
       .style('fill', 'none')
-      .attr('id', 'shapeGroupRect');
+      .attr('id', entity.eTitle);
 
     shapeGroup // Create the Header Title Rectangle
       .append('rect')
@@ -107,32 +109,8 @@ export function createNodeWithDrag(
       const resultArray = Object.values(groupedEntities);
 
       yOffset += 30;
-
-      shapeGroup.call(
-        d3
-          .drag<any, unknown>()
-          .subject(function (event) {
-            const groupElement: SVGGElement = this;
-            const transform = groupElement.transform.baseVal.consolidate();
-            return { x: transform ? transform.matrix.e : 0, y: transform ? transform.matrix.f : 0 };
-          })
-          .on('start', function (e) {
-            console.log('e', e);
-          })
-          .on('drag', function (event) {
-            const groupElement: any = d3.select(this);
-            const newX = event.x;
-            const newY = event.y;
-
-            groupElement.attr('x', newX).attr('y', newY);
-            groupElement.attr('transform', `translate(${newX}, ${newY})`);
-            drawNodeLines(svg, entities, entitiesCoordinates, 'update', entity.eTitle, {
-              newX,
-              newY,
-            });
-          })
-      );
     });
+
     return shapeGroup;
   });
 
@@ -140,21 +118,33 @@ export function createNodeWithDrag(
   return { shapesGroupArray, entitiesCoordinates };
 }
 
-function drawNodeLines(
+const updatedCoordinatesMap: Map<string, { x: number; y: number }> = new Map();
+
+export function drawNodeLines(
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
   entities: any[],
   entitiesCoordinates: any[],
   type: string,
   entityTarget: string,
-  newCoordinates?: { newX: number; newY: number }
-): void {
+  newCoordinates?: { newX: number; newY: number },
+  lineCoordinatesRef?: LineCoordinate[] // Pass lineCoordinates as a reference
+): LineCoordinate[] {
   const line = d3
     .line<any>()
     .x((d) => d.date)
     .y((d) => d.value)
     .curve(d3.curveNatural);
 
-  const lineCoordinates: LineCoordinate[] = findLineCoordinates(RELATIONSHIPS, entitiesCoordinates);
+  let lineCoordinates: LineCoordinate[]; // Declare lineCoordinates variable
+
+  if (lineCoordinatesRef) {
+    // console.log(0, lineCoordinatesRef);
+    // If lineCoordinatesRef is provided, use it
+    lineCoordinates = lineCoordinatesRef;
+  } else {
+    // Otherwise, initialize lineCoordinates
+    lineCoordinates = findLineCoordinates(RELATIONSHIPS, entitiesCoordinates);
+  }
 
   switch (type) {
     case 'draw':
@@ -179,6 +169,8 @@ function drawNodeLines(
       });
       break;
     case 'update':
+      // Updating logic
+
       // Filter lineCoordinates based on the dragged entity's title
       const filteredLineCoordinates = lineCoordinates.filter(
         (coordinate) =>
@@ -193,6 +185,7 @@ function drawNodeLines(
         let updatedNode2X = node2.x2;
         let updatedNode2Y = node2.y2;
 
+        // Adjust the coordinates if the entity is being dragged
         if (node1.title === entityTarget) {
           updatedNode1X += newCoordinates?.newX!;
           updatedNode1Y += newCoordinates?.newY!;
@@ -209,16 +202,29 @@ function drawNodeLines(
 
         // Select the existing line by its ID and update its d attribute
         svg.select(`#${line_id}`).attr('d', line(lineData));
-        // !!!!! HERE I NEED TO UPDATE THE COORDINATES!!!!!!!!!
-      });
-      break;
 
+        // Update lineCoordinates array with new coordinates
+        const index = lineCoordinates.findIndex((coord) => coord.line_id === line_id);
+        if (index !== -1) {
+          // console.log('if');
+          // If line_id is found in lineCoordinates, update its coordinates
+          lineCoordinates[index].node1.x1 = updatedNode1X;
+          lineCoordinates[index].node1.y1 = updatedNode1Y;
+          lineCoordinates[index].node2.x2 = updatedNode2X;
+          lineCoordinates[index].node2.y2 = updatedNode2Y;
+        }
+        // console.log(lineCoordinates);
+      });
+
+      break;
     default:
       console.error('Invalid type:', type);
       break;
   }
+  return lineCoordinates;
 }
-function findLineCoordinates(
+
+export function findLineCoordinates(
   relationships: Relationship[],
   entitiesCoordinates: EntityCoordinates[]
 ): LineCoordinate[] {
