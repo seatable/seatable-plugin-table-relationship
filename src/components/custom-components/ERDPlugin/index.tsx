@@ -20,16 +20,27 @@ import {
   _edges as initialEdges,
 } from '../../../utils/customUtils/constants';
 
+const nodeTypes = {
+  custom: CustomNode,
+};
 
 const ERDPlugin: React.FC<IERDPluginProps> = ({ entities, appActiveState }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes as any);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  
-  const nodeTypes = {
-    custom: CustomNode,
-  };
   useEffect(() => {
-    console.log('appActiveState', appActiveState);
+    appActiveState?.activeTable?.rows?.forEach((row, index) => {
+      const activeNode = {
+        id: index,
+        type: 'custom',
+        position: { x: 100, y: 200 },
+        data: {
+          selects: {
+            'handle-0': 'smoothstep',
+            'handle-1': 'smoothstep',
+          },
+        },
+      };
+    });
   }, []);
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
