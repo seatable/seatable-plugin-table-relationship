@@ -1,24 +1,60 @@
-import React, { useEffect, useRef, useState } from 'react';
-import styles from '../../../styles/custom-styles/ERDPlugin.module.scss';
-import * as d3 from 'd3';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import ReactFlow, {
+  addEdge,
+  MiniMap,
+  Controls,
+  Background,
+  useNodesState,
+  useEdgesState,
+} from 'reactflow';
+import { IERDPluginProps } from '../../../utils/Interfaces/custom-interfaces/ERDPlugin';
+import CustomNode from './CustomNode';
+import './overview.css';
+
+// Import styles once
+import 'reactflow/dist/style.css';
+
+// Import constants
 import {
-  IERDPluginProps,
-  LineCoordinate,
-} from '../../../utils/Interfaces/custom-interfaces/ERDPlugin';
-import { CreateNodeWithDrag, findLineCoordinates } from '../../../utils/customUtils/ERDUtils';
-import { RELATIONSHIPS } from '../../../utils/customUtils/constants';
+  _nodes as initialNodes,
+  _edges as initialEdges,
+} from '../../../utils/customUtils/constants';
 
-const ERDPlugin: React.FC<IERDPluginProps> = ({ entities }) => {
-  const svgRef = useRef<SVGSVGElement | null>(null);
-  const [nodes, setNodes] = useState<LineCoordinate[]>([]);
 
-  useEffect(() => {}, []);
-
+const ERDPlugin: React.FC<IERDPluginProps> = ({ entities, appActiveState }) => {
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes as any);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  
+  const nodeTypes = {
+    custom: CustomNode,
+  };
   useEffect(() => {
-    console.log('node updated', nodes);
-  }, [nodes]);
+    console.log('appActiveState', appActiveState);
+  }, []);
 
-  return <svg ref={svgRef} className={styles.custom}></svg>;
+  const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
+
+  return (
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={onConnect}
+      fitView
+      attributionPosition="top-right"
+      nodeTypes={nodeTypes}>
+      <MiniMap
+        style={{
+          height: 120,
+        }}
+        zoomable
+        pannable
+      />
+      <Controls />
+      <Background color="#aaa" gap={16} />
+    </ReactFlow>
+  );
 };
 
 export default ERDPlugin;

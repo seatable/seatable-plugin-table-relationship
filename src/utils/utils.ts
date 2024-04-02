@@ -8,6 +8,7 @@ import {
   IActiveTableAndView,
   Table,
   TableArray,
+  TableColumn,
   TableRow,
   TableView,
 } from './Interfaces/template-interfaces/Table.interface';
@@ -394,4 +395,8 @@ export const findPresetName = (presets: PresetsArray, presetId: string) => {
 
 export const isMobile = () => {
   return window.innerWidth <= 800;
+};
+
+export const getDefaultLinkColumn = (table: Table) => {
+  return table.columns.filter((c: TableColumn) => c.type === 'link')[0];
 };

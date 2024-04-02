@@ -61,9 +61,49 @@ interface LineCoordinate {
   };
   node2: {
     title: string;
-    attrKey: string; 
+    attrKey: string;
     x2: number;
     y2: number;
+  };
+}
+
+enum Position {
+  Left = 'left',
+  Top = 'top',
+  Right = 'right',
+  Bottom = 'bottom',
+}
+
+type NodeProps<T = any> = {
+  id: string;
+  data: T;
+  dragHandle?: boolean;
+  type?: string;
+  selected?: boolean;
+  isConnectable?: boolean;
+  zIndex?: number;
+  xPos: number;
+  yPos: number;
+  dragging: boolean;
+  targetPosition?: Position;
+  sourcePosition?: Position;
+};
+
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface SelectProps {
+  value: string;
+  handleId: string;
+  nodeId: string;
+}
+
+interface CustomNodeProps {
+  id: string;
+  data: {
+    selects: Record<string, string>;
   };
 }
 
@@ -76,4 +116,8 @@ export type {
   Relationship,
   EntityCoordinates,
   LineCoordinate,
+  NodeProps,
+  Option,
+  SelectProps,
+  CustomNodeProps,
 };

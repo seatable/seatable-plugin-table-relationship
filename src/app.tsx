@@ -43,6 +43,7 @@ import {
   findPresetName,
   getActiveStateSafeGuard,
   getActiveTableAndActiveView,
+  getDefaultLinkColumn,
   getPluginDataStore,
   isMobile,
   parsePluginDataToActiveState,
@@ -319,6 +320,7 @@ const App: React.FC<IAppProps> = (props) => {
           activeTableName: _activeTable.name,
           activeTableView: _activeTable.views[0],
           activeViewRows: _activeViewRows,
+          activeRelationship: getDefaultLinkColumn(_activeTable),
         }));
 
         updatedPluginPresets = pluginPresets.map((preset) =>
@@ -327,6 +329,7 @@ const App: React.FC<IAppProps> = (props) => {
                 ...preset,
                 settings: {
                   ...preset.settings,
+                  relationship: getDefaultLinkColumn(_activeTable),
                   selectedTable: { value: _activeTable._id, label: _activeTable.name },
                   selectedView: {
                     value: _activeTable.views[0]._id,
@@ -467,7 +470,7 @@ const App: React.FC<IAppProps> = (props) => {
           style={{ height: '100%', width: '100%', backgroundColor: '#f5f5f5' }}>
           <div id={PLUGIN_ID} className={styles.body} style={{ padding: '10px', width: '100%' }}>
             {/* Note: The CustomPlugin component serves as a placeholder and should be replaced with your custom plugin component. */}
-            <ERDPlugin entities={ENTITIES} />
+            <ERDPlugin entities={ENTITIES} appActiveState={appActiveState} />
             <button className={styles.add_row} onClick={addRowItem}>
               <FaPlus size={30} color="#fff" />
               {isDevelopment && (
