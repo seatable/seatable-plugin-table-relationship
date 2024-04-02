@@ -114,115 +114,115 @@ export function CreateNodeWithDrag(
     return shapeGroup;
   });
 
-  drawNodeLines(svg, entities, entitiesCoordinates, 'draw', Object.keys(entitiesCoordinates[0])[0]);
+  // drawNodeLines(svg, entities, entitiesCoordinates, 'draw', Object.keys(entitiesCoordinates[0])[0]);
   return { shapesGroupArray, entitiesCoordinates };
 }
 
 const updatedCoordinatesMap: Map<string, { x: number; y: number }> = new Map();
 
-export function drawNodeLines(
-  svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
-  entities: any[],
-  entitiesCoordinates: any[],
-  type: string,
-  entityTarget: string,
-  newCoordinates?: { newX: number; newY: number },
-  lineCoordinatesRef?: LineCoordinate[] // Pass lineCoordinates as a reference
-): LineCoordinate[] {
-  const line = d3
-    .line<any>()
-    .x((d) => d.date)
-    .y((d) => d.value)
-    .curve(d3.curveNatural);
+// export function drawNodeLines(
+//   svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
+//   entities: any[],
+//   entitiesCoordinates: any[],
+//   type: string,
+//   entityTarget: string,
+//   newCoordinates?: { newX: number; newY: number },
+//   lineCoordinatesRef?: LineCoordinate[] // Pass lineCoordinates as a reference
+// ): LineCoordinate[] {
+//   const line = d3
+//     .line<any>()
+//     .x((d) => d.date)
+//     .y((d) => d.value)
+//     .curve(d3.curveNatural);
 
-  let lineCoordinates: LineCoordinate[]; // Declare lineCoordinates variable
+//   let lineCoordinates: LineCoordinate[]; // Declare lineCoordinates variable
 
-  if (lineCoordinatesRef) {
-    // console.log(0, lineCoordinatesRef);
-    // If lineCoordinatesRef is provided, use it
-    lineCoordinates = lineCoordinatesRef;
-  } else {
-    // Otherwise, initialize lineCoordinates
-    lineCoordinates = findLineCoordinates(RELATIONSHIPS, entitiesCoordinates);
-  }
+//   if (lineCoordinatesRef) {
+//     // console.log(0, lineCoordinatesRef);
+//     // If lineCoordinatesRef is provided, use it
+//     lineCoordinates = lineCoordinatesRef;
+//   } else {
+//     // Otherwise, initialize lineCoordinates
+//     lineCoordinates = findLineCoordinates(RELATIONSHIPS, entitiesCoordinates);
+//   }
 
-  switch (type) {
-    case 'draw':
-      // Loop through lineCoordinates array and draw lines
-      lineCoordinates.forEach(({ node1, node2, line_id }, key) => {
-        const startX = node1.x1;
-        const startY = node1.y1;
-        const endX = node2.x2;
-        const endY = node2.y2;
-        const lineData = [
-          { date: startX, value: startY }, // Start point
-          { date: endX, value: endY }, // End point
-        ];
+//   switch (type) {
+//     case 'draw':
+//       // Loop through lineCoordinates array and draw lines
+//       lineCoordinates.forEach(({ node1, node2, line_id }, key) => {
+//         const startX = node1.x1;
+//         const startY = node1.y1;
+//         const endX = node2.x2;
+//         const endY = node2.y2;
+//         const lineData = [
+//           { date: startX, value: startY }, // Start point
+//           { date: endX, value: endY }, // End point
+//         ];
 
-        svg
-          .append('path')
-          .attr('d', line(lineData))
-          .attr('stroke', 'black')
-          .attr('stroke-width', 2)
-          .attr('fill', 'none')
-          .attr('id', line_id);
-      });
-      break;
-    case 'update':
-      // Updating logic
+//         svg
+//           .append('path')
+//           .attr('d', line(lineData))
+//           .attr('stroke', 'black')
+//           .attr('stroke-width', 2)
+//           .attr('fill', 'none')
+//           .attr('id', line_id);
+//       });
+//       break;
+//     case 'update':
+//       // Updating logic
 
-      // Filter lineCoordinates based on the dragged entity's title
-      const filteredLineCoordinates = lineCoordinates.filter(
-        (coordinate) =>
-          coordinate.node1.title === entityTarget || coordinate.node2.title === entityTarget
-      );
+//       // Filter lineCoordinates based on the dragged entity's title
+//       const filteredLineCoordinates = lineCoordinates.filter(
+//         (coordinate) =>
+//           coordinate.node1.title === entityTarget || coordinate.node2.title === entityTarget
+//       );
 
-      // Loop through filtered lineCoordinates and update lines
-      filteredLineCoordinates.forEach(({ node1, node2, line_id }) => {
-        // Calculate updated coordinates based on the drag
-        let updatedNode1X = node1.x1;
-        let updatedNode1Y = node1.y1;
-        let updatedNode2X = node2.x2;
-        let updatedNode2Y = node2.y2;
+//       // Loop through filtered lineCoordinates and update lines
+//       filteredLineCoordinates.forEach(({ node1, node2, line_id }) => {
+//         // Calculate updated coordinates based on the drag
+//         let updatedNode1X = node1.x1;
+//         let updatedNode1Y = node1.y1;
+//         let updatedNode2X = node2.x2;
+//         let updatedNode2Y = node2.y2;
 
-        // Adjust the coordinates if the entity is being dragged
-        if (node1.title === entityTarget) {
-          updatedNode1X += newCoordinates?.newX!;
-          updatedNode1Y += newCoordinates?.newY!;
-        }
-        if (node2.title === entityTarget) {
-          updatedNode2X += newCoordinates?.newX!;
-          updatedNode2Y += newCoordinates?.newY!;
-        }
+//         // Adjust the coordinates if the entity is being dragged
+//         if (node1.title === entityTarget) {
+//           updatedNode1X += newCoordinates?.newX!;
+//           updatedNode1Y += newCoordinates?.newY!;
+//         }
+//         if (node2.title === entityTarget) {
+//           updatedNode2X += newCoordinates?.newX!;
+//           updatedNode2Y += newCoordinates?.newY!;
+//         }
 
-        const lineData = [
-          { date: updatedNode1X, value: updatedNode1Y }, // Updated start point
-          { date: updatedNode2X, value: updatedNode2Y }, // Updated end point
-        ];
+//         const lineData = [
+//           { date: updatedNode1X, value: updatedNode1Y }, // Updated start point
+//           { date: updatedNode2X, value: updatedNode2Y }, // Updated end point
+//         ];
 
-        // Select the existing line by its ID and update its d attribute
-        svg.select(`#${line_id}`).attr('d', line(lineData));
+//         // Select the existing line by its ID and update its d attribute
+//         svg.select(`#${line_id}`).attr('d', line(lineData));
 
-        // Update lineCoordinates array with new coordinates
-        const index = lineCoordinates.findIndex((coord) => coord.line_id === line_id);
-        if (index !== -1) {
-          // console.log('if');
-          // If line_id is found in lineCoordinates, update its coordinates
-          lineCoordinates[index].node1.x1 = updatedNode1X;
-          lineCoordinates[index].node1.y1 = updatedNode1Y;
-          lineCoordinates[index].node2.x2 = updatedNode2X;
-          lineCoordinates[index].node2.y2 = updatedNode2Y;
-        }
-        // console.log(lineCoordinates);
-      });
+//         // Update lineCoordinates array with new coordinates
+//         const index = lineCoordinates.findIndex((coord) => coord.line_id === line_id);
+//         if (index !== -1) {
+//           // console.log('if');
+//           // If line_id is found in lineCoordinates, update its coordinates
+//           lineCoordinates[index].node1.x1 = updatedNode1X;
+//           lineCoordinates[index].node1.y1 = updatedNode1Y;
+//           lineCoordinates[index].node2.x2 = updatedNode2X;
+//           lineCoordinates[index].node2.y2 = updatedNode2Y;
+//         }
+//         // console.log(lineCoordinates);
+//       });
 
-      break;
-    default:
-      console.error('Invalid type:', type);
-      break;
-  }
-  return lineCoordinates;
-}
+//       break;
+//     default:
+//       console.error('Invalid type:', type);
+//       break;
+//   }
+//   return lineCoordinates;
+// }
 
 export function findLineCoordinates(
   relationships: Relationship[],

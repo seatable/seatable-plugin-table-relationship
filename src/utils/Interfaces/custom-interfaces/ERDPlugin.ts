@@ -61,7 +61,7 @@ interface LineCoordinate {
   };
   node2: {
     title: string;
-    attrKey: string;
+    attrKey: string; 
     x2: number;
     y2: number;
   };

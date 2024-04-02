@@ -7,7 +7,7 @@ import Header from './components/template-components/Header';
 import PluginSettings from './components/template-components/PluginSettings';
 import PluginPresets from './components/template-components/PluginPresets';
 import ResizableWrapper from './components/template-components/ResizableWrapper';
-import ERDPlugin from './components/custom-components/ERDPlugin';
+import ERDPlugin from './components/custom-components/ERDPlugin/index';
 // Import of Interfaces
 import {
   AppActiveState,
