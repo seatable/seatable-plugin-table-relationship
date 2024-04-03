@@ -11,6 +11,7 @@ import { HiOutlineChevronDoubleRight } from 'react-icons/hi2';
 import { SettingsOption } from '../../../utils/types';
 import intl from 'react-intl-universal';
 import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from '../../../locale';
+import { RelationshipState } from '../../../utils/Interfaces/custom-interfaces/ERDPlugin';
 const { [DEFAULT_LOCALE]: d } = AVAILABLE_LOCALES;
 
 // PluginSettings component for managing table and view options
@@ -27,7 +28,11 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
   const [viewOptions, setViewOptions] = useState<SelectOption[]>();
   const [tableSelectedOption, setTableSelectedOption] = useState<SelectOption>();
   const [viewSelectedOption, setViewSelectedOption] = useState<SelectOption>();
-
+  const [relationship, setRelationship] = useState<RelationshipState>({
+    recRel: false,
+    lkRel: false,
+  });
+  
   // Change options when active table or view changes
   useEffect(() => {
     const { activeTableView } = appActiveState;
@@ -60,6 +65,10 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
     setViewSelectedOption(viewSelectedOption);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appActiveState]);
+
+  const handleShownFieldNames = (isShown: boolean) => {
+    console.log('isShown', isShown);
+  };
 
   return (
     <div
@@ -104,7 +113,34 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
               />
             </div>
           </div>
-          {/* Insert custom settings */}
+          <div className={`mt-5 ${stylesPSettings.settings_fields}`}>
+            <div className="mb-2 d-flex align-items-center justify-content-between">
+              <p>Show linked record relationship</p>
+              <button
+                onClick={() => {
+                  setRelationship({ ...relationship, recRel: !relationship.recRel });
+                }}
+                className={`${
+                  relationship.recRel
+                    ? stylesPSettings.settings_fields_toggle_btns_active
+                    : stylesPSettings.settings_fields_toggle_btns
+                } `}></button>
+            </div>
+          </div>
+          <div className={`mt-5 ${stylesPSettings.settings_fields}`}>
+            <div className="mb-2 d-flex align-items-center justify-content-between">
+              <p>Show lookup relationship</p>
+              <button
+                onClick={() => {
+                  setRelationship({ ...relationship, lkRel: !relationship.lkRel });
+                }}
+                className={`${
+                  relationship.lkRel
+                    ? stylesPSettings.settings_fields_toggle_btns_active
+                    : stylesPSettings.settings_fields_toggle_btns
+                } `}></button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

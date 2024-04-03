@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import ReactFlow, {
   addEdge,
   MiniMap,
@@ -14,46 +14,42 @@ import './overview.css';
 // Import styles once
 import 'reactflow/dist/style.css';
 
-// Import constants
-import {
-  _nodes as initialNodes,
-  _edges as initialEdges,
-} from '../../../utils/customUtils/constants';
+// Import utils
+import { generateEdges, generateNodes } from '../../../utils/customUtils/ERDUtils';
 
 const nodeTypes = {
   custom: CustomNode,
 };
 
-const ERDPlugin: React.FC<IERDPluginProps> = ({ entities, appActiveState }) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes as any);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+const ERDPlugin: React.FC<IERDPluginProps> = ({ links, allTables }) => {
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
   useEffect(() => {
-    appActiveState?.activeTable?.rows?.forEach((row, index) => {
-      const activeNode = {
-        id: index,
-        type: 'custom',
-        position: { x: 100, y: 200 },
-        data: {
-          selects: {
-            'handle-0': 'smoothstep',
-            'handle-1': 'smoothstep',
-          },
-        },
-      };
-    });
-  }, []);
+    try {
+      if (links && allTables) {
+        const ns = generateNodes(allTables);
+        setNodes(ns);
+        console.log('ns', ns);
+        const es = generateEdges(links, allTables);
+        setEdges(es);
+      }
+    } catch (error) {
+      console.error('Error processing data:', error);
+    }
+  }, [allTables]);
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
 
   return (
     <ReactFlow
+      key={nodes.length}
       nodes={nodes}
       edges={edges}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
       fitView
-      attributionPosition="top-right"
       nodeTypes={nodeTypes}>
       <MiniMap
         style={{

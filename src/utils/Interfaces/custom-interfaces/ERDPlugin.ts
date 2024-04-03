@@ -1,9 +1,9 @@
 import { AppActiveState } from '../template-interfaces/App.interface';
 import { PresetsArray } from '../template-interfaces/PluginPresets/Presets.interface';
-import { TableRow } from '../template-interfaces/Table.interface';
+import { TableArray, TableRow } from '../template-interfaces/Table.interface';
 
 interface IERDPluginProps {
-  entities: Entity[];
+  allTables?: TableArray;
   pluginPresets?: PresetsArray;
   appActiveState?: AppActiveState;
   activeViewRows?: TableRow[];
@@ -16,8 +16,11 @@ interface Node {
 }
 
 interface Link {
-  source: string;
-  target: string;
+  _id: string;
+  table1_id?: string;
+  table2_id: string;
+  table1_table2_map?: Record<string, string[]>;
+  table2_table1_map: Record<string, string[]>;
 }
 
 interface Rectangle {
@@ -103,8 +106,37 @@ interface SelectProps {
 interface CustomNodeProps {
   id: string;
   data: {
-    selects: Record<string, string>;
+    rows: Record<string, string>;
   };
+}
+
+interface EdgeResultItem {
+  id: string;
+  source: string;
+  target: string;
+  sourceHandle: string;
+  targetHandle: string;
+  type: string;
+}
+
+interface NodeResultItem {
+  id: string;
+  type: string;
+  position: {
+    x: number;
+    y: number;
+  };
+  data: {
+    rows: {
+      id: string;
+      value: string | number | any[];
+    }[];
+  };
+}
+
+interface RelationshipState {
+  recRel: boolean;
+  lkRel: boolean;
 }
 
 export type {
@@ -120,4 +152,7 @@ export type {
   Option,
   SelectProps,
   CustomNodeProps,
+  EdgeResultItem,
+  NodeResultItem,
+  RelationshipState,
 };

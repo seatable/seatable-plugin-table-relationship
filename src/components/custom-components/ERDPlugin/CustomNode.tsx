@@ -1,59 +1,29 @@
-import React, { ChangeEvent } from 'react';
-import { Handle, useReactFlow, useStoreApi, Position } from 'reactflow';
-import {
-  SelectProps,
-  Option,
-  CustomNodeProps,
-} from '../../../utils/Interfaces/custom-interfaces/ERDPlugin';
+import { memo } from 'react';
+import { Handle, Position } from 'reactflow';
 
-function CustomNode({ id, data }: CustomNodeProps) {
-  // console.log('data', data);
+function CustomNode({ id, data }: { id: string; data: any }) {
+  console.log('data', data);
+  console.log('id', id);
+
   return (
     <>
       <div className="custom-node__header">
-        <strong>Hardcoded Title</strong>
+        <strong>{id}</strong>
       </div>
       <div className="custom-node__body">
-        {Object.keys(data.selects).map((handleId) => (
-          <Select key={handleId} nodeId={id} value={data.selects[handleId]} handleId={handleId} />
+        {data.rows.map((row: any) => (
+          <div key={row.id} id={row.id} className="custom-node__row">
+            <Handle type="source" position={Position.Right} id={row.id} />
+            <Handle type="target" position={Position.Right} id={row.id} />
+            <div className="custom-node__row-content">
+              <div className="custom-node__value">{row.value}</div>
+              <div className="custom-node__id">{typeof row.value}</div>
+            </div>
+          </div>
         ))}
       </div>
     </>
   );
 }
 
-export default CustomNode;
-
-function Select({ value, handleId, nodeId }: SelectProps) {
-  const { setNodes } = useReactFlow();
-  const store = useStoreApi();
-
-  const onChange = (evt: ChangeEvent<HTMLSelectElement>) => {
-    const { nodeInternals } = store.getState();
-    setNodes(
-      Array.from(nodeInternals.values()).map((node) => {
-        if (node.id === nodeId) {
-          node.data = {
-            ...node.data,
-            selects: {
-              ...node.data.selects,
-              [handleId]: evt.target.value,
-            },
-          };
-        }
-
-        return node;
-      })
-    );
-  };
-
-  return (
-    <div
-      className="custom-node__select"
-      style={{ display: 'flex', justifyContent: 'space-between' }}>
-      <div style={{ order: 1 }}>Edge Type</div>
-      <Handle type="source" position={Position.Right} id={handleId} />
-      <div style={{ order: 2 }}>{value}</div>
-    </div>
-  );
-}
+export default memo(CustomNode);
