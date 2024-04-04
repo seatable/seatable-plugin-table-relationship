@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, ComponentType } from 'react';
 import ReactFlow, {
   addEdge,
   MiniMap,
@@ -6,20 +6,27 @@ import ReactFlow, {
   Background,
   useNodesState,
   useEdgesState,
+  EdgeTypes,
+  EdgeProps,
+  MarkerType,
 } from 'reactflow';
-import { IERDPluginProps } from '../../../utils/Interfaces/custom-interfaces/ERDPlugin';
-import CustomNode from './CustomNode';
-import './overview.css';
+import { IERDPluginProps } from '../../utils/Interfaces/custom-interfaces/ERDPlugin';
+import CustomNode from './erd/CustomNode';
+import CustomEdge from './erd/CustomEdge';
+import './erd/overview.css';
 
 // Import styles once
 import 'reactflow/dist/style.css';
 
 // Import utils
-import { generateEdges, generateNodes } from '../../../utils/customUtils/ERDUtils';
+import { generateEdges, generateNodes } from '../../utils/customUtils/utils';
 
 const nodeTypes = {
   custom: CustomNode,
 };
+// const edgeTypes: any = {
+//   floating: CustomEdge as ComponentType<EdgeProps>,
+// };
 
 const ERDPlugin: React.FC<IERDPluginProps> = ({ links, allTables }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -29,9 +36,8 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ links, allTables }) => {
     try {
       if (links && allTables) {
         const ns = generateNodes(allTables);
-        setNodes(ns);
-        console.log('ns', ns);
         const es = generateEdges(links, allTables);
+        setNodes(ns);
         setEdges(es);
       }
     } catch (error) {
@@ -39,7 +45,13 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ links, allTables }) => {
     }
   }, [allTables]);
 
-  const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
+  const onConnect = useCallback(
+    (params) =>
+      setEdges((eds) =>
+        addEdge({ ...params, type: 'floating', markerEnd: { type: MarkerType.Arrow } }, eds)
+      ),
+    []
+  );
 
   return (
     <ReactFlow
@@ -50,7 +62,9 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ links, allTables }) => {
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
       fitView
-      nodeTypes={nodeTypes}>
+      nodeTypes={nodeTypes}
+      // edgeTypes={edgeTypes}
+      >
       <MiniMap
         style={{
           height: 120,

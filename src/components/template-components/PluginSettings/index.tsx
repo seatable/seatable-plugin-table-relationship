@@ -32,7 +32,7 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
     recRel: false,
     lkRel: false,
   });
-  
+
   // Change options when active table or view changes
   useEffect(() => {
     const { activeTableView } = appActiveState;
@@ -113,7 +113,7 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
               />
             </div>
           </div>
-          <div className={`mt-5 ${stylesPSettings.settings_fields}`}>
+          <div className={'mt-2'}>
             <div className="mb-2 d-flex align-items-center justify-content-between">
               <p>Show linked record relationship</p>
               <button
@@ -127,7 +127,7 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
                 } `}></button>
             </div>
           </div>
-          <div className={`mt-5 ${stylesPSettings.settings_fields}`}>
+          <div className={'mt-2'}>
             <div className="mb-2 d-flex align-items-center justify-content-between">
               <p>Show lookup relationship</p>
               <button
