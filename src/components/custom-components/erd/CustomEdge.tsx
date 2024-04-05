@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import { useStore, getBezierPath, MarkerType } from 'reactflow';
 import { getEdgeParams } from '../../../utils/customUtils/utils';
 
@@ -45,4 +45,4 @@ function CustomEdge({
   );
 }
 
-export default CustomEdge;
+export default memo(CustomEdge);

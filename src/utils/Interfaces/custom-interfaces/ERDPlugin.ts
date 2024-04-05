@@ -114,9 +114,10 @@ interface EdgeResultItem {
   id: string;
   source: string;
   target: string;
-  sourceHandle: string;
-  targetHandle: string;
+  sourceHandle?: string;
+  targetHandle?: string;
   type: string;
+  markerEnd: string;
 }
 
 interface NodeResultItem {
@@ -127,9 +128,14 @@ interface NodeResultItem {
     y: number;
   };
   data: {
-    rows: {
-      id: string;
-      value: string | number | any[];
+    position: {
+      x: number;
+      y: number;
+    };
+    columns: {
+      key: string;
+      name: string;
+      type: string;
     }[];
   };
 }

@@ -1,19 +1,21 @@
+import { useState } from 'react';
 import { EdgeResultItem, Link, NodeResultItem } from '../Interfaces/custom-interfaces/ERDPlugin';
 import { TableArray } from '../Interfaces/template-interfaces/Table.interface';
-import { Position, internalsSymbol } from 'reactflow';
+import { MarkerType, Position, internalsSymbol } from 'reactflow';
 
 export function generateNodes(allTables: TableArray): NodeResultItem[] {
   const ns: NodeResultItem[] = allTables?.map((table, index) => {
-    const info = table.rows.map((row) => {
-      return { id: row._id, value: row['0000'] };
+    const info = table.columns.map((cl) => {
+      return { key: cl.key, type: cl.type, name: cl.name };
     });
+    const position = { x: 100 + index * 250, y: 200 + index * 100 };
     const activeNode = {
       id: table.name.toString(),
       type: 'custom',
-      position: { x: 100 + index * 250, y: 200 + index * 100 },
+      position: position,
       data: {
-        rows: info,
-        position: { x: 100 + index * 250, y: 200 + index * 100 },
+        columns: info,
+        position: position,
       },
     };
     return activeNode;
@@ -21,105 +23,129 @@ export function generateNodes(allTables: TableArray): NodeResultItem[] {
   return ns;
 }
 
-export function generateEdges(links: Link[], tables: TableArray): EdgeResultItem[] {
+export function generateEdges(links: Link[], tables: TableArray, ns: NodeResultItem[]): any[] {
   const result: EdgeResultItem[] = [];
 
+  let sourceHandle = '';
+  let targetHandle = '';
   links.forEach((link, index) => {
-    const table2 = tables.find((table) => table._id === link.table2_id);
-
     if (link.table1_id === undefined) {
       // We skip the relationship within the same table
       return;
     }
+    const sourceTbl = tables.find((table) => table._id === link.table1_id);
+    const targetTbl = tables.find((table) => table._id === link.table2_id);
+    const sourceNode = ns.find((n) => n.id === sourceTbl?.name);
+    const targetNode = ns.find((n) => n.id === targetTbl?.name);
 
-    const table1 = link.table1_id ? tables.find((table) => table._id === link.table1_id) : table2;
-    const source = table2 ? table2.name : '';
-    const target = table1 ? table1.name : source;
-
-    if (link.table2_table1_map) {
-      Object.entries(link.table2_table1_map).forEach(([sourceHandle, targetHandles]) => {
-        targetHandles.forEach((targetHandle) => {
-          result.push({
-            id: String(result.length),
-            source,
-            target,
-            sourceHandle,
-            targetHandle,
-            type: 'smoothstep',
-          });
-        });
-      });
+    if (sourceNode && targetNode) {
+      sourceHandle = `${sourceNode.id}_0000_${
+        sourceNode.position > targetNode.position ? 'l' : 'r'
+      }-src`;
+      targetHandle = `${targetNode.id}_0000_${
+        sourceNode.position > targetNode.position ? 'r' : 'l'
+      }-tgt`;
     }
 
-    if (link.table1_table2_map) {
-      Object.entries(link.table1_table2_map).forEach(([targetHandle, sourceHandles]) => {
-        sourceHandles.forEach((sourceHandle) => {
-          result.push({
-            id: String(result.length),
-            source: target,
-            target: source,
-            sourceHandle,
-            targetHandle,
-            type: 'smoothstep',
-          });
-        });
+    if (sourceTbl && targetTbl) {
+      result.push({
+        id: String(result.length),
+        source: sourceTbl.name,
+        target: targetTbl.name,
+        sourceHandle: sourceHandle,
+        targetHandle: targetHandle,
+        type: 'smoothstep',
+        markerEnd: MarkerType.ArrowClosed,
       });
     }
   });
 
-  const uniqueEdges: { [key: string]: boolean } = {};
-  const cleanResult: EdgeResultItem[] = [];
-
-  // Iterate through the array
-  result.forEach((edge) => {
-    // Generate a unique key for each edge by sorting sourceHandle and targetHandle
-    const key1 = [edge.sourceHandle, edge.targetHandle].sort().join('-');
-    const key2 = [edge.targetHandle, edge.sourceHandle].sort().join('-');
-
-    // Check if either key already exists in uniqueEdges
-    if (!uniqueEdges[key1] && !uniqueEdges[key2]) {
-      // If not, add both keys to uniqueEdges and push the edge to the result
-      uniqueEdges[key1] = true;
-      uniqueEdges[key2] = true;
-      cleanResult.push(edge);
-    }
-  });
-
-  return cleanResult;
+  return result;
 }
 
+// THIS IS FOR EDGE IF WE NEED TO CONNECT ROW VALUES
+// export function generateEdges(links: Link[], tables: TableArray): EdgeResultItem[] {
+//   const result: EdgeResultItem[] = [];
+//   console.log('links', links);
+//   links.forEach((link, index) => {
+//     const table2 = tables.find((table) => table._id === link.table2_id);
+
+//     if (link.table1_id === undefined) {
+//       // We skip the relationship within the same table
+//       return;
+//     }
+
+//     const table1 = link.table1_id ? tables.find((table) => table._id === link.table1_id) : table2;
+//     const source = table2 ? table2.name : '';
+//     const target = table1 ? table1.name : source;
+
+//     if (link.table2_table1_map) {
+//       Object.entries(link.table2_table1_map).forEach(([sourceHandle, targetHandles]) => {
+//         targetHandles.forEach((targetHandle) => {
+//           result.push({
+//             id: String(result.length),
+//             source,
+//             target,
+//             sourceHandle,
+//             targetHandle,
+//             type: 'smoothstep',
+//             markerEnd: MarkerType.ArrowClosed,
+//           });
+//         });
+//       });
+//     }
+
+//     if (link.table1_table2_map) {
+//       Object.entries(link.table1_table2_map).forEach(([targetHandle, sourceHandles]) => {
+//         sourceHandles.forEach((sourceHandle) => {
+//           result.push({
+//             id: String(result.length),
+//             source: target,
+//             target: source,
+//             sourceHandle,
+//             targetHandle,
+//             type: 'smoothstep',
+//             markerEnd: MarkerType.ArrowClosed,
+//           });
+//         });
+//       });
+//     }
+//   });
+
+//   const uniqueEdges: { [key: string]: boolean } = {};
+//   const cleanResult: EdgeResultItem[] = [];
+
+//   // Iterate through the array
+//   result.forEach((edge) => {
+//     // Generate a unique key for each edge by sorting sourceHandle and targetHandle
+//     const key1 = [edge.sourceHandle, edge.targetHandle].sort().join('-');
+//     const key2 = [edge.targetHandle, edge.sourceHandle].sort().join('-');
+
+//     // Check if either key already exists in uniqueEdges
+//     if (!uniqueEdges[key1] && !uniqueEdges[key2]) {
+//       // If not, add both keys to uniqueEdges and push the edge to the result
+//       uniqueEdges[key1] = true;
+//       uniqueEdges[key2] = true;
+//       cleanResult.push(edge);
+//     }
+//   });
+
+//   return cleanResult;
+// }
+
 // returns the position (top,right,bottom or right) passed node compared to
-function getParams(nodeA: any, nodeB: any) {
+export function getParams(nodeA: any, nodeB: any) {
   const centerA = getNodeCenter(nodeA);
   const centerB = getNodeCenter(nodeB);
-
-  const horizontalDiff = Math.abs(centerA.x - centerB.x);
-  const verticalDiff = Math.abs(centerA.y - centerB.y);
-
-  let position;
-
-  // when the horizontal difference between the nodes is bigger, we use Position.Left or Position.Right for the handle
-  if (horizontalDiff > verticalDiff) {
-    position = centerA.x > centerB.x ? Position.Left : Position.Right;
-  } else {
-    // here the vertical difference between the nodes is bigger, so we use Position.Top or Position.Bottom for the handle
-    position = centerA.y > centerB.y ? Position.Right : Position.Left;
-  }
+  console.log('centerA', centerA);
+  console.log('centerB', centerB);
+  const position = centerA.x > centerB.x ? Position.Left : Position.Right;
 
   const [x, y] = getHandleCoordsByPosition(nodeA, position);
   return [x, y, position];
 }
 
 function getHandleCoordsByPosition(node: any, handlePosition: any) {
-  // console.log('node', node);
-  // console.log('handlePosition', handlePosition);
-  // console.log('internalsSymbol', internalsSymbol);
-  // console.log('node[internalsSymbol].handleBounds', node[internalsSymbol].handleBounds);
-  // console.log(
-  //   'node[internalsSymbol].handleBounds.source',
-  //   node[internalsSymbol].handleBounds.source
-  // );
-
   // all handles are from type source, that's why we use handleBounds.source here
   const handle = node[internalsSymbol].handleBounds.source.find(
     (h: any) => h.position === handlePosition
@@ -128,7 +154,7 @@ function getHandleCoordsByPosition(node: any, handlePosition: any) {
     // Handle is undefined, handle this case accordingly
     console.error('Handle is undefined for position:', handlePosition);
   }
-  console.log('handle:', handle);
+
   let offsetX = handle.width / 2;
   let offsetY = handle.height / 2;
 
@@ -142,24 +168,18 @@ function getHandleCoordsByPosition(node: any, handlePosition: any) {
     case Position.Right:
       offsetX = handle.width;
       break;
-    case Position.Top:
-      offsetY = 0;
-      break;
-    case Position.Bottom:
-      offsetY = handle.height;
-      break;
   }
 
-  const x = node.positionAbsolute.x + handle.x + offsetX;
-  const y = node.positionAbsolute.y + handle.y + offsetY;
+  const x = node.position.x + handle.x + offsetX;
+  const y = node.position.y + handle.y + offsetY;
 
   return [x, y];
 }
 
 function getNodeCenter(node: any) {
   return {
-    x: node.positionAbsolute.x + node.width / 2,
-    y: node.positionAbsolute.y + node.height / 2,
+    x: node.position.x + node.width / 2,
+    y: node.position.y + node.height / 2,
   };
 }
 
