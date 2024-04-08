@@ -11,6 +11,7 @@ import ReactFlow, {
 import {
   IERDPluginProps,
   NodeResultItem,
+  nodeCts,
 } from '../../utils/Interfaces/custom-interfaces/ERDPlugin';
 import CustomNode from './erd/CustomNode';
 import './erd/overview.css';
@@ -31,11 +32,8 @@ const nodeTypes = {
 const ERDPlugin: React.FC<IERDPluginProps> = ({ links, allTables }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodesCts, setNodesCts] = useState<nodeCts[]>([]);
   const [prevNodePositions, setPrevNodePositions]: any = useState({});
-
-  useEffect(() => {
-    // console.log('new edges received', edges);
-  }, [edges]);
 
   useEffect(() => {
     try {
@@ -82,31 +80,34 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ links, allTables }) => {
         }) as NodeResultItem[];
 
         setNodes(updatedNodes);
-        updatedNodes.forEach((n) => {
-          const prevNodePosition = prevNodePositions[n.id];
-          const centerSrc = node.position.x < prevNodePosition.x + 90;
-          // const params = getParams(node, n);
-          // console.log('first', params);
-          // Check if the dragged node is TOTAL less than another node
-          if (prevNodePosition && n.id !== node.id && centerSrc) {
-            console.log(`${node.id} is TOTAL less than ${n.id}`);
 
-            // Update the related edge between node.id and n.id
-            const updatedEdges = edges.map((edge) => {
-              if (edge.source === n.id && edge.target === node.id) {
-                console.log('here', 0);
-                // Update the sourceHandle and targetHandle accordingly
-                return {
-                  ...edge,
-                  sourceHandle: edge.sourceHandle?.replace('_r-', '_l-'),
-                  targetHandle: edge.targetHandle?.replace('_l-', '_r-'),
-                };
-              }
-              return edge;
-            });
-            setEdges(updatedEdges);
-          }
+        const nodeDataArray = updatedNodes.map((node) => {
+          return { n: node.id, cts: node.position.x };
         });
+        setNodesCts(nodeDataArray);
+
+        const updatedEdges = edges.map((e) => {
+          const sourceNode = nodeDataArray.find((node) => node.n === e.source);
+          const targetNode = nodeDataArray.find((node) => node.n === e.target);
+
+          if (sourceNode && targetNode) {
+            if (sourceNode.cts + 90 < targetNode.cts) {
+              return {
+                ...e,
+                sourceHandle: e.sourceHandle?.replace('_l-', '_r-'),
+                targetHandle: e.targetHandle?.replace('_r-', '_l-'),
+              };
+            } else {
+              return {
+                ...e,
+                sourceHandle: e.sourceHandle?.replace('_r-', '_l-'),
+                targetHandle: e.targetHandle?.replace('_l-', '_r-'),
+              };
+            }
+          }
+          return e;
+        });
+        setEdges(updatedEdges);
       }
     },
     [nodes, setNodes, prevNodePositions]

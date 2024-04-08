@@ -145,6 +145,11 @@ interface RelationshipState {
   lkRel: boolean;
 }
 
+interface nodeCts {
+  n: string;
+  cts: number;
+}
+
 export type {
   IERDPluginProps,
   Node,
@@ -161,4 +166,5 @@ export type {
   EdgeResultItem,
   NodeResultItem,
   RelationshipState,
+  nodeCts,
 };
