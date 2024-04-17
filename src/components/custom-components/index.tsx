@@ -1,6 +1,5 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import ReactFlow, {
-  addEdge,
   MiniMap,
   Controls,
   Background,
@@ -10,6 +9,7 @@ import ReactFlow, {
 } from 'reactflow';
 import {
   IERDPluginProps,
+  Link,
   NodeResultItem,
   nodeCts,
 } from '../../utils/Interfaces/custom-interfaces/ERDPlugin';
@@ -20,27 +20,27 @@ import './erd/overview.css';
 import 'reactflow/dist/style.css';
 
 // Import utils
-import { generateEdges, generateNodes, getParams } from '../../utils/customUtils/utils';
+import { generateEdges, generateLinks, generateNodes } from '../../utils/customUtils/utils';
 
 const nodeTypes = {
   custom: CustomNode,
 };
-// const edgeTypes: any = {
-//   floating: CustomEdge as ComponentType<EdgeProps>,
-// };
 
-const ERDPlugin: React.FC<IERDPluginProps> = ({ links, allTables }) => {
+const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [links, setLinks] = useState<Link[]>([]);
   const [nodesCts, setNodesCts] = useState<nodeCts[]>([]);
   const [prevNodePositions, setPrevNodePositions]: any = useState({});
 
   useEffect(() => {
     try {
-      if (links && allTables) {
+      if (allTables) {
+        const lnk = generateLinks(allTables);
+        setLinks(lnk);
         const ns = generateNodes(allTables);
-        const es = generateEdges(links, allTables, ns);
         setNodes(ns);
+        const es = generateEdges(lnk, allTables, ns);
         setEdges(es);
       }
     } catch (error) {

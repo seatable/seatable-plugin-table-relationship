@@ -60,7 +60,6 @@ const App: React.FC<IAppProps> = (props) => {
   const { isShowPlugin, isShowSettings, isLoading, isShowPresets } = isShowState;
   // Tables, Presets, Views as dataStates. The main data of the plugin
   const [allTables, setAllTables] = useState<TableArray>([]);
-  const [links, setLinks] = useState<any>([]);
   const [activeTableViews, setActiveTableViews] = useState<TableViewArray>([]);
   const [pluginDataStore, setPluginDataStore] = useState<IPluginDataStore>(DEFAULT_PLUGIN_DATA);
   const [pluginPresets, setPluginPresets] = useState<PresetsArray>([]);
@@ -123,10 +122,7 @@ const App: React.FC<IAppProps> = (props) => {
     let activeTableViews: TableViewArray = activeTable.views; // All the Views of the specific Active Table
     let pluginDataStore: IPluginDataStore = getPluginDataStore(activeTable, PLUGIN_NAME);
     let pluginPresets: PresetsArray = pluginDataStore.presets; // An array with all the Presets
-    let link = window.dtableSDK.getLinks();
-    // const linkedRows = window.dtableSDK.getTableLinkRows(allTables[0].rows, allTables[0]);
-    // console.log('linkedRows', linkedRows);
-    setLinks(link);
+
     setPluginDataStore(pluginDataStore);
     setAllTables(allTables);
     setPluginPresets(pluginPresets);
@@ -475,7 +471,7 @@ const App: React.FC<IAppProps> = (props) => {
           style={{ height: '100%', width: '100%', backgroundColor: '#f5f5f5' }}>
           <div id={PLUGIN_ID} className={styles.body} style={{ padding: '10px', width: '100%' }}>
             {/* Note: The CustomPlugin component serves as a placeholder and should be replaced with your custom plugin component. */}
-            <ERDPlugin appActiveState={appActiveState} allTables={allTables} links={links} />
+            <ERDPlugin appActiveState={appActiveState} allTables={allTables} />
             <button className={styles.add_row} onClick={addRowItem}>
               <FaPlus size={30} color="#fff" />
               {isDevelopment && (

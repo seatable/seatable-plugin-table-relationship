@@ -1,11 +1,7 @@
-import { memo, useEffect, useState } from 'react';
+import { memo } from 'react';
 import { Handle, Position } from 'reactflow';
 
 function CustomNode({ id, data }: { id: string; data: any }) {
-  // console.log('data', id, { x: data.position.x, y: data.position.y });
-  // console.log('id', id);
-  // console.log('data', data);
-
   return (
     <>
       <div className="custom-node__header">
