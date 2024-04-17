@@ -6,13 +6,35 @@ export function generateLinks(allTables: TableArray) {
   const tableInfoFiltered: any[] = [];
   const allColumns: TableColumn[] = [];
 
+  // THESE NEEDS TO BE INSIDE THE FOREACH LOOP
+  let targetFormulaTableId: string;
+  let targetFormulaTableName: string;
+  let targetFormulaColumnName: string;
+  let targetFormulaColumnKey: string;
+  // TILL HERE
+  console.log('allTables', allTables);
   allTables.forEach((t) => {
     const filteredColumns: any[] = t.columns.reduce((accumulator: any[], column) => {
-      if (column.data) {
+      if (column.type === 'link-formula') {
+        for (let i = 0; i < allTables.length; i++) {
+          const table = allTables[i];
+          const cc: any = table.columns.find(
+            (c) => c.key === column.data.level1_linked_table_column_key
+          );
+          if (cc) {
+            console.log('cc', cc);
+            targetFormulaTableId = table._id;
+            targetFormulaTableName = table.name;
+            targetFormulaColumnName = cc.name;
+            targetFormulaColumnKey = cc.key;
+          }
+        }
+      }
+      if (column.type === 'link' || column.type === 'link-formula') {
         const { data } = column;
         const { table_id, other_table_id } = data;
 
-        if (table_id !== other_table_id) {
+        if (table_id !== other_table_id || data.formula === 'lookup') {
           const { key, type, name, data } = column;
           const { table_id, other_table_id, link_id } = data;
 
@@ -20,9 +42,10 @@ export function generateLinks(allTables: TableArray) {
             key,
             type,
             name,
-            data_table_id: table_id,
-            data_other_table_id: other_table_id,
-            data_link_id: link_id,
+            data_table_id: table_id || t._id,
+            data_other_table_id: other_table_id || targetFormulaTableId,
+            data_link_id: link_id || data.link_column_key,
+            data_other_column_key: data.level1_linked_table_column_key || undefined,
           });
         }
       }
@@ -41,24 +64,39 @@ export function generateLinks(allTables: TableArray) {
 
   const onlyTablesWithLinksColumn = tableInfoFiltered.filter((i) => i.columns.length > 0);
 
-  onlyTablesWithLinksColumn.forEach((table: any) => {
-    const columnsWithTableInfo = table.columns.map((column: any) => ({
+  onlyTablesWithLinksColumn.forEach((t: any) => {
+    const columnsWithTableInfo = t.columns.map((column: any) => ({
       type: column.type,
       link_id: column.data_link_id,
       column_key: column.key,
       column_name: column.name,
-      dataTableId: table._id,
-      sourceTable_id: column.data_table_id === table._id ? table._id : column.data_table_id,
-      targetTable_id:
-        column.data_other_table_id === table._id ? table._id : column.data_other_table_id,
-      table_name: table.name,
+      dataTableId: t._id,
+      sourceTable_id: column.data_table_id === t._id ? t._id : column.data_table_id,
+      targetTable_id: column.data_other_table_id === t._id ? t._id : column.data_other_table_id,
+      table_name: t.name,
     }));
     allColumns.push(...columnsWithTableInfo);
   });
 
+  console.log('allColumns', allColumns);
+
   const links = Object.values(
     allColumns.reduce((a: { [key: string]: any }, c: any) => {
-      if (c.dataTableId === c.sourceTable_id) {
+      console.log('c', c);
+      if (c.type === 'link-formula') {
+        const mockedObject = {
+          type: c.type,
+          link_id: c.link_id,
+          sourceColumn_key: c.column_key,
+          sourceColumn_name: c.column_name,
+          sourceTable_name: c.table_name,
+          targetColumn_key: targetFormulaColumnKey,
+          targetColumn_name: targetFormulaColumnName,
+          targetTable_name: targetFormulaTableName,
+          targetTable_id: c.targetTable_id,
+        };
+        a[c.link_id] = a[c.link_id] || { ...mockedObject };
+      } else if (c.dataTableId === c.sourceTable_id) {
         a[c.link_id] = a[c.link_id] || { ...c };
         a[c.link_id].sourceColumn_key = c.column_key;
         a[c.link_id].sourceColumn_name = c.column_name;
@@ -80,6 +118,7 @@ export function generateLinks(allTables: TableArray) {
       return a;
     }, {})
   );
+  console.log('links', links);
   return links;
 }
 
@@ -143,7 +182,22 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
         sourceHandle: sourceHandle,
         targetHandle: targetHandle,
         type: 'smoothstep',
-        markerEnd: MarkerType.ArrowClosed,
+        style:
+          link.type === 'link-formula'
+            ? {
+                strokeWidth: 2,
+                stroke: '#FF0072',
+              }
+            : {
+                strokeWidth: 1,
+                stroke: '#000',
+              },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 10,
+          height: 10,
+          color: '#000',
+        },
       });
     }
   });
