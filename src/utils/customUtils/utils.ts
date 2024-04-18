@@ -115,7 +115,7 @@ export function generateLinks(allTables: TableArray) {
       return a;
     }, {})
   );
-  console.log('links', links);
+
   return links;
 }
 

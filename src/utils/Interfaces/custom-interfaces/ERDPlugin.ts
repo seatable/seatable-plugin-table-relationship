@@ -7,6 +7,7 @@ interface IERDPluginProps {
   pluginPresets?: PresetsArray;
   appActiveState?: AppActiveState;
   activeViewRows?: TableRow[];
+  relationship: RelationshipState;
   nodes?: Node[];
   links?: Link[];
 }
