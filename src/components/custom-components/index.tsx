@@ -21,6 +21,7 @@ import 'reactflow/dist/style.css';
 
 // Import utils
 import { generateEdges, generateLinks, generateNodes } from '../../utils/customUtils/utils';
+import { LINK_TYPE } from '../../utils/constants';
 
 const nodeTypes = {
   custom: CustomNode,
@@ -39,10 +40,10 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship }) => {
         let lnk = generateLinks(allTables);
 
         if (!relationship.recRel) {
-          lnk = lnk.filter((obj) => obj.type !== 'link');
+          lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.link);
         }
         if (!relationship.lkRel) {
-          lnk = lnk.filter((obj) => obj.type !== 'link-formula');
+          lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula);
         }
         setLinks(lnk);
         const ns = generateNodes(allTables);

@@ -83,6 +83,11 @@ const DEFAULT_SELECTED_PRESET: IActivePresetSettings = {
   selectedView: DEFAULT_SELECT_OPTION,
 };
 
+const LINK_TYPE = {
+  link: 'link',
+  formula: 'link-formula',
+};
+
 // Exported Constants
 export {
   POSSIBLE,
@@ -98,5 +103,5 @@ export {
   INITIAL_CURRENT_STATE,
   DEFAULT_SELECTED_PRESET,
   DEFAULT_SELECT_OPTION,
+  LINK_TYPE,
 };
-
