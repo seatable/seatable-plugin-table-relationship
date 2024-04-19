@@ -117,7 +117,8 @@ interface EdgeResultItem {
   sourceHandle?: string;
   targetHandle?: string;
   type: string;
-  markerEnd: string;
+  markerEnd: any;
+  style?: any;
 }
 
 interface NodeResultItem {

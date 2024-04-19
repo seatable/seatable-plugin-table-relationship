@@ -7,51 +7,86 @@ export function generateLinks(allTables: TableArray) {
   const allColumns: TableColumn[] = [];
 
   allTables.forEach((t) => {
-    const filteredColumns: any[] = t.columns.reduce((accumulator: any[], column) => {
-      if (column.data) {
-        const { data } = column;
-        const { table_id, other_table_id } = data;
+    t.columns.reduce((accumulator: any[], column) => {
+      if (column.type === 'link-formula') {
+        for (let i = 0; i < allTables.length; i++) {
+          const table = allTables[i];
+          const cc: any = table.columns.find(
+            (c) => c.key === column.data.level1_linked_table_column_key
+          );
+          if (cc) {
+            const srcFilteredObject = {
+              _id: t._id,
+              name: t.name,
+              columns: [
+                {
+                  key: column.key,
+                  type: column.type,
+                  name: column.name,
+                  data_table_id: t._id, // Source Table
+                  data_other_table_id: table._id, // Target Table
+                  data_link_id: column.key,
+                },
+              ],
+            };
+            const tgtFilteredObject = {
+              _id: table._id,
+              name: table.name,
+              columns: [
+                {
+                  key: cc.key,
+                  type: column.type,
+                  name: table.name,
+                  data_table_id: t._id, // Source Table
+                  data_other_table_id: table._id, // Target Table
+                  data_link_id: column.key,
+                },
+              ],
+            };
 
-        if (table_id !== other_table_id) {
-          const { key, type, name, data } = column;
-          const { table_id, other_table_id, link_id } = data;
-
-          accumulator.push({
-            key,
-            type,
-            name,
-            data_table_id: table_id,
-            data_other_table_id: other_table_id,
-            data_link_id: link_id,
-          });
+            tableInfoFiltered.push(srcFilteredObject, tgtFilteredObject);
+          }
         }
       }
-
+      if (column.type === 'link') {
+        const { data } = column;
+        const { table_id, other_table_id } = data;
+        if (table_id !== other_table_id || data.formula === 'lookup') {
+          const { key, type, name, data } = column;
+          const { table_id, other_table_id, link_id } = data;
+          const filteredObject = {
+            _id: t._id,
+            name: t.name,
+            columns: [
+              {
+                key,
+                type,
+                name,
+                data_table_id: table_id, // Source Table
+                data_other_table_id: other_table_id, // Target Table
+                data_link_id: link_id,
+              },
+            ],
+          };
+          tableInfoFiltered.push(filteredObject);
+        }
+      }
       return accumulator;
     }, []);
-
-    const filteredObject = {
-      _id: t._id,
-      name: t.name,
-      columns: filteredColumns,
-    };
-
-    tableInfoFiltered.push(filteredObject);
   });
 
   const onlyTablesWithLinksColumn = tableInfoFiltered.filter((i) => i.columns.length > 0);
 
-  onlyTablesWithLinksColumn.forEach((table: any) => {
-    const columnsWithTableInfo = table.columns.map((column: any) => ({
+  onlyTablesWithLinksColumn.forEach((t: any) => {
+    const columnsWithTableInfo = t.columns.map((column: any) => ({
       type: column.type,
       link_id: column.data_link_id,
       column_key: column.key,
       column_name: column.name,
-      dataTableId: table._id,
-      sourceTable_id: column.data_table_id === table._id ? table._id : column.data_table_id,
-      targetTable_id:
-        column.data_other_table_id === table._id ? table._id : column.data_other_table_id,
-      table_name: table.name,
+      dataTableId: t._id,
+      sourceTable_id: column.data_table_id === t._id ? t._id : column.data_table_id,
+      targetTable_id: column.data_other_table_id === t._id ? t._id : column.data_other_table_id,
+      table_name: t.name,
     }));
     allColumns.push(...columnsWithTableInfo);
   });
@@ -80,6 +115,7 @@ export function generateLinks(allTables: TableArray) {
       return a;
     }, {})
   );
+  console.log('links', links);
   return links;
 }
 
@@ -143,7 +179,22 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
         sourceHandle: sourceHandle,
         targetHandle: targetHandle,
         type: 'smoothstep',
-        markerEnd: MarkerType.ArrowClosed,
+        style:
+          link.type === 'link-formula'
+            ? {
+                strokeWidth: 1,
+                stroke: '#ff8000',
+              }
+            : {
+                strokeWidth: 1,
+                stroke: '#000',
+              },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 10,
+          height: 10,
+          color: '#000',
+        },
       });
     }
   });
