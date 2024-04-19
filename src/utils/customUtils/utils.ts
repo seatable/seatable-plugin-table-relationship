@@ -6,7 +6,7 @@ import { LINK_TYPE } from '../constants';
 export function generateLinks(allTables: TableArray) {
   const formulaCc: TableColumn[] = [];
   const linkCc: any[] = [];
-  console.log('allTables', allTables);
+
   allTables.forEach((t) => {
     t.columns.forEach((c) => {
       if (c.type === LINK_TYPE.link) {
@@ -26,8 +26,7 @@ export function generateLinks(allTables: TableArray) {
   });
   const lCcData = reduceLindCcData(linkCc);
   const fCcData = createFormulaCcData(formulaCc, allTables);
-  console.log('lCcData', lCcData);
-  console.log('fCcData', fCcData);
+
   return [...lCcData, ...fCcData];
 }
 
