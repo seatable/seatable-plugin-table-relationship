@@ -64,9 +64,9 @@ export function generateNodes(allTables: TableArray): NodeResultItem[] {
 
 export function generateEdges(links: any[], tables: TableArray, ns: NodeResultItem[]): any[] {
   const result: EdgeResultItem[] = [];
-
   let sourceHandle = '';
   let targetHandle = '';
+
   links.forEach((link, index) => {
     const { sourceData, targetData1st, type } = link;
 
@@ -74,6 +74,7 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
     const targetTbl = targetData1st.table_name;
     const sourceNode = ns.find((n) => n.id === sourceTbl);
     const targetNode = ns.find((n) => n.id === targetTbl);
+
     let color;
     switch (type) {
       case 'link':
@@ -91,12 +92,21 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
     }
 
     if (sourceNode && targetNode) {
-      sourceHandle = `${sourceNode.id}_${sourceData.column_key}_${
-        sourceNode.position > targetNode.position ? 'l' : 'r'
-      }-src`;
-      targetHandle = `${targetNode.id}_${targetData1st.column_key}_${
-        sourceNode.position > targetNode.position ? 'r' : 'l'
-      }-tgt`;
+      let src = {
+        tId: sourceNode.id,
+        cId: sourceData.column_key,
+        edgSide: sourceNode.position.x > targetNode.position.x ? 'l' : 'r',
+        suffix: '-src',
+      };
+      let tgt = {
+        tId: targetNode.id,
+        cId: targetData1st.column_key,
+        edgSide: sourceNode.position.x < targetNode.position.x ? 'l' : 'r',
+        suffix: '-tgt',
+      };
+
+      sourceHandle = `${src.tId}_${src.cId}_${src.edgSide}${src.suffix}`;
+      targetHandle = `${tgt.tId}_${tgt.cId}_${tgt.edgSide}${tgt.suffix}`;
     }
 
     if (sourceTbl && targetTbl) {
