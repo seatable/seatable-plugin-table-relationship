@@ -7,7 +7,6 @@ export function generateLinks(allTables: TableArray) {
   const formulaCc: TableColumn[] = [];
   const linkCc: any[] = [];
 
-  console.log('allTables', allTables);
   allTables.forEach((t) => {
     t.columns.forEach((c) => {
       if (c.type === LINK_TYPE.link) {
@@ -70,6 +69,7 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
   let targetHandle = '';
   links.forEach((link, index) => {
     const { sourceData, targetData1st, type } = link;
+
     const sourceTbl = sourceData.table_name;
     const targetTbl = targetData1st.table_name;
     const sourceNode = ns.find((n) => n.id === sourceTbl);
@@ -190,11 +190,23 @@ function reduceLindCcData(linkCc: any[]) {
     }
   });
 
-  const resultArray = Object.values(groupedItems).map((group) => ({
-    type: 'link',
-    sourceData: group.sourceData,
-    targetData1st: group.targetData,
-  }));
+  let filteredData: any = {};
+
+  for (let key in groupedItems) {
+    if (Object.prototype.hasOwnProperty.call(groupedItems, key)) {
+      if (groupedItems[key].targetData !== null) {
+        filteredData[key] = groupedItems[key];
+      }
+    }
+  }
+
+  const resultArray = Object.values(filteredData).map((g: any) => {
+    return {
+      type: 'link',
+      sourceData: g.sourceData,
+      targetData1st: g.targetData,
+    };
+  });
   return resultArray;
 }
 
@@ -242,7 +254,6 @@ function createFormulaCcData(data: any, allTables: TableArray) {
       };
     }
   });
-  console.log('fCcRowData', fCcRowData);
 
   fCcRowData.forEach((fc: any) => {
     fCcData.push({
@@ -259,6 +270,6 @@ function createFormulaCcData(data: any, allTables: TableArray) {
       });
     }
   });
-  console.log('fCcData', fCcData);
+
   return fCcData;
 }
