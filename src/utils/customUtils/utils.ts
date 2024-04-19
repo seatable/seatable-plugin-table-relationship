@@ -44,7 +44,7 @@ export function generateNodes(allTables: TableArray): NodeResultItem[] {
     const rowIndex = Math.floor(i / numCols);
     const colIndex = i % numCols;
     const x = 100 + colIndex * 250;
-    const y = 100 + rowIndex * 250 + (colIndex % 2 === 0 ? 0 : 100);
+    const y = 100 + rowIndex * 250;
 
     const activeNode: NodeResultItem = {
       id: table.name.toString(),
@@ -113,7 +113,6 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
         target: targetTbl,
         sourceHandle: sourceHandle,
         targetHandle: targetHandle,
-        // type: 'bezier',
         style: {
           strokeWidth: 1,
           stroke: color,
