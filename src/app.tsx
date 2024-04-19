@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { FaPlus } from 'react-icons/fa6';
-import { getLinkCellValue } from 'dtable-utils';
 
 // Import of Component
 import Header from './components/template-components/Header';

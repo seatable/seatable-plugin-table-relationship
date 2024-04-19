@@ -86,6 +86,7 @@ const DEFAULT_SELECTED_PRESET: IActivePresetSettings = {
 const LINK_TYPE = {
   link: 'link',
   formula: 'link-formula',
+  formula2nd: 'link-formula-2nd',
 };
 
 // Exported Constants

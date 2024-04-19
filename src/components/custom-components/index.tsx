@@ -38,12 +38,13 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship }) => {
     try {
       if (allTables) {
         let lnk = generateLinks(allTables);
-
         if (!relationship.recRel) {
           lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.link);
         }
         if (!relationship.lkRel) {
-          lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula);
+          lnk = lnk.filter(
+            (obj) => obj.type !== LINK_TYPE.formula && obj.type !== LINK_TYPE.formula2nd
+          );
         }
         setLinks(lnk);
         const ns = generateNodes(allTables);

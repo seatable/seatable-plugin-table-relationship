@@ -1,122 +1,34 @@
 import { EdgeResultItem, NodeResultItem } from '../Interfaces/custom-interfaces/ERDPlugin';
 import { TableArray, TableColumn } from '../Interfaces/template-interfaces/Table.interface';
-import { MarkerType } from 'reactflow';
+import { MarkerType, clamp } from 'reactflow';
+import { LINK_TYPE } from '../constants';
 
 export function generateLinks(allTables: TableArray) {
-  const tableInfoFiltered: any[] = [];
-  const allColumns: TableColumn[] = [];
+  const formulaCc: TableColumn[] = [];
+  const linkCc: any[] = [];
 
+  console.log('allTables', allTables);
   allTables.forEach((t) => {
-    t.columns.reduce((accumulator: any[], column) => {
-      if (column.type === 'link-formula') {
-        for (let i = 0; i < allTables.length; i++) {
-          const table = allTables[i];
-          const cc: any = table.columns.find(
-            (c) => c.key === column.data.level1_linked_table_column_key
-          );
-          if (cc) {
-            const srcFilteredObject = {
-              _id: t._id,
-              name: t.name,
-              columns: [
-                {
-                  key: column.key,
-                  type: column.type,
-                  name: column.name,
-                  data_table_id: t._id, // Source Table
-                  data_other_table_id: table._id, // Target Table
-                  data_link_id: column.key,
-                },
-              ],
-            };
-            const tgtFilteredObject = {
-              _id: table._id,
-              name: table.name,
-              columns: [
-                {
-                  key: cc.key,
-                  type: column.type,
-                  name: table.name,
-                  data_table_id: t._id, // Source Table
-                  data_other_table_id: table._id, // Target Table
-                  data_link_id: column.key,
-                },
-              ],
-            };
-
-            tableInfoFiltered.push(srcFilteredObject, tgtFilteredObject);
-          }
-        }
+    t.columns.forEach((c) => {
+      if (c.type === LINK_TYPE.link) {
+        linkCc.push({
+          table_id: t._id,
+          table_name: t.name,
+          column_key: c.key,
+          column_name: c.name,
+          srcT: c.data.table_id,
+          tgtT: c.data.other_table_id,
+          link_id: c.data.link_id,
+        });
+      } else if (c.type === LINK_TYPE.formula) {
+        formulaCc.push(c);
       }
-      if (column.type === 'link') {
-        const { data } = column;
-        const { table_id, other_table_id } = data;
-        if (table_id !== other_table_id || data.formula === 'lookup') {
-          const { key, type, name, data } = column;
-          const { table_id, other_table_id, link_id } = data;
-          const filteredObject = {
-            _id: t._id,
-            name: t.name,
-            columns: [
-              {
-                key,
-                type,
-                name,
-                data_table_id: table_id, // Source Table
-                data_other_table_id: other_table_id, // Target Table
-                data_link_id: link_id,
-              },
-            ],
-          };
-          tableInfoFiltered.push(filteredObject);
-        }
-      }
-      return accumulator;
-    }, []);
+    });
   });
+  const lCcData = reduceLindCcData(linkCc);
+  const fCcData = createFormulaCcData(formulaCc, allTables);
 
-  const onlyTablesWithLinksColumn = tableInfoFiltered.filter((i) => i.columns.length > 0);
-
-  onlyTablesWithLinksColumn.forEach((t: any) => {
-    const columnsWithTableInfo = t.columns.map((column: any) => ({
-      type: column.type,
-      link_id: column.data_link_id,
-      column_key: column.key,
-      column_name: column.name,
-      dataTableId: t._id,
-      sourceTable_id: column.data_table_id === t._id ? t._id : column.data_table_id,
-      targetTable_id: column.data_other_table_id === t._id ? t._id : column.data_other_table_id,
-      table_name: t.name,
-    }));
-    allColumns.push(...columnsWithTableInfo);
-  });
-
-  const links = Object.values(
-    allColumns.reduce((a: { [key: string]: any }, c: any) => {
-      if (c.dataTableId === c.sourceTable_id) {
-        a[c.link_id] = a[c.link_id] || { ...c };
-        a[c.link_id].sourceColumn_key = c.column_key;
-        a[c.link_id].sourceColumn_name = c.column_name;
-        a[c.link_id].sourceTable_name = c.table_name;
-        delete a[c.link_id].column_key;
-        delete a[c.link_id].column_name;
-        delete a[c.link_id].dataTableId;
-        delete a[c.link_id].table_name;
-      } else if (c.dataTableId === c.targetTable_id) {
-        a[c.link_id] = a[c.link_id] || { ...c };
-        a[c.link_id].targetColumn_key = c.column_key;
-        a[c.link_id].targetColumn_name = c.column_name;
-        a[c.link_id].targetTable_name = c.table_name;
-        delete a[c.link_id].dataTableId;
-        delete a[c.link_id].table_name;
-        delete a[c.link_id].column_key;
-        delete a[c.link_id].column_name;
-      }
-      return a;
-    }, {})
-  );
-
-  return links;
+  return [...lCcData, ...fCcData];
 }
 
 export function generateNodes(allTables: TableArray): NodeResultItem[] {
@@ -157,16 +69,32 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
   let sourceHandle = '';
   let targetHandle = '';
   links.forEach((link, index) => {
-    const sourceTbl = link.sourceTable_name;
-    const targetTbl = link.targetTable_name;
+    const { sourceData, targetData1st, type } = link;
+    const sourceTbl = sourceData.table_name;
+    const targetTbl = targetData1st.table_name;
     const sourceNode = ns.find((n) => n.id === sourceTbl);
     const targetNode = ns.find((n) => n.id === targetTbl);
+    let color;
+    switch (type) {
+      case 'link':
+        color = '#000';
+        break;
+      case 'link-formula':
+        color = '#ff8000';
+        break;
+      case 'link-formula-2nd':
+        color = '#ADD8E6';
+        break;
+      default:
+        color = '#000';
+        break;
+    }
 
     if (sourceNode && targetNode) {
-      sourceHandle = `${sourceNode.id}_${link.sourceColumn_key}_${
+      sourceHandle = `${sourceNode.id}_${sourceData.column_key}_${
         sourceNode.position > targetNode.position ? 'l' : 'r'
       }-src`;
-      targetHandle = `${targetNode.id}_${link.targetColumn_key}_${
+      targetHandle = `${targetNode.id}_${targetData1st.column_key}_${
         sourceNode.position > targetNode.position ? 'r' : 'l'
       }-tgt`;
     }
@@ -178,26 +106,159 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
         target: targetTbl,
         sourceHandle: sourceHandle,
         targetHandle: targetHandle,
-        type: 'smoothstep',
-        style:
-          link.type === 'link-formula'
-            ? {
-                strokeWidth: 1,
-                stroke: '#ff8000',
-              }
-            : {
-                strokeWidth: 1,
-                stroke: '#000',
-              },
+        // type: 'bezier',
+        style: {
+          strokeWidth: 1,
+          stroke: color,
+        },
         markerEnd: {
           type: MarkerType.ArrowClosed,
           width: 10,
           height: 10,
-          color: '#000',
+          color: color,
         },
       });
     }
   });
 
   return result;
+}
+
+// Helper for generateLinks
+
+function findData(tableKey: string, columnKey: string, allTables: TableArray) {
+  let result;
+  allTables.forEach((t) => {
+    if (t._id === tableKey) {
+      t?.columns.forEach((c: TableColumn) => {
+        if (c.key === columnKey) {
+          result = {
+            column_key: c.key,
+            column_name: c.name,
+            table_id: t._id,
+            table_name: t.name,
+          };
+        }
+      });
+    }
+  });
+  return result;
+}
+function findFirstLinkedTable(key: string, allTables: TableArray) {
+  let result: {
+    firstLinkTableId: string;
+    sourceTableId: string;
+  } = { firstLinkTableId: '', sourceTableId: '' };
+  allTables.forEach((t) => {
+    t.columns.forEach((c) => {
+      if (c.key === key) {
+        result = { firstLinkTableId: c.data.other_table_id, sourceTableId: t._id };
+      }
+    });
+  });
+  return result;
+}
+
+function findSecondLinedTable(tableKey: string, columnKey: string, allTables: TableArray) {
+  let targetColumns: any;
+  let result;
+  allTables.forEach((t) => {
+    if (t._id === tableKey) {
+      targetColumns = t.columns;
+    }
+  });
+  targetColumns?.forEach((c: TableColumn) => {
+    if (c.key === columnKey) {
+      result = c.data.other_table_id;
+    }
+  });
+  return result;
+}
+
+function reduceLindCcData(linkCc: any[]) {
+  const groupedItems: { [key: string]: { sourceData: any | null; targetData: any | null } } = {};
+
+  linkCc.forEach((item) => {
+    if (!groupedItems[item.link_id]) {
+      groupedItems[item.link_id] = { sourceData: null, targetData: null };
+    }
+
+    if (item.table_id === item.srcT) {
+      groupedItems[item.link_id].sourceData = item;
+    } else if (item.table_id === item.tgtT) {
+      groupedItems[item.link_id].targetData = item;
+    }
+  });
+
+  const resultArray = Object.values(groupedItems).map((group) => ({
+    type: 'link',
+    sourceData: group.sourceData,
+    targetData1st: group.targetData,
+  }));
+  return resultArray;
+}
+
+function createFormulaCcData(data: any, allTables: TableArray) {
+  const fCcData: any = [];
+  const fCcRowData = data.map((fc: any) => {
+    let secondLinkedTableId: string | undefined;
+    const { sourceTableId, firstLinkTableId } = findFirstLinkedTable(
+      fc.data.link_column_key,
+      allTables
+    );
+
+    if (firstLinkTableId && fc.data.level2_linked_table_column_key !== null) {
+      secondLinkedTableId = findSecondLinedTable(
+        firstLinkTableId,
+        fc.data.level1_linked_table_column_key,
+        allTables
+      );
+    }
+
+    if (fc.data.level2_linked_table_column_key !== null) {
+      return {
+        type: fc.type,
+        sourceData: findData(sourceTableId, fc.key, allTables),
+        targetData1st: findData(
+          firstLinkTableId,
+          fc.data.level1_linked_table_column_key,
+          allTables
+        ),
+        targetData2nd: findData(
+          secondLinkedTableId!,
+          fc.data.level2_linked_table_column_key,
+          allTables
+        ),
+      };
+    } else {
+      return {
+        type: fc.type,
+        sourceData: findData(sourceTableId, fc.key, allTables),
+        targetData1st: findData(
+          firstLinkTableId,
+          fc.data.level1_linked_table_column_key,
+          allTables
+        ),
+      };
+    }
+  });
+  console.log('fCcRowData', fCcRowData);
+
+  fCcRowData.forEach((fc: any) => {
+    fCcData.push({
+      type: fc.targetData2nd ? 'link-formula-2nd' : 'link-formula',
+      sourceData: fc.sourceData,
+      targetData1st: fc.targetData1st,
+    });
+
+    if (fc.targetData2nd) {
+      fCcData.push({
+        type: 'link-formula-2nd',
+        sourceData: fc.targetData1st,
+        targetData1st: fc.targetData2nd,
+      });
+    }
+  });
+  console.log('fCcData', fCcData);
+  return fCcData;
 }
