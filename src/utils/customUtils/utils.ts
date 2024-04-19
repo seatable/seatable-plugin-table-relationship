@@ -26,7 +26,8 @@ export function generateLinks(allTables: TableArray) {
   });
   const lCcData = reduceLindCcData(linkCc);
   const fCcData = createFormulaCcData(formulaCc, allTables);
-
+  console.log('lCcData', lCcData);
+  console.log('fCcData', fCcData);
   return [...lCcData, ...fCcData];
 }
 
@@ -90,20 +91,22 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
         color = '#000';
         break;
     }
-
     if (sourceNode && targetNode) {
-      const getSourceOrTargetData = (node: any, data: any, side: string) => ({
-        tId: node.id,
-        cId: data.column_key,
-        edgSide: node.position.x > targetNode.position.x ? 'l' : 'r',
-        suffix: side,
-      });
+      let src = {
+        tId: sourceNode.id,
+        cId: sourceData.column_key,
+        edgSide: sourceNode.position.x > targetNode.position.x ? 'l' : 'r',
+        suffix: '-src',
+      };
+      let tgt = {
+        tId: targetNode.id,
+        cId: targetData1st.column_key,
+        edgSide: sourceNode.position.x < targetNode.position.x ? 'l' : 'r',
+        suffix: '-tgt',
+      };
 
-      const srcHandleData = getSourceOrTargetData(sourceNode, sourceData, '-src');
-      const tgtHandleData = getSourceOrTargetData(targetNode, targetData1st, '-tgt');
-
-      sourceHandle = `${srcHandleData.tId}_${srcHandleData.cId}_${srcHandleData.edgSide}${srcHandleData.suffix}`;
-      targetHandle = `${tgtHandleData.tId}_${tgtHandleData.cId}_${tgtHandleData.edgSide}${tgtHandleData.suffix}`;
+      sourceHandle = `${src.tId}_${src.cId}_${src.edgSide}${src.suffix}`;
+      targetHandle = `${tgt.tId}_${tgt.cId}_${tgt.edgSide}${tgt.suffix}`;
     }
 
     if (sourceTbl && targetTbl) {
@@ -113,6 +116,7 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
         target: targetTbl,
         sourceHandle: sourceHandle,
         targetHandle: targetHandle,
+        type: 'simplebezier',
         style: {
           strokeWidth: 1,
           stroke: color,
@@ -277,5 +281,9 @@ function createFormulaCcData(data: any, allTables: TableArray) {
     }
   });
 
-  return fCcData;
+  if (fCcData.sourceData !== undefined) {
+    return fCcData;
+  } else {
+    return [];
+  }
 }

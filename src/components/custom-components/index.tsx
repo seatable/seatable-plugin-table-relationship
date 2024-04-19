@@ -131,6 +131,8 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship }) => {
       onEdgesChange={onEdgesChange}
       onNodeDragStart={onNodeDragStart}
       onNodeDrag={onNodeDrag}
+      onEdgeClick={(event, edge) => console.log('edge clicked', edge)}
+      onEdgeMouseLeave={(event, edge) => console.log('edge mouse leave', edge)}
       fitView
       nodeTypes={nodeTypes}>
       <MiniMap
