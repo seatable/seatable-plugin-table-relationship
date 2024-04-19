@@ -6,7 +6,7 @@ import { LINK_TYPE } from '../constants';
 export function generateLinks(allTables: TableArray) {
   const formulaCc: TableColumn[] = [];
   const linkCc: any[] = [];
-
+  console.log('allTables', allTables);
   allTables.forEach((t) => {
     t.columns.forEach((c) => {
       if (c.type === LINK_TYPE.link) {
@@ -221,7 +221,7 @@ function reduceLindCcData(linkCc: any[]) {
 }
 
 function createFormulaCcData(data: any, allTables: TableArray) {
-  const fCcData: any = [];
+  let fCcData: any = [];
   const fCcRowData = data.map((fc: any) => {
     let secondLinkedTableId: string | undefined;
     const { sourceTableId, firstLinkTableId } = findFirstLinkedTable(
@@ -281,9 +281,9 @@ function createFormulaCcData(data: any, allTables: TableArray) {
     }
   });
 
-  if (fCcData.sourceData !== undefined) {
-    return fCcData;
-  } else {
-    return [];
-  }
+  fCcData = fCcData.filter(
+    (i: any) => Object.prototype.hasOwnProperty.call(i, 'sourceData') && i.sourceData !== undefined
+  );
+
+  return fCcData;
 }
