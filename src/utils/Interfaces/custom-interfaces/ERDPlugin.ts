@@ -7,6 +7,7 @@ interface IERDPluginProps {
   pluginPresets?: PresetsArray;
   appActiveState?: AppActiveState;
   activeViewRows?: TableRow[];
+  relationship: RelationshipState;
   nodes?: Node[];
   links?: Link[];
 }
@@ -116,7 +117,7 @@ interface EdgeResultItem {
   target: string;
   sourceHandle?: string;
   targetHandle?: string;
-  type: string;
+  type?: string;
   markerEnd: any;
   style?: any;
 }

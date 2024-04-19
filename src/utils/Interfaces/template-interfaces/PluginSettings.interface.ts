@@ -1,4 +1,5 @@
 import { SettingsOption } from '../../types';
+import { RelationshipState } from '../custom-interfaces/ERDPlugin';
 import { AppActiveState } from './App.interface';
 import { PresetSettings, PresetsArray } from './PluginPresets/Presets.interface';
 import { TableArray, TableViewArray } from './Table.interface';
@@ -11,6 +12,8 @@ interface IPluginSettingsProps {
   onTableOrViewChange: (type: SettingsOption, option: SelectOption) => void;
   onToggleSettings: () => void;
   isShowSettings: boolean;
+  relationship: RelationshipState;
+  setRelationship: (t: any) => void;
 }
 
 interface SelectOption {

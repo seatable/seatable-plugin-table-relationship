@@ -21,12 +21,13 @@ import 'reactflow/dist/style.css';
 
 // Import utils
 import { generateEdges, generateLinks, generateNodes } from '../../utils/customUtils/utils';
+import { LINK_TYPE } from '../../utils/constants';
 
 const nodeTypes = {
   custom: CustomNode,
 };
 
-const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables }) => {
+const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [links, setLinks] = useState<Link[]>([]);
@@ -36,7 +37,15 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables }) => {
   useEffect(() => {
     try {
       if (allTables) {
-        const lnk = generateLinks(allTables);
+        let lnk = generateLinks(allTables);
+        if (!relationship.recRel) {
+          lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.link);
+        }
+        if (!relationship.lkRel) {
+          lnk = lnk.filter(
+            (obj) => obj.type !== LINK_TYPE.formula && obj.type !== LINK_TYPE.formula2nd
+          );
+        }
         setLinks(lnk);
         const ns = generateNodes(allTables);
         setNodes(ns);
@@ -46,7 +55,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables }) => {
     } catch (error) {
       console.error('Error processing data:', error);
     }
-  }, [allTables]);
+  }, [allTables, relationship]);
 
   const onNodeDragStart = useCallback(
     (event, node) => {

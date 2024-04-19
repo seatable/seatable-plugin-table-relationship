@@ -22,16 +22,14 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
   isShowSettings,
   onToggleSettings,
   onTableOrViewChange,
+  relationship,
+  setRelationship,
 }) => {
   // State variables for table and view options
   const [tableOptions, setTableOptions] = useState<SelectOption[]>();
   const [viewOptions, setViewOptions] = useState<SelectOption[]>();
   const [tableSelectedOption, setTableSelectedOption] = useState<SelectOption>();
   const [viewSelectedOption, setViewSelectedOption] = useState<SelectOption>();
-  const [relationship, setRelationship] = useState<RelationshipState>({
-    recRel: false,
-    lkRel: false,
-  });
 
   // Change options when active table or view changes
   useEffect(() => {
@@ -66,8 +64,13 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appActiveState]);
 
+
   const handleShownFieldNames = (isShown: boolean) => {
     console.log('isShown', isShown);
+  };
+
+  const handleSetRelationship = (r: RelationshipState) => {
+    setRelationship(r);
   };
 
   return (
@@ -118,7 +121,7 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
               <p>Show linked record relationship</p>
               <button
                 onClick={() => {
-                  setRelationship({ ...relationship, recRel: !relationship.recRel });
+                  handleSetRelationship({ ...relationship, recRel: !relationship.recRel });
                 }}
                 className={`${
                   relationship.recRel
@@ -132,7 +135,7 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
               <p>Show lookup relationship</p>
               <button
                 onClick={() => {
-                  setRelationship({ ...relationship, lkRel: !relationship.lkRel });
+                  handleSetRelationship({ ...relationship, lkRel: !relationship.lkRel });
                 }}
                 className={`${
                   relationship.lkRel

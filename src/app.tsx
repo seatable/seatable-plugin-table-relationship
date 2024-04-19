@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { FaPlus } from 'react-icons/fa6';
-import { getLinkCellValue } from 'dtable-utils';
 
 // Import of Component
 import Header from './components/template-components/Header';
@@ -52,6 +51,7 @@ import {
 } from './utils/utils';
 import { SettingsOption } from './utils/types';
 import pluginContext from './plugin-context';
+import { RelationshipState } from './utils/Interfaces/custom-interfaces/ERDPlugin';
 
 const App: React.FC<IAppProps> = (props) => {
   const { isDevelopment, lang } = props;
@@ -66,6 +66,10 @@ const App: React.FC<IAppProps> = (props) => {
   // appActiveState: Define the app's active Preset + (Table + View) state using the useState hook
   // For better understanding read the comments in the AppActiveState interface
   const [appActiveState, setAppActiveState] = useState<AppActiveState>(INITIAL_CURRENT_STATE);
+  const [relationship, setRelationship] = useState<RelationshipState>({
+    recRel: true,
+    lkRel: true,
+  });
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx, activeViewRows, activeTableView } =
     appActiveState;
@@ -395,11 +399,10 @@ const App: React.FC<IAppProps> = (props) => {
   const onInsertRow = (table: Table, view: TableView, rowData: any) => {
     let columns = window.dtableSDK.getColumns(table);
     let newRowData: { [key: string]: any } = {};
-    console.log('columns', columns);
+
     for (let key in rowData) {
-      console.log('key', key);
       let column = columns.find((column: TableColumn) => column.name === key);
-      console.log('column.type', column.type);
+
       if (!column) {
         continue;
       }
@@ -434,6 +437,10 @@ const App: React.FC<IAppProps> = (props) => {
     if (insertedRow) {
       pluginContext.expandRow(insertedRow, table);
     }
+  };
+
+  const onToggleRelationship = (r: RelationshipState) => {
+    setRelationship(r);
   };
 
   if (!isShowPlugin) {
@@ -471,7 +478,11 @@ const App: React.FC<IAppProps> = (props) => {
           style={{ height: '100%', width: '100%', backgroundColor: '#f5f5f5' }}>
           <div id={PLUGIN_ID} className={styles.body} style={{ padding: '10px', width: '100%' }}>
             {/* Note: The CustomPlugin component serves as a placeholder and should be replaced with your custom plugin component. */}
-            <ERDPlugin appActiveState={appActiveState} allTables={allTables} />
+            <ERDPlugin
+              appActiveState={appActiveState}
+              allTables={allTables}
+              relationship={relationship}
+            />
             <button className={styles.add_row} onClick={addRowItem}>
               <FaPlus size={30} color="#fff" />
               {isDevelopment && (
@@ -490,6 +501,8 @@ const App: React.FC<IAppProps> = (props) => {
             pluginPresets={pluginPresets}
             onTableOrViewChange={onTableOrViewChange}
             onToggleSettings={toggleSettings}
+            relationship={relationship}
+            setRelationship={onToggleRelationship}
           />
         </div>
       </div>
