@@ -44,7 +44,7 @@ export function generateNodes(allTables: TableArray): NodeResultItem[] {
     const rowIndex = Math.floor(i / numCols);
     const colIndex = i % numCols;
     const x = 100 + colIndex * 250;
-    const y = 100 + rowIndex * 250 + (colIndex % 2 === 0 ? 0 : 100);
+    const y = 100 + rowIndex * 250;
 
     const activeNode: NodeResultItem = {
       id: table.name.toString(),
@@ -64,9 +64,9 @@ export function generateNodes(allTables: TableArray): NodeResultItem[] {
 
 export function generateEdges(links: any[], tables: TableArray, ns: NodeResultItem[]): any[] {
   const result: EdgeResultItem[] = [];
-
   let sourceHandle = '';
   let targetHandle = '';
+
   links.forEach((link, index) => {
     const { sourceData, targetData1st, type } = link;
 
@@ -74,6 +74,7 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
     const targetTbl = targetData1st.table_name;
     const sourceNode = ns.find((n) => n.id === sourceTbl);
     const targetNode = ns.find((n) => n.id === targetTbl);
+
     let color;
     switch (type) {
       case 'link':
@@ -89,14 +90,22 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
         color = '#000';
         break;
     }
-
     if (sourceNode && targetNode) {
-      sourceHandle = `${sourceNode.id}_${sourceData.column_key}_${
-        sourceNode.position > targetNode.position ? 'l' : 'r'
-      }-src`;
-      targetHandle = `${targetNode.id}_${targetData1st.column_key}_${
-        sourceNode.position > targetNode.position ? 'r' : 'l'
-      }-tgt`;
+      let src = {
+        tId: sourceNode.id,
+        cId: sourceData.column_key,
+        edgSide: sourceNode.position.x > targetNode.position.x ? 'l' : 'r',
+        suffix: '-src',
+      };
+      let tgt = {
+        tId: targetNode.id,
+        cId: targetData1st.column_key,
+        edgSide: sourceNode.position.x < targetNode.position.x ? 'l' : 'r',
+        suffix: '-tgt',
+      };
+
+      sourceHandle = `${src.tId}_${src.cId}_${src.edgSide}${src.suffix}`;
+      targetHandle = `${tgt.tId}_${tgt.cId}_${tgt.edgSide}${tgt.suffix}`;
     }
 
     if (sourceTbl && targetTbl) {
@@ -106,7 +115,7 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
         target: targetTbl,
         sourceHandle: sourceHandle,
         targetHandle: targetHandle,
-        // type: 'bezier',
+        type: 'simplebezier',
         style: {
           strokeWidth: 1,
           stroke: color,
@@ -211,7 +220,7 @@ function reduceLindCcData(linkCc: any[]) {
 }
 
 function createFormulaCcData(data: any, allTables: TableArray) {
-  const fCcData: any = [];
+  let fCcData: any = [];
   const fCcRowData = data.map((fc: any) => {
     let secondLinkedTableId: string | undefined;
     const { sourceTableId, firstLinkTableId } = findFirstLinkedTable(
@@ -270,6 +279,10 @@ function createFormulaCcData(data: any, allTables: TableArray) {
       });
     }
   });
+
+  fCcData = fCcData.filter(
+    (i: any) => Object.prototype.hasOwnProperty.call(i, 'sourceData') && i.sourceData !== undefined
+  );
 
   return fCcData;
 }
