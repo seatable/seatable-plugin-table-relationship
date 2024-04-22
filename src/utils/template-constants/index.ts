@@ -1,9 +1,9 @@
 // External imports
 import info from '../../plugin-config/info.json';
 // Interfaces
-import { PresetSettings } from '../Interfaces/template-interfaces/PluginPresets/Presets.interface';
-import { AppActiveState, AppIsShowState } from '../Interfaces/template-interfaces/App.interface';
-import { IActivePresetSettings } from '../Interfaces/template-interfaces/PluginSettings.interface';
+import { PresetSettings } from '../template-interfaces/PluginPresets/Presets.interface';
+import { AppActiveState, AppIsShowState } from '../template-interfaces/App.interface';
+import { IActivePresetSettings } from '../template-interfaces/PluginSettings.interface';
 
 // Constants
 const POSSIBLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789';
@@ -83,12 +83,6 @@ const DEFAULT_SELECTED_PRESET: IActivePresetSettings = {
   selectedView: DEFAULT_SELECT_OPTION,
 };
 
-const LINK_TYPE = {
-  link: 'link',
-  formula: 'link-formula',
-  formula2nd: 'link-formula-2nd',
-};
-
 // Exported Constants
 export {
   POSSIBLE,
@@ -104,5 +98,4 @@ export {
   INITIAL_CURRENT_STATE,
   DEFAULT_SELECTED_PRESET,
   DEFAULT_SELECT_OPTION,
-  LINK_TYPE,
 };

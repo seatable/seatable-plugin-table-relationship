@@ -3,8 +3,8 @@ import styles from '../../../styles/template-styles/Plugin.module.scss';
 import stylesPPresets from '../../../styles/template-styles/PluginPresets.module.scss';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { IHeaderProps } from '../../../utils/Interfaces/template-interfaces/Header.interface';
-import { PLUGIN_ID } from '../../../utils/constants';
+import { IHeaderProps } from '../../../utils/template-interfaces/Header.interface';
+import { PLUGIN_ID } from '../../../utils/template-constants';
 import { HiOutlineChevronDoubleRight } from 'react-icons/hi2';
 
 const Header: React.FC<IHeaderProps> = (props) => {

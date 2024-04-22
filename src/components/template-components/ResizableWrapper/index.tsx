@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styles from '../../../styles/template-styles/Plugin.module.scss';
-import { IResizableWrapper } from '../../../utils/Interfaces/template-interfaces/ResizableWrapper.interface';
+import { IResizableWrapper } from '../../../utils/template-interfaces/ResizableWrapper.interface';
 
 const ResizableWrapper: React.FC<IResizableWrapper> = ({ children }) => {
   const [allowTextSelection, setAllowTextSelection] = useState<boolean>(true);

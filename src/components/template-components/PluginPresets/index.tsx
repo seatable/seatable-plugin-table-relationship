@@ -9,28 +9,28 @@ import {
   IPresetsProps,
   PresetSettings,
   PresetsArray,
-} from '../../../utils/Interfaces/template-interfaces/PluginPresets/Presets.interface';
+} from '../../../utils/template-interfaces/PluginPresets/Presets.interface';
 import {
   appendPresetSuffix,
   createDefaultPresetSettings,
   generatorPresetId,
   getActiveTableAndActiveView,
   isUniquePresetName,
-} from '../../../utils/utils';
+} from '../../../utils/template-utils/utils';
 import {
   DEFAULT_PLUGIN_DATA,
   PLUGIN_NAME,
   PresetHandleAction,
   TABLE_NAME,
-} from '../../../utils/constants';
+} from '../../../utils/template-constants';
 import {
   IActiveTableAndView,
   TableArray,
   TableColumn,
-} from '../../../utils/Interfaces/template-interfaces/Table.interface';
+} from '../../../utils/template-interfaces/Table.interface';
 import PresetInput from './PresetInput';
 import useClickOut from '../../../hooks/useClickOut';
-import { AppActiveState } from '../../../utils/Interfaces/template-interfaces/App.interface';
+import { AppActiveState } from '../../../utils/template-interfaces/App.interface';
 import { HiOutlineChevronDoubleLeft } from 'react-icons/hi2';
 import intl from 'react-intl-universal';
 import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from '../../../locale';

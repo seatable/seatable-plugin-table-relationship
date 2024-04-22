@@ -1,11 +1,16 @@
-import { EdgeResultItem, NodeResultItem } from '../Interfaces/custom-interfaces/ERDPlugin';
-import { TableArray, TableColumn } from '../Interfaces/template-interfaces/Table.interface';
-import { MarkerType, clamp } from 'reactflow';
-import { LINK_TYPE } from '../constants';
+import { LINK_TYPE } from '../custom-constants/constants';
+import {
+  ILinksColumnData,
+  ILinksData,
+  ISrcFrstTblId,
+  NodeResultItem,
+} from '../custom-interfaces/ERDPlugin';
+import { TableArray, TableColumn } from '../template-interfaces/Table.interface';
+import { MarkerType, Edge } from 'reactflow';
 
-export function generateLinks(allTables: TableArray) {
-  const formulaCc: TableColumn[] = [];
-  const linkCc: any[] = [];
+export function generateLinks(allTables: TableArray): ILinksData[] {
+  const formulaCc: TableColumn[] = []; // Column 'link' type
+  const linkCc: ILinksColumnData[] = []; // Column 'link-formula' type
 
   allTables.forEach((t) => {
     t.columns.forEach((c) => {
@@ -24,8 +29,9 @@ export function generateLinks(allTables: TableArray) {
       }
     });
   });
-  const lCcData = reduceLindCcData(linkCc);
-  const fCcData = createFormulaCcData(formulaCc, allTables);
+
+  const lCcData: ILinksData[] = reduceLinkCcData(linkCc); // Column 'link' Data for Link
+  const fCcData: ILinksData[] = createFormulaCcData(formulaCc, allTables); // Column 'link-formula' Data for Link
 
   return [...lCcData, ...fCcData];
 }
@@ -62,8 +68,8 @@ export function generateNodes(allTables: TableArray): NodeResultItem[] {
   return ns;
 }
 
-export function generateEdges(links: any[], tables: TableArray, ns: NodeResultItem[]): any[] {
-  const result: EdgeResultItem[] = [];
+export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[] {
+  const es: Edge[] = [];
   let sourceHandle = '';
   let targetHandle = '';
 
@@ -75,15 +81,15 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
     const sourceNode = ns.find((n) => n.id === sourceTbl);
     const targetNode = ns.find((n) => n.id === targetTbl);
 
-    let color;
+    let color: string;
     switch (type) {
-      case 'link':
+      case LINK_TYPE.link:
         color = '#000';
         break;
-      case 'link-formula':
+      case LINK_TYPE.formula:
         color = '#ff8000';
         break;
-      case 'link-formula-2nd':
+      case LINK_TYPE.formula2nd:
         color = '#ADD8E6';
         break;
       default:
@@ -109,8 +115,8 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
     }
 
     if (sourceTbl && targetTbl) {
-      result.push({
-        id: String(result.length),
+      es.push({
+        id: String(es.length),
         source: sourceTbl,
         target: targetTbl,
         sourceHandle: sourceHandle,
@@ -130,13 +136,18 @@ export function generateEdges(links: any[], tables: TableArray, ns: NodeResultIt
     }
   });
 
-  return result;
+  return es;
 }
 
 // Helper for generateLinks
-
+// Finding the data for the source and target of the link
 function findData(tableKey: string, columnKey: string, allTables: TableArray) {
-  let result;
+  let result: ILinksColumnData = {
+    column_key: '',
+    column_name: '',
+    table_id: '',
+    table_name: '',
+  };
   allTables.forEach((t) => {
     if (t._id === tableKey) {
       t?.columns.forEach((c: TableColumn) => {
@@ -151,13 +162,12 @@ function findData(tableKey: string, columnKey: string, allTables: TableArray) {
       });
     }
   });
+
   return result;
 }
-function findFirstLinkedTable(key: string, allTables: TableArray) {
-  let result: {
-    firstLinkTableId: string;
-    sourceTableId: string;
-  } = { firstLinkTableId: '', sourceTableId: '' };
+
+function findSourceAndFirstLinkedTableId(key: string, allTables: TableArray) {
+  let result: ISrcFrstTblId = { firstLinkTableId: '', sourceTableId: '' };
   allTables.forEach((t) => {
     t.columns.forEach((c) => {
       if (c.key === key) {
@@ -168,9 +178,9 @@ function findFirstLinkedTable(key: string, allTables: TableArray) {
   return result;
 }
 
-function findSecondLinedTable(tableKey: string, columnKey: string, allTables: TableArray) {
-  let targetColumns: any;
-  let result;
+function findSecondLinkedTableId(tableKey: string, columnKey: string, allTables: TableArray) {
+  let targetColumns: TableColumn[] = [];
+  let result: string = '';
   allTables.forEach((t) => {
     if (t._id === tableKey) {
       targetColumns = t.columns;
@@ -181,55 +191,66 @@ function findSecondLinedTable(tableKey: string, columnKey: string, allTables: Ta
       result = c.data.other_table_id;
     }
   });
+
   return result;
 }
 
-function reduceLindCcData(linkCc: any[]) {
-  const groupedItems: { [key: string]: { sourceData: any | null; targetData: any | null } } = {};
-
+function reduceLinkCcData(linkCc: ILinksColumnData[]) {
+  const groupedItems: {
+    [key: string]: { sourceData: ILinksColumnData | null; targetData: ILinksColumnData | null };
+  } = {};
   linkCc.forEach((item) => {
-    if (!groupedItems[item.link_id]) {
+    if (item.link_id && !groupedItems[item.link_id]) {
       groupedItems[item.link_id] = { sourceData: null, targetData: null };
     }
 
-    if (item.table_id === item.srcT) {
+    if (item.link_id && item.table_id === item.srcT) {
       groupedItems[item.link_id].sourceData = item;
-    } else if (item.table_id === item.tgtT) {
+    } else if (item.link_id && item.table_id === item.tgtT) {
       groupedItems[item.link_id].targetData = item;
     }
   });
 
-  let filteredData: any = {};
+  let filteredData: {
+    [linkId: string]: {
+      sourceData: ILinksColumnData;
+      targetData: ILinksColumnData;
+    };
+  } = {};
 
   for (let key in groupedItems) {
     if (Object.prototype.hasOwnProperty.call(groupedItems, key)) {
-      if (groupedItems[key].targetData !== null) {
-        filteredData[key] = groupedItems[key];
-      }
+      filteredData[key] = {
+        sourceData: groupedItems[key].sourceData!,
+        targetData: groupedItems[key].targetData!,
+      };
     }
   }
 
-  const resultArray = Object.values(filteredData).map((g: any) => {
-    return {
-      type: 'link',
-      sourceData: g.sourceData,
-      targetData1st: g.targetData,
-    };
-  });
-  return resultArray;
+  const filteredDataResult = Object.values(filteredData).map(
+    (g: { sourceData: ILinksColumnData; targetData: ILinksColumnData }) => {
+      return {
+        type: LINK_TYPE.link,
+        sourceData: g.sourceData,
+        targetData1st: g.targetData,
+      };
+    }
+  );
+
+  return filteredDataResult;
 }
 
-function createFormulaCcData(data: any, allTables: TableArray) {
-  let fCcData: any = [];
-  const fCcRowData = data.map((fc: any) => {
+function createFormulaCcData(data: TableColumn[], allTables: TableArray) {
+  let fCcData: ILinksData[] = [];
+  const fCcRowData = data.map((fc: TableColumn) => {
     let secondLinkedTableId: string | undefined;
-    const { sourceTableId, firstLinkTableId } = findFirstLinkedTable(
+    const { sourceTableId, firstLinkTableId } = findSourceAndFirstLinkedTableId(
       fc.data.link_column_key,
       allTables
     );
 
     if (firstLinkTableId && fc.data.level2_linked_table_column_key !== null) {
-      secondLinkedTableId = findSecondLinedTable(
+      secondLinkedTableId = findSecondLinkedTableId(
         firstLinkTableId,
         fc.data.level1_linked_table_column_key,
         allTables
@@ -264,24 +285,25 @@ function createFormulaCcData(data: any, allTables: TableArray) {
     }
   });
 
-  fCcRowData.forEach((fc: any) => {
+  fCcRowData.forEach((fc: ILinksData) => {
     fCcData.push({
-      type: fc.targetData2nd ? 'link-formula-2nd' : 'link-formula',
+      type: fc.targetData2nd ? LINK_TYPE.formula2nd : LINK_TYPE.formula,
       sourceData: fc.sourceData,
       targetData1st: fc.targetData1st,
     });
 
     if (fc.targetData2nd) {
       fCcData.push({
-        type: 'link-formula-2nd',
+        type: LINK_TYPE.formula2nd,
         sourceData: fc.targetData1st,
         targetData1st: fc.targetData2nd,
       });
     }
   });
-
+  console.log('fCcData', fCcData);
   fCcData = fCcData.filter(
-    (i: any) => Object.prototype.hasOwnProperty.call(i, 'sourceData') && i.sourceData !== undefined
+    (i: ILinksData) =>
+      Object.prototype.hasOwnProperty.call(i, 'sourceData') && i.sourceData !== undefined
   );
 
   return fCcData;

@@ -1,4 +1,4 @@
-import { AvailableLocales } from '../utils/Interfaces/template-interfaces/App.interface';
+import { AvailableLocales } from '../utils/template-interfaces/App.interface';
 import setting from '../setting.local';
 
 const files = require.context('./lang', false, /\.json$/);
