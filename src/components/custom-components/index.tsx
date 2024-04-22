@@ -11,15 +11,14 @@ import {
   IERDPluginProps,
   ILinksData,
   INodePositions,
-  Link,
   NodeResultItem,
   nodeCts,
 } from '../../utils/custom-interfaces/ERDPlugin';
 import CustomNode from './erd/CustomNode';
-import './erd/overview.css';
 
 // Import styles once
 import 'reactflow/dist/style.css';
+import '../../styles/custom-styles/overview.css';
 
 // Import utils
 import { generateEdges, generateLinks, generateNodes } from '../../utils/custom-utils/utils';
@@ -34,7 +33,6 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship }) => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [links, setLinks] = useState<ILinksData[]>([]);
   const [nodesCts, setNodesCts] = useState<nodeCts[]>([]);
-
   const [prevNodePositions, setPrevNodePositions]: [
     INodePositions,
     React.Dispatch<React.SetStateAction<INodePositions>>,
@@ -44,13 +42,15 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship }) => {
     try {
       if (allTables) {
         let lnk = generateLinks(allTables);
+
         if (!relationship.recRel) {
           lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.link);
         }
         if (!relationship.lkRel) {
-          lnk = lnk.filter(
-            (obj) => obj.type !== LINK_TYPE.formula && obj.type !== LINK_TYPE.formula2nd
-          );
+          lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula);
+        }
+        if (!relationship.lk2Rel) {
+          lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula2nd);
         }
         setLinks(lnk);
         const ns = generateNodes(allTables);

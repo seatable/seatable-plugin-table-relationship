@@ -69,6 +69,7 @@ const App: React.FC<IAppProps> = (props) => {
   const [relationship, setRelationship] = useState<RelationshipState>({
     recRel: true,
     lkRel: true,
+    lk2Rel: true,
   });
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx, activeViewRows, activeTableView } =

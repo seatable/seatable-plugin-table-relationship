@@ -23,6 +23,7 @@ interface Link {
 interface RelationshipState {
   recRel: boolean;
   lkRel: boolean;
+  lk2Rel: boolean;
 }
 
 interface NodeResultItem {
