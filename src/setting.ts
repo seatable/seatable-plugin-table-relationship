@@ -1,4 +1,4 @@
-import { Config } from './utils/Interfaces/template-interfaces/Setting.interface';
+import { Config } from './utils/template-interfaces/Setting.interface';
 
 /** (1/4) initialize config object */
 let config: Config = {} as Config;

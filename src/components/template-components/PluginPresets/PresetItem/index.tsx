@@ -8,9 +8,9 @@ import useClickOut from '../../../../hooks/useClickOut';
 import PresetDropdown from '../PresetDropdown';
 import PresetInput from '../PresetInput';
 // Constants
-import { PresetHandleAction } from '../../../../utils/constants';
+import { PresetHandleAction } from '../../../../utils/template-constants';
 // Interfaces
-import { IPresetItemProps } from '../../../../utils/Interfaces/template-interfaces/PluginPresets/Item.interface';
+import { IPresetItemProps } from '../../../../utils/template-interfaces/PluginPresets/Item.interface';
 // Styles
 import styles from '../../../../styles/template-styles/Plugin.module.scss';
 import '../../../../assets/css/plugin-layout.css';

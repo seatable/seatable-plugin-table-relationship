@@ -9,10 +9,12 @@ import ReactFlow, {
 } from 'reactflow';
 import {
   IERDPluginProps,
+  ILinksData,
+  INodePositions,
   Link,
   NodeResultItem,
   nodeCts,
-} from '../../utils/Interfaces/custom-interfaces/ERDPlugin';
+} from '../../utils/custom-interfaces/ERDPlugin';
 import CustomNode from './erd/CustomNode';
 import './erd/overview.css';
 
@@ -20,8 +22,8 @@ import './erd/overview.css';
 import 'reactflow/dist/style.css';
 
 // Import utils
-import { generateEdges, generateLinks, generateNodes } from '../../utils/customUtils/utils';
-import { LINK_TYPE } from '../../utils/constants';
+import { generateEdges, generateLinks, generateNodes } from '../../utils/custom-utils/utils';
+import { LINK_TYPE } from '../../utils/custom-constants/constants';
 
 const nodeTypes = {
   custom: CustomNode,
@@ -30,9 +32,13 @@ const nodeTypes = {
 const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [links, setLinks] = useState<Link[]>([]);
+  const [links, setLinks] = useState<ILinksData[]>([]);
   const [nodesCts, setNodesCts] = useState<nodeCts[]>([]);
-  const [prevNodePositions, setPrevNodePositions]: any = useState({});
+
+  const [prevNodePositions, setPrevNodePositions]: [
+    INodePositions,
+    React.Dispatch<React.SetStateAction<INodePositions>>,
+  ] = useState({});
 
   useEffect(() => {
     try {
@@ -49,7 +55,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship }) => {
         setLinks(lnk);
         const ns = generateNodes(allTables);
         setNodes(ns);
-        const es = generateEdges(lnk, allTables, ns);
+        const es = generateEdges(lnk, ns);
         setEdges(es);
       }
     } catch (error) {

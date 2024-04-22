@@ -5,13 +5,13 @@ import stylesPresets from '../../../styles/template-styles/PluginPresets.module.
 import {
   SelectOption,
   IPluginSettingsProps,
-} from '../../../utils/Interfaces/template-interfaces/PluginSettings.interface';
-import { truncateTableName } from '../../../utils/utils';
+} from '../../../utils/template-interfaces/PluginSettings.interface';
+import { truncateTableName } from '../../../utils/template-utils/utils';
 import { HiOutlineChevronDoubleRight } from 'react-icons/hi2';
 import { SettingsOption } from '../../../utils/types';
 import intl from 'react-intl-universal';
 import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from '../../../locale';
-import { RelationshipState } from '../../../utils/Interfaces/custom-interfaces/ERDPlugin';
+import { RelationshipState } from '../../../utils/custom-interfaces/ERDPlugin';
 const { [DEFAULT_LOCALE]: d } = AVAILABLE_LOCALES;
 
 // PluginSettings component for managing table and view options
@@ -63,7 +63,6 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
     setViewSelectedOption(viewSelectedOption);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appActiveState]);
-
 
   const handleShownFieldNames = (isShown: boolean) => {
     console.log('isShown', isShown);
