@@ -300,7 +300,7 @@ function createFormulaCcData(data: TableColumn[], allTables: TableArray) {
       });
     }
   });
-  console.log('fCcData', fCcData);
+  // console.log('fCcData', fCcData);
   fCcData = fCcData.filter(
     (i: ILinksData) =>
       Object.prototype.hasOwnProperty.call(i, 'sourceData') && i.sourceData !== undefined

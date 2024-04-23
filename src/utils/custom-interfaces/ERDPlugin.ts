@@ -1,12 +1,10 @@
-import { AppActiveState } from '../template-interfaces/App.interface';
+import { AppActiveState, IPluginDataStore } from '../template-interfaces/App.interface';
 import { PresetsArray } from '../template-interfaces/PluginPresets/Presets.interface';
 import { TableArray, TableRow } from '../template-interfaces/Table.interface';
 
 interface IERDPluginProps {
-  allTables?: TableArray;
-  pluginPresets?: PresetsArray;
-  appActiveState?: AppActiveState;
-  activeViewRows?: TableRow[];
+  pluginDataStore: IPluginDataStore;
+  allTables: TableArray;
   relationship: RelationshipState;
   nodes?: Node[];
   links?: Link[];

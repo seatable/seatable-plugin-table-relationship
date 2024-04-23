@@ -38,6 +38,9 @@ export interface IPluginDataStore
   extends Pick<AppActiveState, 'activePresetId' | 'activePresetIdx'> {
   presets: PresetsArray;
   pluginName: string;
+  erdPluginData?: {
+    [key: string]: any;
+  };
 }
 
 export interface AvailableLocales {
