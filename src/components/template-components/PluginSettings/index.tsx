@@ -143,6 +143,20 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
                 } `}></button>
             </div>
           </div>
+          <div className={'mt-2'}>
+            <div className="mb-2 d-flex align-items-center justify-content-between">
+              <p>Show 2nd level lookup relationship</p>
+              <button
+                onClick={() => {
+                  handleSetRelationship({ ...relationship, lk2Rel: !relationship.lk2Rel });
+                }}
+                className={`${
+                  relationship.lk2Rel
+                    ? stylesPSettings.settings_fields_toggle_btns_active
+                    : stylesPSettings.settings_fields_toggle_btns
+                } `}></button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -66,9 +66,10 @@ const App: React.FC<IAppProps> = (props) => {
   // appActiveState: Define the app's active Preset + (Table + View) state using the useState hook
   // For better understanding read the comments in the AppActiveState interface
   const [appActiveState, setAppActiveState] = useState<AppActiveState>(INITIAL_CURRENT_STATE);
-  const [relationship, setRelationship] = useState<RelationshipState>({
+  const [relationshipBtn, setRelationshipBtn] = useState<RelationshipState>({
     recRel: true,
     lkRel: true,
+    lk2Rel: true,
   });
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx, activeViewRows, activeTableView } =
@@ -115,7 +116,6 @@ const App: React.FC<IAppProps> = (props) => {
   const onDTableConnect = () => {
     resetData();
   };
-
   const onDTableChanged = () => {
     resetData();
   };
@@ -440,7 +440,7 @@ const App: React.FC<IAppProps> = (props) => {
   };
 
   const onToggleRelationship = (r: RelationshipState) => {
-    setRelationship(r);
+    setRelationshipBtn(r);
   };
 
   if (!isShowPlugin) {
@@ -479,9 +479,9 @@ const App: React.FC<IAppProps> = (props) => {
           <div id={PLUGIN_ID} className={styles.body} style={{ padding: '10px', width: '100%' }}>
             {/* Note: The CustomPlugin component serves as a placeholder and should be replaced with your custom plugin component. */}
             <ERDPlugin
-              appActiveState={appActiveState}
               allTables={allTables}
-              relationship={relationship}
+              relationship={relationshipBtn}
+              pluginDataStore={pluginDataStore}
             />
             <button className={styles.add_row} onClick={addRowItem}>
               <FaPlus size={30} color="#fff" />
@@ -501,7 +501,7 @@ const App: React.FC<IAppProps> = (props) => {
             pluginPresets={pluginPresets}
             onTableOrViewChange={onTableOrViewChange}
             onToggleSettings={toggleSettings}
-            relationship={relationship}
+            relationship={relationshipBtn}
             setRelationship={onToggleRelationship}
           />
         </div>

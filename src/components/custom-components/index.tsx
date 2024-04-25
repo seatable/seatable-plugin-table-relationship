@@ -6,62 +6,112 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   isNode,
+  Edge,
 } from 'reactflow';
 import {
   IERDPluginProps,
   ILinksData,
   INodePositions,
-  Link,
   NodeResultItem,
   nodeCts,
 } from '../../utils/custom-interfaces/ERDPlugin';
 import CustomNode from './erd/CustomNode';
-import './erd/overview.css';
 
 // Import styles once
 import 'reactflow/dist/style.css';
+import '../../styles/custom-styles/overview.css';
 
 // Import utils
 import { generateEdges, generateLinks, generateNodes } from '../../utils/custom-utils/utils';
 import { LINK_TYPE } from '../../utils/custom-constants/constants';
+import { PLUGIN_NAME } from '../../utils/template-constants';
+import { TableArray } from '../../utils/template-interfaces/Table.interface';
 
 const nodeTypes = {
   custom: CustomNode,
 };
 
-const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship }) => {
+const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship, pluginDataStore }) => {
+  const [_allTables, setAllTables] = useState<TableArray>([]);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [links, setLinks] = useState<ILinksData[]>([]);
   const [nodesCts, setNodesCts] = useState<nodeCts[]>([]);
-
   const [prevNodePositions, setPrevNodePositions]: [
     INodePositions,
     React.Dispatch<React.SetStateAction<INodePositions>>,
   ] = useState({});
 
   useEffect(() => {
-    try {
-      if (allTables) {
-        let lnk = generateLinks(allTables);
-        if (!relationship.recRel) {
-          lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.link);
+    if (pluginDataStore.erdPluginData) {
+      let lnk = generateLinks(allTables);
+      const ns = generateNodes(allTables);
+      const es = generateEdges(lnk, ns);
+
+      const { nodes, links, edges } = pluginDataStore.erdPluginData;
+      const nsIds = ns.map((node) => node.id);
+      const nodesIds = nodes.map((node: NodeResultItem) => node.id);
+
+      if (nsIds.length === nodesIds.length && nsIds.every((id) => nodesIds.includes(id))) {
+        let differingObjects = [];
+
+        for (let i = 0; i < ns.length; i++) {
+          if (ns[i].data.columns.length !== nodes[i].data.columns.length) {
+            differingObjects.push(ns[i]);
+          }
         }
-        if (!relationship.lkRel) {
-          lnk = lnk.filter(
-            (obj) => obj.type !== LINK_TYPE.formula && obj.type !== LINK_TYPE.formula2nd
-          );
+
+        if (differingObjects.length > 0) {
+          differingObjects.forEach((obj) => {
+            const correspondingNode = nodes.find((node: NodeResultItem) => node.id === obj.id);
+
+            if (correspondingNode) {
+              correspondingNode.data.columns = obj.data.columns;
+            }
+          });
+        } else {
+          setNodes(nodes);
+          const _es = generateEdges(lnk, nodes);
+          setEdges(_es);
+          setPluginDataStore(nodes, lnk, _es);
         }
         setLinks(lnk);
-        const ns = generateNodes(allTables);
-        setNodes(ns);
-        const es = generateEdges(lnk, ns);
+        setNodes(nodes);
         setEdges(es);
+        setPluginDataStore(nodes, lnk, es);
+      } else {
+        const missingIds = nsIds.filter((id) => !nodesIds.includes(id));
+        const extraIds = nodesIds.filter((id: string) => !nsIds.includes(id));
+        const updatedNodes = [...nodes, ...ns.filter((node) => missingIds.includes(node.id))];
+        const filteredNodes = updatedNodes.filter(
+          (node: NodeResultItem) => !extraIds.includes(node.id)
+        );
+        let lnk = generateLinks(allTables);
+
+        const es = generateEdges(lnk, filteredNodes);
+        setNodes(filteredNodes);
+        setEdges(es);
+        setLinks(lnk);
+        setPluginDataStore(filteredNodes, lnk, es);
       }
-    } catch (error) {
-      console.error('Error processing data:', error);
+    } else {
+      // THIS IS THE FIRST TIME THE PLUGIN IS LOADED and there is no data in the pluginDataStore
+      let lnk = generateLinks(allTables);
+      const ns = generateNodes(allTables);
+      const es = generateEdges(lnk, ns);
+      setNodes(ns);
+      setEdges(es);
+      setLinks(lnk);
+      setPluginDataStore(ns, lnk, es);
     }
-  }, [allTables, relationship]);
+  }, [JSON.stringify(allTables), relationship]);
+
+  function setPluginDataStore(ns: any[], lnk: ILinksData[], es: Edge[]) {
+    window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
+      ...pluginDataStore,
+      erdPluginData: { nodes: ns, links: lnk, edges: es },
+    });
+  }
 
   const onNodeDragStart = useCallback(
     (event, node) => {
@@ -128,29 +178,40 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship }) => {
     [nodes, setNodes, prevNodePositions]
   );
 
+  const onNodeDragStop = useCallback(
+    (event, node) => {
+      setPluginDataStore(nodes, links, edges);
+    },
+    [nodes]
+  );
+
   return (
-    <ReactFlow
-      key={nodes.length}
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onNodeDragStart={onNodeDragStart}
-      onNodeDrag={onNodeDrag}
-      onEdgeClick={(event, edge) => console.log('edge clicked', edge)}
-      onEdgeMouseLeave={(event, edge) => console.log('edge mouse leave', edge)}
-      fitView
-      nodeTypes={nodeTypes}>
-      <MiniMap
-        style={{
-          height: 120,
-        }}
-        zoomable
-        pannable
-      />
-      <Controls />
-      <Background color="#aaa" gap={16} />
-    </ReactFlow>
+    <>
+      {/* <p>{allTables.length}</p> */}
+      <ReactFlow
+        key={nodes.length}
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onNodeDragStart={onNodeDragStart}
+        onNodeDrag={onNodeDrag}
+        onNodeDragStop={onNodeDragStop}
+        onEdgeClick={(event, edge) => console.log('edge clicked', edge)}
+        onEdgeMouseLeave={(event, edge) => console.log('edge mouse leave', edge)}
+        fitView
+        nodeTypes={nodeTypes}>
+        <MiniMap
+          style={{
+            height: 120,
+          }}
+          zoomable
+          pannable
+        />
+        <Controls />
+        <Background color="#aaa" gap={16} />
+      </ReactFlow>
+    </>
   );
 };
 

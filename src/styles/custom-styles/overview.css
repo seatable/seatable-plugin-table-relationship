@@ -43,34 +43,3 @@
 .react-flow__node.annotation .react-flow__handle {
   display: none;
 }
-
-.custom-node__header {
-  background: #ff8000;
-  padding: 8px 10px;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.custom-node__body {
-  padding: 10px;
-}
-
-.custom-node__select {
-  position: relative;
-  margin-bottom: 10px;
-}
-
-.custom-node__row {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.custom-node__row-content {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.custom-node__handle {
-  top: -10px;
-}

@@ -1,15 +1,16 @@
 import { memo } from 'react';
 import { Handle, Position } from 'reactflow';
+import stylesCustom from '../../../styles/custom-styles/ERDPlugin.module.scss';
 
 function CustomNode({ id, data }: { id: string; data: any }) {
   return (
     <>
-      <div className="custom-node__header">
-        <strong>{id.substring(0, 25)}</strong>
+      <div className={stylesCustom.custom_node_header}>
+        <strong>{data.name.substring(0, 25)}</strong>
       </div>
-      <div className="custom-node__body">
+      <div className={stylesCustom.custom_node_body}>
         {data.columns.map((cl: any) => (
-          <div key={cl.key} id={cl.key} className="custom-node__row">
+          <div key={cl.key} id={cl.key} className={stylesCustom.custom_node_row}>
             <Handle
               type="source"
               position={Position.Left}
@@ -34,9 +35,9 @@ function CustomNode({ id, data }: { id: string; data: any }) {
               style={{ right: '-10px' }}
               id={id + '_' + cl.key + '_r-src'}
             />
-            <div className="custom-node__row-content">
-              <div className="custom-node__value">{cl.name}</div>
-              <div className="custom-node__id">{cl.type}</div>
+            <div className={stylesCustom.custom_node_row_content}>
+              <div className={stylesCustom.custom_node_row_content_value}>{cl.name}</div>
+              <div className={stylesCustom.custom_node_row_content_id}>{cl.type}</div>
             </div>
           </div>
         ))}
