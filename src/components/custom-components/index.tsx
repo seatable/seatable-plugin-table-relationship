@@ -83,7 +83,8 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship, pluginD
         }
         setLinks(lnk);
         setNodes(nodes);
-        setEdges(es);
+        const _es = generateEdges(lnk, nodes);
+        setEdges(_es);
         setPluginDataStore(nodes, lnk, es);
       } else {
         const missingIds = nsIds.filter((id) => !nodesIds.includes(id));
