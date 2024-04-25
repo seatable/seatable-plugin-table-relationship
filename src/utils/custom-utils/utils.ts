@@ -4,6 +4,7 @@ import {
   ILinksData,
   ISrcFrstTblId,
   NodeResultItem,
+  RelationshipState,
 } from '../custom-interfaces/ERDPlugin';
 import { TableArray, TableColumn } from '../template-interfaces/Table.interface';
 import { MarkerType, Edge } from 'reactflow';
@@ -34,6 +35,17 @@ export function generateLinks(allTables: TableArray): ILinksData[] {
   const fCcData: ILinksData[] = createFormulaCcData(formulaCc, allTables); // Column 'link-formula' Data for Link
 
   return [...lCcData, ...fCcData];
+}
+
+export function filterRelationshipLinks(lnk: ILinksData[], relationship: RelationshipState) {
+  if (!relationship.recRel) {
+    lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.link);
+  } else if (!relationship.lkRel) {
+    lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula);
+  } else if (!relationship.lk2Rel) {
+    lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula2nd);
+  }
+  return lnk;
 }
 
 export function generateNodes(allTables: TableArray): NodeResultItem[] {

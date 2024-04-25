@@ -22,7 +22,12 @@ import 'reactflow/dist/style.css';
 import '../../styles/custom-styles/overview.css';
 
 // Import utils
-import { generateEdges, generateLinks, generateNodes } from '../../utils/custom-utils/utils';
+import {
+  generateEdges,
+  generateLinks,
+  generateNodes,
+  filterRelationshipLinks,
+} from '../../utils/custom-utils/utils';
 import { LINK_TYPE } from '../../utils/custom-constants/constants';
 import { PLUGIN_NAME } from '../../utils/template-constants';
 import { TableArray } from '../../utils/template-interfaces/Table.interface';
@@ -45,10 +50,11 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship, pluginD
   useEffect(() => {
     if (pluginDataStore.erdPluginData) {
       let lnk = generateLinks(allTables);
+      const filteredLinks = filterRelationshipLinks(lnk, relationship);
       const ns = generateNodes(allTables);
-      const es = generateEdges(lnk, ns);
+      const es = generateEdges(filteredLinks, ns);
 
-      const { nodes, links, edges } = pluginDataStore.erdPluginData;
+      const { nodes } = pluginDataStore.erdPluginData;
       const nsIds = ns.map((node) => node.id);
       const nodesIds = nodes.map((node: NodeResultItem) => node.id);
 
