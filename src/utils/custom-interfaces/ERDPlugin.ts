@@ -1,6 +1,5 @@
-import { AppActiveState, IPluginDataStore } from '../template-interfaces/App.interface';
-import { PresetsArray } from '../template-interfaces/PluginPresets/Presets.interface';
-import { TableArray, TableRow } from '../template-interfaces/Table.interface';
+import { IPluginDataStore } from '../template-interfaces/App.interface';
+import { TableArray } from '../template-interfaces/Table.interface';
 
 interface IERDPluginProps {
   pluginDataStore: IPluginDataStore;
@@ -32,6 +31,7 @@ interface NodeResultItem {
     y: number;
   };
   data: {
+    name: string;
     position: {
       x: number;
       y: number;

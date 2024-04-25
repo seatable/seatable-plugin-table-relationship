@@ -6,7 +6,7 @@ function CustomNode({ id, data }: { id: string; data: any }) {
   return (
     <>
       <div className={stylesCustom.custom_node_header}>
-        <strong>{id.substring(0, 25)}</strong>
+        <strong>{data.name.substring(0, 25)}</strong>
       </div>
       <div className={stylesCustom.custom_node_body}>
         {data.columns.map((cl: any) => (

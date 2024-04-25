@@ -53,10 +53,11 @@ export function generateNodes(allTables: TableArray): NodeResultItem[] {
     const y = 100 + rowIndex * 250;
 
     const activeNode: NodeResultItem = {
-      id: table.name.toString(),
+      id: table._id.toString(),
       type: 'custom',
       position: { x, y },
       data: {
+        name: table.name.toString(),
         columns: info,
         position: { x, y },
       },
@@ -76,8 +77,8 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
   links.forEach((link, index) => {
     const { sourceData, targetData1st, type } = link;
 
-    const sourceTbl = sourceData.table_name;
-    const targetTbl = targetData1st.table_name;
+    const sourceTbl = sourceData.table_id;
+    const targetTbl = targetData1st.table_id;
     const sourceNode = ns.find((n) => n.id === sourceTbl);
     const targetNode = ns.find((n) => n.id === targetTbl);
 

@@ -6,6 +6,7 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   isNode,
+  Edge,
 } from 'reactflow';
 import {
   IERDPluginProps,
@@ -42,136 +43,74 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship, pluginD
   ] = useState({});
 
   useEffect(() => {
-    console.log('useEffect');
-    let totalCount = 0;
-    let lnk = generateLinks(allTables);
-    const ns = generateNodes(allTables);
-    const es = generateEdges(lnk, ns);
-    console.log('ns', ns);
-    // if (nodes.length === 0) {
-    //   setLinks(lnk);
-    //   setNodes(ns);
-    //   setEdges(es);
-    // }
-    if (
-      ns.length === pluginDataStore?.erdPluginData?.nodes.length &&
-      lnk.length === pluginDataStore?.erdPluginData?.links.length &&
-      es.length === pluginDataStore?.erdPluginData?.edges.length
-    ) {
-      console.log('PluginDataStore Reigns');
+    if (pluginDataStore.erdPluginData) {
+      let lnk = generateLinks(allTables);
+      const ns = generateNodes(allTables);
+      const es = generateEdges(lnk, ns);
+
       const { nodes, links, edges } = pluginDataStore.erdPluginData;
-      setLinks(links);
-      setNodes(nodes);
-      setEdges(edges);
+      const nsIds = ns.map((node) => node.id);
+      const nodesIds = nodes.map((node: NodeResultItem) => node.id);
+
+      if (nsIds.length === nodesIds.length && nsIds.every((id) => nodesIds.includes(id))) {
+        let differingObjects = [];
+
+        for (let i = 0; i < ns.length; i++) {
+          if (ns[i].data.columns.length !== nodes[i].data.columns.length) {
+            differingObjects.push(ns[i]);
+          }
+        }
+
+        if (differingObjects.length > 0) {
+          differingObjects.forEach((obj) => {
+            const correspondingNode = nodes.find((node: NodeResultItem) => node.id === obj.id);
+
+            if (correspondingNode) {
+              correspondingNode.data.columns = obj.data.columns;
+            }
+          });
+        } else {
+          setNodes(nodes);
+          const _es = generateEdges(lnk, nodes);
+          setEdges(_es);
+          setPluginDataStore(nodes, lnk, _es);
+        }
+        setLinks(lnk);
+        setNodes(nodes);
+        setEdges(es);
+        setPluginDataStore(nodes, lnk, es);
+      } else {
+        const missingIds = nsIds.filter((id) => !nodesIds.includes(id));
+        const extraIds = nodesIds.filter((id: string) => !nsIds.includes(id));
+        const updatedNodes = [...nodes, ...ns.filter((node) => missingIds.includes(node.id))];
+        const filteredNodes = updatedNodes.filter(
+          (node: NodeResultItem) => !extraIds.includes(node.id)
+        );
+        let lnk = generateLinks(allTables);
+
+        const es = generateEdges(lnk, filteredNodes);
+        setNodes(filteredNodes);
+        setEdges(es);
+        setLinks(lnk);
+        setPluginDataStore(filteredNodes, lnk, es);
+      }
     } else {
-      console.log('we are in the else');
-      setLinks(lnk);
+      // THIS IS THE FIRST TIME THE PLUGIN IS LOADED and there is no data in the pluginDataStore
+      let lnk = generateLinks(allTables);
+      const ns = generateNodes(allTables);
+      const es = generateEdges(lnk, ns);
       setNodes(ns);
       setEdges(es);
+      setLinks(lnk);
+      setPluginDataStore(ns, lnk, es);
     }
-
-    // setAllTables(allTables);
-    // if (!relationship.recRel) {
-    //   lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.link);
-    // }
-    // if (!relationship.lkRel) {
-    //   lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula);
-    // }
-    // if (!relationship.lk2Rel) {
-    //   lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula2nd);
-    // }
-    // setLinks(lnk);
-    // setNodes(ns);
-    // setEdges(es);
-    // window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
-    //   ...pluginDataStore,
-    //   erdPluginData: { nodes: ns, links: lnk, edges: es },
-    // });
-
-    // allTables.forEach((t) => {
-    //   allTables.forEach((table) => {
-    //     if (table.columns) {
-    //       table.columns.forEach((column) => {
-    //         if (
-    //           (column.key !== undefined && column.type === LINK_TYPE.link) ||
-    //           column.type === LINK_TYPE.formula2nd ||
-    //           column.type === LINK_TYPE.formula
-    //         ) {
-    //           totalCount++;
-    //         }
-    //       });
-    //     }
-    //   });
-    // });
-    // console.log('totalCount', totalCount);
-
-    // console.log('useEffect', 0);
-    // if (nodes.length !== 0) {
-    //   console.log('nodes is NOT empty', nodes);
-    //   if (allTables) {
-    //     setAllTables(allTables);
-    //     let lnk = generateLinks(allTables);
-    //     if (!relationship.recRel) {
-    //       lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.link);
-    //     }
-    //     if (!relationship.lkRel) {
-    //       lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula);
-    //     }
-    //     if (!relationship.lk2Rel) {
-    //       lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula2nd);
-    //     }
-    //     setLinks(lnk);
-    //     const ns = generateNodes(allTables);
-    //     setNodes(ns);
-    //     const es = generateEdges(lnk, ns);
-    //     setEdges(es);
-    //     const { nodes, links, edges } = pluginDataStore.erdPluginData!;
-    //     console.log('nodes.length', nodes.length);
-    //     console.log('ns.length', ns.length);
-    //   }
-    // }
-    // if (nodes.length === 0 && pluginDataStore.erdPluginData) {
-    //   console.log('nodes is empty');
-    //   const { nodes, links, edges } = pluginDataStore.erdPluginData;
-    //   setNodes(nodes);
-    //   setLinks(links);
-    //   setEdges(edges);
-    //   setAllTables(allTables);
-    // }
   }, [JSON.stringify(allTables), relationship]);
 
-  // useEffect(() => {
-  //   try {
-  //     // console.log('going to generate nodes and edges');
-  //     if (allTables) {
-  //       let lnk = generateLinks(allTables);
-
-  //       if (!relationship.recRel) {
-  //         lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.link);
-  //       }
-  //       if (!relationship.lkRel) {
-  //         lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula);
-  //       }
-  //       if (!relationship.lk2Rel) {
-  //         lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula2nd);
-  //       }
-  //       setLinks(lnk);
-  //       const ns = generateNodes(allTables);
-  //       setNodes(ns);
-  //       const es = generateEdges(lnk, ns);
-  //       setEdges(es);
-  //       window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
-  //         ...pluginDataStore,
-  //         erdPluginData: { nodes: ns, links: lnk, edges: es },
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error('Error processing data:', error);
-  //   }
-  // }, [allTables, relationship]);
-
-  function isDataEqual() {
-    console.log('checking if data is equal');
+  function setPluginDataStore(ns: any[], lnk: ILinksData[], es: Edge[]) {
+    window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
+      ...pluginDataStore,
+      erdPluginData: { nodes: ns, links: lnk, edges: es },
+    });
   }
 
   const onNodeDragStart = useCallback(
@@ -241,11 +180,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship, pluginD
 
   const onNodeDragStop = useCallback(
     (event, node) => {
-      console.log('drag stop');
-      window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
-        ...pluginDataStore,
-        erdPluginData: { nodes: nodes, links: links, edges: edges },
-      });
+      setPluginDataStore(nodes, links, edges);
     },
     [nodes]
   );
