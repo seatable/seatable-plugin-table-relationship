@@ -40,9 +40,11 @@ export function generateLinks(allTables: TableArray): ILinksData[] {
 export function filterRelationshipLinks(lnk: ILinksData[], relationship: RelationshipState) {
   if (!relationship.recRel) {
     lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.link);
-  } else if (!relationship.lkRel) {
+  }
+  if (!relationship.lkRel) {
     lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula);
-  } else if (!relationship.lk2Rel) {
+  }
+  if (!relationship.lk2Rel) {
     lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula2nd);
   }
   return lnk;
@@ -136,7 +138,7 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
         targetHandle: targetHandle,
         type: 'simplebezier',
         style: {
-          strokeWidth: 1,
+          strokeWidth: 2,
           stroke: color,
         },
         markerEnd: {

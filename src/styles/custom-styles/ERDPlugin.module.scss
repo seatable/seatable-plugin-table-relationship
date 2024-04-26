@@ -11,12 +11,29 @@
   height: 100%;
 }
 
+.custom_tableVisual {
+  width: 200px;
+  height: 70px;
+  border: 1px solid black;
+  padding: 10px;
+  position: fixed;
+  top: 100px;
+  right: 50px;
+}
+
 .custom_node {
   &_header {
     background: #ff8000;
     padding: 8px 10px;
     border-bottom: 1px solid #e2e8f0;
   }
+
+  &_header_sel {
+    background: #0c4e90;
+    padding: 8px 10px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
   &_body {
     padding: 10px;
   }

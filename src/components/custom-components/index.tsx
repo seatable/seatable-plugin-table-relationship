@@ -15,7 +15,7 @@ import {
   NodeResultItem,
   nodeCts,
 } from '../../utils/custom-interfaces/ERDPlugin';
-import CustomNode from './erd/CustomNode';
+import CustomNode from './NodesComponent/CustomNode';
 
 // Import styles once
 import 'reactflow/dist/style.css';
@@ -28,7 +28,6 @@ import {
   generateNodes,
   filterRelationshipLinks,
 } from '../../utils/custom-utils/utils';
-import { LINK_TYPE } from '../../utils/custom-constants/constants';
 import { PLUGIN_NAME } from '../../utils/template-constants';
 import { TableArray } from '../../utils/template-interfaces/Table.interface';
 
@@ -36,7 +35,12 @@ const nodeTypes = {
   custom: CustomNode,
 };
 
-const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship, pluginDataStore }) => {
+const ERDPlugin: React.FC<IERDPluginProps> = ({
+  appActiveState,
+  allTables,
+  pluginDataStore,
+  relationship,
+}) => {
   const [_allTables, setAllTables] = useState<TableArray>([]);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -48,13 +52,16 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship, pluginD
   ] = useState({});
 
   useEffect(() => {
-    if (pluginDataStore.erdPluginData) {
+    const PRESET_ID = appActiveState.activePresetId;
+    const presetIndex = pluginDataStore.presets.findIndex((preset) => preset._id === PRESET_ID);
+    const pluginPresetData = pluginDataStore.presets[presetIndex].customSettings;
+    if (pluginPresetData) {
       let lnk = generateLinks(allTables);
       const filteredLinks = filterRelationshipLinks(lnk, relationship);
       const ns = generateNodes(allTables);
       const es = generateEdges(filteredLinks, ns);
 
-      const { nodes } = pluginDataStore.erdPluginData;
+      const nodes = pluginPresetData.nodes;
       const nsIds = ns.map((node) => node.id);
       const nodesIds = nodes.map((node: NodeResultItem) => node.id);
 
@@ -81,11 +88,11 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship, pluginD
           setEdges(_es);
           setPluginDataStore(nodes, lnk, _es);
         }
-        setLinks(lnk);
+        setLinks(filteredLinks);
         setNodes(nodes);
-        const _es = generateEdges(lnk, nodes);
+        const _es = generateEdges(filteredLinks, nodes);
         setEdges(_es);
-        setPluginDataStore(nodes, lnk, es);
+        setPluginDataStore(nodes, filteredLinks, es);
       } else {
         const missingIds = nsIds.filter((id) => !nodesIds.includes(id));
         const extraIds = nodesIds.filter((id: string) => !nsIds.includes(id));
@@ -111,12 +118,26 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship, pluginD
       setLinks(lnk);
       setPluginDataStore(ns, lnk, es);
     }
-  }, [JSON.stringify(allTables), relationship]);
+  }, [JSON.stringify(allTables), relationship, appActiveState.activePresetId]);
 
   function setPluginDataStore(ns: any[], lnk: ILinksData[], es: Edge[]) {
     window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
       ...pluginDataStore,
-      erdPluginData: { nodes: ns, links: lnk, edges: es },
+      presets: pluginDataStore.presets.map((preset) => {
+        if (preset._id === appActiveState.activePresetId) {
+          return {
+            ...preset,
+            customSettings: {
+              ...preset.customSettings,
+              nodes: ns,
+              links: lnk,
+              edges: es,
+              relationship: relationship,
+            },
+          };
+        }
+        return preset;
+      }),
     });
   }
 
@@ -134,6 +155,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship, pluginD
 
   const onNodeDrag = useCallback(
     (event, node) => {
+      node.data.selected = true;
       if (isNode(node) && links && allTables) {
         // Node position is continuously changing, update node's position in state
         const updatedNodes = nodes.map((n) => {
@@ -187,7 +209,23 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship, pluginD
 
   const onNodeDragStop = useCallback(
     (event, node) => {
-      setPluginDataStore(nodes, links, edges);
+      const updatedNodes = nodes.map((n) => {
+        if (n.id === node.id) {
+          // Update node's position in state
+          return {
+            ...n,
+
+            data: {
+              ...n.data,
+              selected: false,
+            },
+          };
+        }
+        return n;
+      }) as NodeResultItem[];
+
+      setNodes(updatedNodes);
+      setPluginDataStore(updatedNodes, links, edges);
     },
     [nodes]
   );
@@ -205,16 +243,16 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({ allTables, relationship, pluginD
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
         onEdgeClick={(event, edge) => console.log('edge clicked', edge)}
-        onEdgeMouseLeave={(event, edge) => console.log('edge mouse leave', edge)}
+        // onEdgeMouseLeave={(event, edge) => console.log('edge mouse leave', edge)}
         fitView
         nodeTypes={nodeTypes}>
-        <MiniMap
+        {/* <MiniMap
           style={{
             height: 120,
           }}
           zoomable
           pannable
-        />
+        /> */}
         <Controls />
         <Background color="#aaa" gap={16} />
       </ReactFlow>

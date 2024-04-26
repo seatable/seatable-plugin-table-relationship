@@ -66,7 +66,7 @@ const App: React.FC<IAppProps> = (props) => {
   // appActiveState: Define the app's active Preset + (Table + View) state using the useState hook
   // For better understanding read the comments in the AppActiveState interface
   const [appActiveState, setAppActiveState] = useState<AppActiveState>(INITIAL_CURRENT_STATE);
-  const [relationshipBtn, setRelationshipBtn] = useState<RelationshipState>({
+  const [activeRelationshipBtn, setActiveRelationshipBtn] = useState<RelationshipState>({
     recRel: true,
     lkRel: true,
     lk2Rel: true,
@@ -214,6 +214,11 @@ const App: React.FC<IAppProps> = (props) => {
         activePresetIdx: _activePresetIdx,
       };
 
+      // TO CHANGE
+      const activeCustomRelationship = activePreset?.customSettings?.relationship;
+      setActiveRelationshipBtn(
+        activeCustomRelationship || { recRel: true, lkRel: true, lk2Rel: true }
+      );
       updatePluginDataStore({
         ...pluginDataStore,
         activePresetId: presetId,
@@ -440,7 +445,24 @@ const App: React.FC<IAppProps> = (props) => {
   };
 
   const onToggleRelationship = (r: RelationshipState) => {
-    setRelationshipBtn(r);
+    setActiveRelationshipBtn(r);
+    const updatedPresets = pluginDataStore.presets.map((preset) => {
+      if (preset._id === appActiveState.activePresetId) {
+        return {
+          ...preset,
+          customSettings: {
+            ...preset.customSettings,
+            relationship: r,
+          },
+        };
+      }
+      return preset;
+    });
+
+    window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
+      ...pluginDataStore,
+      presets: updatedPresets,
+    });
   };
 
   if (!isShowPlugin) {
@@ -479,8 +501,9 @@ const App: React.FC<IAppProps> = (props) => {
           <div id={PLUGIN_ID} className={styles.body} style={{ padding: '10px', width: '100%' }}>
             {/* Note: The CustomPlugin component serves as a placeholder and should be replaced with your custom plugin component. */}
             <ERDPlugin
+              appActiveState={appActiveState}
               allTables={allTables}
-              relationship={relationshipBtn}
+              relationship={activeRelationshipBtn}
               pluginDataStore={pluginDataStore}
             />
             <button className={styles.add_row} onClick={addRowItem}>
@@ -501,7 +524,7 @@ const App: React.FC<IAppProps> = (props) => {
             pluginPresets={pluginPresets}
             onTableOrViewChange={onTableOrViewChange}
             onToggleSettings={toggleSettings}
-            relationship={relationshipBtn}
+            relationship={activeRelationshipBtn}
             setRelationship={onToggleRelationship}
           />
         </div>

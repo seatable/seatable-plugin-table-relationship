@@ -1,4 +1,4 @@
-import { PLUGIN_NAME } from '../../template-constants';
+import { RelationshipState } from '../../custom-interfaces/ERDPlugin';
 import { AppActiveState, IPluginDataStore } from '../App.interface';
 import { SelectOption } from '../PluginSettings.interface';
 import { TableArray } from '../Table.interface';
@@ -31,6 +31,10 @@ export interface IPresetInfo {
   _id: string;
   name: string;
   settings?: PresetSettings;
+  customSettings?: {
+    relationship: RelationshipState;
+    [key: string]: any;
+  };
 }
 
 export interface PresetSettings {
