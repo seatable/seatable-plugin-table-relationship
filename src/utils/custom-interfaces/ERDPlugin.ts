@@ -1,12 +1,16 @@
-import { IPluginDataStore } from '../template-interfaces/App.interface';
+import { AppActiveState, IPluginDataStore } from '../template-interfaces/App.interface';
 import { TableArray } from '../template-interfaces/Table.interface';
 
 interface IERDPluginProps {
+  appActiveState: AppActiveState;
   pluginDataStore: IPluginDataStore;
   allTables: TableArray;
   relationship: RelationshipState;
   nodes?: Node[];
   links?: Link[];
+}
+interface ITableVisualizationProps {
+  appActiveState: AppActiveState;
 }
 
 interface Link {
@@ -32,6 +36,7 @@ interface NodeResultItem {
   };
   data: {
     name: string;
+    selected?: boolean;
     position: {
       x: number;
       y: number;
@@ -87,6 +92,7 @@ interface ISrcFrstTblId {
 
 export type {
   IERDPluginProps,
+  ITableVisualizationProps,
   Link,
   NodeResultItem,
   RelationshipState,

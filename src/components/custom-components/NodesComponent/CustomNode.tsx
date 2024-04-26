@@ -5,6 +5,10 @@ import stylesCustom from '../../../styles/custom-styles/ERDPlugin.module.scss';
 function CustomNode({ id, data }: { id: string; data: any }) {
   return (
     <>
+      {/* <div
+        className={
+          !data.selected ? stylesCustom.custom_node_header : stylesCustom.custom_node_header_sel
+        }> */}
       <div className={stylesCustom.custom_node_header}>
         <strong>{data.name.substring(0, 25)}</strong>
       </div>
