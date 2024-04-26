@@ -48,9 +48,15 @@
       width: 100%;
       &_value {
         color: #000;
+        align-items: self-start;
       }
       &_id {
         color: #000;
+        align-items: center;
+      }
+      &_multiple {
+        color: #000;
+        align-items: self-end;
       }
     }
   }

@@ -7,7 +7,7 @@ import {
   RelationshipState,
 } from '../custom-interfaces/ERDPlugin';
 import { TableArray, TableColumn } from '../template-interfaces/Table.interface';
-import { MarkerType, Edge } from 'reactflow';
+import { MarkerType, Edge, EdgeMarkerType } from 'reactflow';
 
 export function generateLinks(allTables: TableArray): ILinksData[] {
   const formulaCc: TableColumn[] = []; // Column 'link' type
@@ -103,9 +103,17 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
     const targetNode = ns.find((n) => n.id === targetTbl);
 
     let color: string;
+    let markerType: EdgeMarkerType | undefined;
+    
     switch (type) {
       case LINK_TYPE.link:
         color = '#000';
+        markerType = {
+          type: MarkerType.ArrowClosed,
+          width: 10,
+          height: 10,
+          color: color,
+        };
         break;
       case LINK_TYPE.formula:
         color = '#ff8000';
@@ -153,12 +161,8 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
           strokeWidth: 2,
           stroke: color,
         },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 10,
-          height: 10,
-          color: color,
-        },
+        markerStart: markerType,
+        markerEnd: markerType,
       });
     }
   });
