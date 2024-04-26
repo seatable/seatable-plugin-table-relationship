@@ -7,7 +7,7 @@ import {
   RelationshipState,
 } from '../custom-interfaces/ERDPlugin';
 import { TableArray, TableColumn } from '../template-interfaces/Table.interface';
-import { MarkerType, Edge, EdgeMarkerType } from 'reactflow';
+import { MarkerType, Edge, EdgeMarkerType, EdgeMarker } from 'reactflow';
 
 export function generateLinks(allTables: TableArray): ILinksData[] {
   const formulaCc: TableColumn[] = []; // Column 'link' type
@@ -103,20 +103,15 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
     const targetNode = ns.find((n) => n.id === targetTbl);
 
     let color: string;
-    let markerType: EdgeMarkerType | undefined;
-    
+
     switch (type) {
       case LINK_TYPE.link:
         color = '#000';
-        markerType = {
-          type: MarkerType.ArrowClosed,
-          width: 10,
-          height: 10,
-          color: color,
-        };
+
         break;
       case LINK_TYPE.formula:
         color = '#ff8000';
+
         break;
       case LINK_TYPE.formula2nd:
         color = '#ADD8E6';
@@ -145,6 +140,12 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
     const labelString = `${sourceData.isMultiple ? '∞' : '1'} - ${
       targetData1st.isMultiple ? '∞' : '1'
     }`;
+    const markerType: EdgeMarker = {
+      type: MarkerType.ArrowClosed,
+      width: 10,
+      height: 10,
+      color: color,
+    };
     if (sourceTbl && targetTbl) {
       es.push({
         id: String(es.length),
@@ -161,7 +162,7 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
           strokeWidth: 2,
           stroke: color,
         },
-        markerStart: markerType,
+        markerStart: type === LINK_TYPE.link ? markerType : '',
         markerEnd: markerType,
       });
     }
@@ -189,7 +190,7 @@ function findData(tableKey: string, columnKey: string, allTables: TableArray) {
             column_name: c.name,
             table_id: t._id,
             table_name: t.name,
-            isMultiple: c.data.is_multiple,
+            isMultiple: c.type === LINK_TYPE.link ? c.data.is_multiple : false,
           };
         }
       });
@@ -333,7 +334,7 @@ function createFormulaCcData(data: TableColumn[], allTables: TableArray) {
       });
     }
   });
-  // console.log('fCcData', fCcData);
+
   fCcData = fCcData.filter(
     (i: ILinksData) =>
       Object.prototype.hasOwnProperty.call(i, 'sourceData') && i.sourceData !== undefined

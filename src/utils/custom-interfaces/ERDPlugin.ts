@@ -70,7 +70,7 @@ interface ILinksColumnData {
   srcT?: string;
   tgtT?: string;
   link_id?: string;
-  isMultiple: boolean;
+  isMultiple?: boolean;
 }
 
 interface ILinksData {
