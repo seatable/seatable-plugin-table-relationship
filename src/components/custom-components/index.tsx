@@ -253,8 +253,8 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
           zoomable
           pannable
         /> */}
-        <Controls />
-        <Background color="#aaa" gap={16} />
+        <Controls position="top-right" />
+        {/* <Background color="#aaa" gap={30} /> */}
       </ReactFlow>
     </>
   );

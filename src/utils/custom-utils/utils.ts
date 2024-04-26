@@ -24,6 +24,7 @@ export function generateLinks(allTables: TableArray): ILinksData[] {
           srcT: c.data.table_id,
           tgtT: c.data.other_table_id,
           link_id: c.data.link_id,
+          isMultiple: c.data.is_multiple,
         });
       } else if (c.type === LINK_TYPE.formula) {
         formulaCc.push(c);
@@ -58,7 +59,12 @@ export function generateNodes(allTables: TableArray): NodeResultItem[] {
 
   for (let i = 0; i < allTables.length; i++) {
     const table = allTables[i];
-    const info = table.columns.map((cl) => ({ key: cl.key, type: cl.type, name: cl.name }));
+    const info = table.columns.map((cl) => ({
+      key: cl.key,
+      type: cl.type,
+      name: cl.name,
+      isMultiple: cl.data === undefined || cl.data === null ? false : cl.data.is_multiple,
+    }));
 
     // Calculate position
     const rowIndex = Math.floor(i / numCols);
@@ -128,7 +134,9 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
       sourceHandle = `${src.tId}_${src.cId}_${src.edgSide}${src.suffix}`;
       targetHandle = `${tgt.tId}_${tgt.cId}_${tgt.edgSide}${tgt.suffix}`;
     }
-
+    const labelString = `${sourceData.isMultiple ? '∞' : '1'} - ${
+      targetData1st.isMultiple ? '∞' : '1'
+    }`;
     if (sourceTbl && targetTbl) {
       es.push({
         id: String(es.length),
@@ -137,6 +145,10 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
         sourceHandle: sourceHandle,
         targetHandle: targetHandle,
         type: 'simplebezier',
+        label: labelString,
+        labelShowBg: true,
+        labelBgStyle: { fill: '#f5f5f5' },
+        labelStyle: { fill: 'black', fontWeight: 500, fontSize: 14 },
         style: {
           strokeWidth: 2,
           stroke: color,
@@ -162,6 +174,7 @@ function findData(tableKey: string, columnKey: string, allTables: TableArray) {
     column_name: '',
     table_id: '',
     table_name: '',
+    isMultiple: true,
   };
   allTables.forEach((t) => {
     if (t._id === tableKey) {
@@ -172,6 +185,7 @@ function findData(tableKey: string, columnKey: string, allTables: TableArray) {
             column_name: c.name,
             table_id: t._id,
             table_name: t.name,
+            isMultiple: c.data.is_multiple,
           };
         }
       });
