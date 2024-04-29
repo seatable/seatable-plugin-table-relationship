@@ -254,8 +254,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
         onNodeDragStop={onNodeDragStop}
         onEdgeClick={(event, edge) => console.log('edge clicked', edge)}
         // onEdgeMouseLeave={(event, edge) => console.log('edge mouse leave', edge)}
-        fitView={false}
-        fitViewOptions={{ padding: 0, includeHiddenNodes: true }}
+        fitView={true}
         nodeTypes={nodeTypes}>
         {/* <Background color="#aaa" gap={30} /> */}
       </ReactFlow>
