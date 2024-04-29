@@ -67,7 +67,7 @@ const Header: React.FC<IHeaderProps> = (props) => {
       <div
         className={`d-flex align-items-center justify-content-end ${styles.plugin_header_settings}`}>
         <span className={styles.plugin_header_icon_btn} onClick={onToggleView}>
-          <span className="dtable-font dtable-icon-refresh"></span>
+          <span className="dtable-font dtable-icon-collapse-all"></span>
         </span>
         <span className={styles.plugin_header_icon_btn} onClick={downloadPdfDocument}>
           <span className="dtable-font dtable-icon-download"></span>
