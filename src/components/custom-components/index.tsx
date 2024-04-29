@@ -57,11 +57,13 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
   const reactFlowInstance = useReactFlow();
 
   useEffect(() => {
+    console.log(0, relationship);
     const PRESET_ID = appActiveState.activePresetId;
     const presetIndex = pluginDataStore.presets.findIndex((preset) => preset._id === PRESET_ID);
     const pluginPresetData = pluginDataStore.presets[presetIndex].customSettings;
     if (pluginPresetData) {
       let lnk = generateLinks(allTables);
+      console.log(1, relationship);
       const filteredLinks = filterRelationshipLinks(lnk, relationship);
       const ns = generateNodes(allTables);
       const es = generateEdges(filteredLinks, ns);

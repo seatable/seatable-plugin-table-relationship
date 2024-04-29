@@ -71,17 +71,13 @@ const App: React.FC<IAppProps> = (props) => {
   // For better understanding read the comments in the AppActiveState interface
   const [appActiveState, setAppActiveState] = useState<AppActiveState>(INITIAL_CURRENT_STATE);
   const [activeComponents, setActiveComponents] = useState<IActiveComponents>({});
-  const [activeRelationshipBtn, setActiveRelationshipBtn] = useState<RelationshipState>({
-    recRel: true,
-    lkRel: true,
-    lk2Rel: true,
-  });
+  const [activeRelationshipBtn, setActiveRelationshipBtn] = useState<any>({});
   // Destructure properties from the app's active state for easier access
-  const { activeTable, activePresetId, activePresetIdx, activeViewRows, activeTableView } =
-    appActiveState;
+  const { activeTable, activePresetId, activePresetIdx } = appActiveState;
   const { collaborators } = window.app.state;
 
   useEffect(() => {
+    console.log(111, activeRelationshipBtn);
     initPluginDTableData();
     return () => {
       unsubscribeLocalDtableChanged();
@@ -131,12 +127,15 @@ const App: React.FC<IAppProps> = (props) => {
     let activeTableViews: TableViewArray = activeTable.views; // All the Views of the specific Active Table
     let pluginDataStore: IPluginDataStore = getPluginDataStore(activeTable, PLUGIN_NAME);
     let pluginPresets: PresetsArray = pluginDataStore.presets; // An array with all the Presets
-
+    console.log('pluginPresets', pluginPresets);
+    console.log('pDataStore', 0, pluginDataStore.presets[0].customSettings?.relationship);
     setActiveComponents((prevState) => ({
       ...prevState,
       settingsDropDowns: info.active_components.settings_dropdowns,
       add_row_button: info.active_components.add_row_button,
     }));
+    console.log('pDataStore', 1, pluginDataStore.presets[0].customSettings?.relationship);
+
     setPluginDataStore(pluginDataStore);
     setAllTables(allTables);
     setPluginPresets(pluginPresets);
@@ -149,9 +148,14 @@ const App: React.FC<IAppProps> = (props) => {
         allTables
       );
 
+      console.log('pDataStore', 2, pluginDataStore.presets[0].customSettings?.relationship);
+
       onSelectPreset(pluginDataStore.activePresetId, appActiveState);
+      console.log('pDataStore', 3, pluginDataStore.presets[0].customSettings?.relationship);
+
       return;
     } else {
+      console.log('pDataStore', 4, pluginDataStore.presets[0].customSettings?.relationship);
       // If there are no presets, the default one is created
       if (pluginPresets.length === 0) {
         const defaultPluginDataStore: IPluginDataStore = createDefaultPluginDataStore(
@@ -198,6 +202,7 @@ const App: React.FC<IAppProps> = (props) => {
     let updatedActiveState: AppActiveState;
     let updatedActiveTableViews: TableView[];
     const _activePresetIdx = pluginPresets.findIndex((preset) => preset._id === presetId);
+
     if (newPresetActiveState !== undefined) {
       updatedActiveState = {
         ...newPresetActiveState,
@@ -224,11 +229,6 @@ const App: React.FC<IAppProps> = (props) => {
         activePresetIdx: _activePresetIdx,
       };
 
-      // TO CHANGE
-      const activeCustomRelationship = activePreset?.customSettings?.relationship;
-      setActiveRelationshipBtn(
-        activeCustomRelationship || { recRel: true, lkRel: true, lk2Rel: true }
-      );
       updatePluginDataStore({
         ...pluginDataStore,
         activePresetId: presetId,
