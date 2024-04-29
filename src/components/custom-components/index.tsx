@@ -63,7 +63,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     if (pluginPresetData) {
       let lnk = generateLinks(allTables);
       const filteredLinks = filterRelationshipLinks(lnk, relationship);
-      const ns = generateNodes(allTables);
+      const ns = generateNodes(allTables, relationship);
       const es = generateEdges(filteredLinks, ns);
 
       const nodes = pluginPresetData.nodes;
@@ -116,7 +116,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     } else {
       // THIS IS THE FIRST TIME THE PLUGIN IS LOADED and there is no data in the pluginDataStore
       let lnk = generateLinks(allTables);
-      const ns = generateNodes(allTables);
+      const ns = generateNodes(allTables, relationship);
       const es = generateEdges(lnk, ns);
       setNodes(ns);
       setEdges(es);
@@ -235,14 +235,8 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     [nodes]
   );
 
-  function onToggleView() {
-    console.log('toggle');
-    reactFlowInstance.fitView();
-  }
-
   return (
     <>
-      {/* <p>{allTables.length}</p> */}
       <ReactFlow
         key={nodes.length}
         nodes={nodes}
