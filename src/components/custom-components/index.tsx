@@ -1,12 +1,15 @@
 import React, { useEffect, useCallback, useState } from 'react';
+import { FaPlus } from 'react-icons/fa6';
+
 import ReactFlow, {
-  MiniMap,
   Controls,
-  Background,
   useNodesState,
   useEdgesState,
   isNode,
   Edge,
+  ControlButton,
+  useReactFlow,
+  ReactFlowProvider,
 } from 'reactflow';
 import {
   IERDPluginProps,
@@ -30,6 +33,7 @@ import {
 } from '../../utils/custom-utils/utils';
 import { PLUGIN_NAME } from '../../utils/template-constants';
 import { TableArray } from '../../utils/template-interfaces/Table.interface';
+import { zoom } from 'd3';
 
 const nodeTypes = {
   custom: CustomNode,
@@ -50,6 +54,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     INodePositions,
     React.Dispatch<React.SetStateAction<INodePositions>>,
   ] = useState({});
+  const reactFlowInstance = useReactFlow();
 
   useEffect(() => {
     const PRESET_ID = appActiveState.activePresetId;
@@ -230,6 +235,11 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     [nodes]
   );
 
+  function onToggleView() {
+    console.log('toggle');
+    reactFlowInstance.fitView();
+  }
+
   return (
     <>
       {/* <p>{allTables.length}</p> */}
@@ -244,16 +254,9 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
         onNodeDragStop={onNodeDragStop}
         onEdgeClick={(event, edge) => console.log('edge clicked', edge)}
         // onEdgeMouseLeave={(event, edge) => console.log('edge mouse leave', edge)}
-        fitView
+        fitView={false}
+        fitViewOptions={{ padding: 0, includeHiddenNodes: true }}
         nodeTypes={nodeTypes}>
-        {/* <MiniMap
-          style={{
-            height: 120,
-          }}
-          zoomable
-          pannable
-        /> */}
-        <Controls position="top-right" />
         {/* <Background color="#aaa" gap={30} /> */}
       </ReactFlow>
     </>
