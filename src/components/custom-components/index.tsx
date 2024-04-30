@@ -48,12 +48,18 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
   const reactFlowInstance = useReactFlow();
 
   useEffect(() => {
-    console.log(22, activeRelationships);
-    setRelationship(activeRelationships);
+    // console.log(22, activeRelationships);
+
+    // still not sure about where to put these guys
     let lnk = generateLinks(allTables);
     const filteredLinks = filterRelationshipLinks(lnk, activeRelationships);
     setLinks(filteredLinks);
-  }, [activeRelationships]);
+
+    // no need to set relationship state if there's no change (precautionary measure for infinite loop)
+    if(JSON.stringify(activeRelationships) !== JSON.stringify(relationship)) {
+      setRelationship(activeRelationships);
+    }
+  }, [activeRelationships, relationship]);
 
   useEffect(() => {
     console.log(1, links);

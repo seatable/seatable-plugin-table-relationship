@@ -171,10 +171,7 @@ const App: React.FC<IAppProps> = (props) => {
       const activePresetRelationship = pluginPresets.find((p) => {
         return p._id === pluginDataStore.activePresetId;
       })?.customSettings?.relationship;
-      console.log(44, activePresetRelationship);
-      console.log('active ID', pluginDataStore.activePresetId);
       setActiveRelationships(activePresetRelationship);
-
       return;
     } else {
       // If there are no presets, the default one is created
@@ -516,7 +513,7 @@ const App: React.FC<IAppProps> = (props) => {
                 appActiveState={appActiveState}
                 allTables={allTables}
                 pluginDataStore={pluginDataStore}
-                activeRelationships={activeRelationships}
+                activeRelationships={pluginPresets[activePresetIdx].customSettings?.relationship || activeRelationships}
                 setPluginDataStore={setPluginDataStore}
               />
 
