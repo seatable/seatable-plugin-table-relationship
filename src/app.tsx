@@ -53,7 +53,6 @@ import {
 } from './utils/template-utils/utils';
 import { SettingsOption } from './utils/types';
 import pluginContext from './plugin-context';
-import { RelationshipState } from './utils/custom-interfaces/ERDPlugin';
 import { ReactFlowProvider } from 'reactflow';
 
 const App: React.FC<IAppProps> = (props) => {
@@ -513,7 +512,9 @@ const App: React.FC<IAppProps> = (props) => {
                 appActiveState={appActiveState}
                 allTables={allTables}
                 pluginDataStore={pluginDataStore}
-                activeRelationships={pluginPresets[activePresetIdx].customSettings?.relationship || activeRelationships}
+                activeRelationships={
+                  pluginPresets[activePresetIdx].customSettings?.relationship || activeRelationships
+                }
                 setPluginDataStore={setPluginDataStore}
               />
 
