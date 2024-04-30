@@ -71,13 +71,34 @@ const App: React.FC<IAppProps> = (props) => {
   // For better understanding read the comments in the AppActiveState interface
   const [appActiveState, setAppActiveState] = useState<AppActiveState>(INITIAL_CURRENT_STATE);
   const [activeComponents, setActiveComponents] = useState<IActiveComponents>({});
-  const [activeRelationshipBtn, setActiveRelationshipBtn] = useState<any>({});
+  const [activeRelationships, setActiveRelationships] = useState<any>({});
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx } = appActiveState;
   const { collaborators } = window.app.state;
 
+  function handleRelationships(r: any) {
+    console.log('rel', 11, r);
+    setActiveRelationships(r);
+    const updatedPresets = pluginDataStore.presets.map((preset) => {
+      if (preset._id === appActiveState.activePresetId) {
+        return {
+          ...preset,
+          customSettings: {
+            ...preset.customSettings,
+            relationship: r,
+          },
+        };
+      }
+      return preset;
+    });
+    console.log('updatedPresets', updatedPresets);
+    window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
+      ...pluginDataStore,
+      presets: updatedPresets,
+    });
+  }
+
   useEffect(() => {
-    console.log(111, activeRelationshipBtn);
     initPluginDTableData();
     return () => {
       unsubscribeLocalDtableChanged();
@@ -122,20 +143,18 @@ const App: React.FC<IAppProps> = (props) => {
   };
 
   const resetData = () => {
+    console.log('resetData');
     let allTables: TableArray = window.dtableSDK.getTables(); // All the Tables of the Base
     let activeTable: Table = window.dtableSDK.getActiveTable(); // How is the ActiveTable Set? allTables[0]?
     let activeTableViews: TableViewArray = activeTable.views; // All the Views of the specific Active Table
     let pluginDataStore: IPluginDataStore = getPluginDataStore(activeTable, PLUGIN_NAME);
     let pluginPresets: PresetsArray = pluginDataStore.presets; // An array with all the Presets
-    console.log('pluginPresets', pluginPresets);
-    console.log('pDataStore', 0, pluginDataStore.presets[0].customSettings?.relationship);
+
     setActiveComponents((prevState) => ({
       ...prevState,
       settingsDropDowns: info.active_components.settings_dropdowns,
       add_row_button: info.active_components.add_row_button,
     }));
-    console.log('pDataStore', 1, pluginDataStore.presets[0].customSettings?.relationship);
-
     setPluginDataStore(pluginDataStore);
     setAllTables(allTables);
     setPluginPresets(pluginPresets);
@@ -148,14 +167,14 @@ const App: React.FC<IAppProps> = (props) => {
         allTables
       );
 
-      console.log('pDataStore', 2, pluginDataStore.presets[0].customSettings?.relationship);
-
       onSelectPreset(pluginDataStore.activePresetId, appActiveState);
-      console.log('pDataStore', 3, pluginDataStore.presets[0].customSettings?.relationship);
+      const activePresetRelationship = pluginPresets.find((p) => {
+        return p._id === activePresetId;
+      })?.customSettings?.relationship;
+      setActiveRelationships(activePresetRelationship);
 
       return;
     } else {
-      console.log('pDataStore', 4, pluginDataStore.presets[0].customSettings?.relationship);
       // If there are no presets, the default one is created
       if (pluginPresets.length === 0) {
         const defaultPluginDataStore: IPluginDataStore = createDefaultPluginDataStore(
@@ -454,27 +473,6 @@ const App: React.FC<IAppProps> = (props) => {
     }
   };
 
-  const onToggleRelationship = (r: RelationshipState) => {
-    setActiveRelationshipBtn(r);
-    const updatedPresets = pluginDataStore.presets.map((preset) => {
-      if (preset._id === appActiveState.activePresetId) {
-        return {
-          ...preset,
-          customSettings: {
-            ...preset.customSettings,
-            relationship: r,
-          },
-        };
-      }
-      return preset;
-    });
-
-    window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
-      ...pluginDataStore,
-      presets: updatedPresets,
-    });
-  };
-
   if (!isShowPlugin) {
     return null;
   }
@@ -515,8 +513,9 @@ const App: React.FC<IAppProps> = (props) => {
               <ERDPlugin
                 appActiveState={appActiveState}
                 allTables={allTables}
-                relationship={activeRelationshipBtn}
                 pluginDataStore={pluginDataStore}
+                activeRelationships={activeRelationships}
+                setPluginDataStore={setPluginDataStore}
               />
 
               {activeComponents.add_row_button && (
@@ -540,8 +539,8 @@ const App: React.FC<IAppProps> = (props) => {
               pluginPresets={pluginPresets}
               onTableOrViewChange={onTableOrViewChange}
               onToggleSettings={toggleSettings}
-              relationship={activeRelationshipBtn}
-              setRelationship={onToggleRelationship}
+              activeRelationships={activeRelationships}
+              handleRelationships={handleRelationships}
             />
           </div>
         </div>

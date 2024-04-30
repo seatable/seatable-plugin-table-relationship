@@ -23,14 +23,18 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
   isShowSettings,
   onToggleSettings,
   onTableOrViewChange,
-  relationship,
-  setRelationship,
+  activeRelationships,
+  handleRelationships,
 }) => {
   // State variables for table and view options
   const [tableOptions, setTableOptions] = useState<SelectOption[]>();
   const [viewOptions, setViewOptions] = useState<SelectOption[]>();
   const [tableSelectedOption, setTableSelectedOption] = useState<SelectOption>();
   const [viewSelectedOption, setViewSelectedOption] = useState<SelectOption>();
+
+  useEffect(() => {
+    console.log(33, activeRelationships);
+  }, [activeRelationships]);
 
   // Change options when active table or view changes
   useEffect(() => {
@@ -67,10 +71,6 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
 
   const handleShownFieldNames = (isShown: boolean) => {
     console.log('isShown', isShown);
-  };
-
-  const handleSetRelationship = (r: RelationshipState) => {
-    setRelationship(r);
   };
 
   return (
@@ -123,10 +123,13 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
               <p>Show linked record relationship</p>
               <button
                 onClick={() => {
-                  handleSetRelationship({ ...relationship, recRel: !relationship.recRel });
+                  handleRelationships({
+                    ...activeRelationships,
+                    recRel: !activeRelationships.recRel,
+                  });
                 }}
                 className={`${
-                  relationship.recRel
+                  activeRelationships.recRel
                     ? stylesPSettings.settings_fields_toggle_btns_active
                     : stylesPSettings.settings_fields_toggle_btns
                 } `}></button>
@@ -137,10 +140,13 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
               <p>Show lookup relationship</p>
               <button
                 onClick={() => {
-                  handleSetRelationship({ ...relationship, lkRel: !relationship.lkRel });
+                  handleRelationships({
+                    ...activeRelationships,
+                    lkRel: !activeRelationships.lkRel,
+                  });
                 }}
                 className={`${
-                  relationship.lkRel
+                  activeRelationships.lkRel
                     ? stylesPSettings.settings_fields_toggle_btns_active
                     : stylesPSettings.settings_fields_toggle_btns
                 } `}></button>
@@ -151,10 +157,13 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
               <p>Show 2nd level lookup relationship</p>
               <button
                 onClick={() => {
-                  handleSetRelationship({ ...relationship, lk2Rel: !relationship.lk2Rel });
+                  handleRelationships({
+                    ...activeRelationships,
+                    lk2Rel: !activeRelationships.lk2Rel,
+                  });
                 }}
                 className={`${
-                  relationship.lk2Rel
+                  activeRelationships.lk2Rel
                     ? stylesPSettings.settings_fields_toggle_btns_active
                     : stylesPSettings.settings_fields_toggle_btns
                 } `}></button>

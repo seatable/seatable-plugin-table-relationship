@@ -63,7 +63,7 @@ const KeyDownActions = {
 // Initial App State
 const INITIAL_IS_SHOW_STATE: AppIsShowState = {
   isShowPlugin: true,
-  isShowSettings: false,
+  isShowSettings: true,
   isLoading: true,
   isShowPresets: false,
 };
