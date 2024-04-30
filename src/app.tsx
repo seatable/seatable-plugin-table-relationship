@@ -169,8 +169,10 @@ const App: React.FC<IAppProps> = (props) => {
 
       onSelectPreset(pluginDataStore.activePresetId, appActiveState);
       const activePresetRelationship = pluginPresets.find((p) => {
-        return p._id === activePresetId;
+        return p._id === pluginDataStore.activePresetId;
       })?.customSettings?.relationship;
+      console.log(44, activePresetRelationship);
+      console.log('active ID', pluginDataStore.activePresetId);
       setActiveRelationships(activePresetRelationship);
 
       return;

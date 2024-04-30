@@ -40,6 +40,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [links, setLinks] = useState<ILinksData[]>([]);
   const [nodesCts, setNodesCts] = useState<nodeCts[]>([]);
+  const [relationship, setRelationship] = useState(activeRelationships);
   const [prevNodePositions, setPrevNodePositions]: [
     INodePositions,
     React.Dispatch<React.SetStateAction<INodePositions>>,
@@ -48,20 +49,21 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
 
   useEffect(() => {
     console.log(22, activeRelationships);
+    setRelationship(activeRelationships);
+    let lnk = generateLinks(allTables);
+    const filteredLinks = filterRelationshipLinks(lnk, activeRelationships);
+    setLinks(filteredLinks);
   }, [activeRelationships]);
 
   useEffect(() => {
-    console.log(1, activeRelationships);
+    console.log(1, links);
     const PRESET_ID = appActiveState.activePresetId;
     const presetIndex = pluginDataStore.presets.findIndex((preset) => preset._id === PRESET_ID);
     const pluginPresetData = pluginDataStore.presets[presetIndex].customSettings;
 
     if (pluginPresetData) {
-      let lnk = generateLinks(allTables);
-      // const filteredLinks = filterRelationshipLinks(lnk, relationship);
       const ns = generateNodes(allTables);
-      const es = generateEdges(lnk, ns);
-      // const es = generateEdges(filteredLinks, ns);
+      const es = generateEdges(links, ns);
 
       const nodes = pluginPresetData.nodes;
       const nsIds = ns.map((node) => node.id);
@@ -86,15 +88,17 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
           });
         } else {
           setNodes(nodes);
-          const _es = generateEdges(lnk, nodes);
+          const _es = generateEdges(links, nodes);
           setEdges(_es);
+          let lnk = generateLinks(allTables);
+
           setPluginDataStoreFn(nodes, lnk, _es);
         }
-        setLinks(lnk); // filteredLinks
+        setLinks(links); // filteredLinks
         setNodes(nodes);
-        const _es = generateEdges(lnk, nodes); // filteredLinks
+        const _es = generateEdges(links, nodes); // filteredLinks
         setEdges(_es);
-        setPluginDataStoreFn(nodes, lnk, es); // filteredLinks
+        setPluginDataStoreFn(nodes, links, es); // filteredLinks
       } else {
         const missingIds = nsIds.filter((id) => !nodesIds.includes(id));
         const extraIds = nodesIds.filter((id: string) => !nsIds.includes(id));
