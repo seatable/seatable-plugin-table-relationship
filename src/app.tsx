@@ -167,7 +167,16 @@ const App: React.FC<IAppProps> = (props) => {
       const activePresetRelationship = pluginPresets.find((p) => {
         return p._id === pluginDataStore.activePresetId;
       })?.customSettings?.relationship;
-      setActiveRelationships(activePresetRelationship);
+
+      if (activePresetRelationship == undefined) {
+        setActiveRelationships({
+          recRel: true,
+          lkRel: true,
+          lk2Rel: true,
+        });
+      } else {
+        setActiveRelationships(activePresetRelationship);
+      }
       return;
     } else {
       // If there are no presets, the default one is created
