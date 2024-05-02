@@ -53,7 +53,10 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     React.Dispatch<React.SetStateAction<INodePositions>>,
   ] = useState({});
 
+  useEffect(() => {}, [nodes]);
+
   useEffect(() => {
+    console.log('tblNoLnk', activeRelationships.tblNoLnk);
     // no need to set relationship state if there's no change (precautionary measure for infinite loop)
     if (JSON.stringify(activeRelationships) !== JSON.stringify(relationship)) {
       setRelationship(activeRelationships);

@@ -53,6 +53,7 @@ import {
 import { SettingsOption } from './utils/types';
 import pluginContext from './plugin-context';
 import { ReactFlowProvider } from 'reactflow';
+import { RelationshipState } from './utils/custom-interfaces/ERDPlugin';
 
 const App: React.FC<IAppProps> = (props) => {
   const { isDevelopment, lang } = props;
@@ -69,31 +70,15 @@ const App: React.FC<IAppProps> = (props) => {
   // For better understanding read the comments in the AppActiveState interface
   const [appActiveState, setAppActiveState] = useState<AppActiveState>(INITIAL_CURRENT_STATE);
   const [activeComponents, setActiveComponents] = useState<IActiveComponents>({});
-  const [activeRelationships, setActiveRelationships] = useState<any>({});
+  const [activeRelationships, setActiveRelationships] = useState<RelationshipState>({
+    recRel: true,
+    lkRel: true,
+    lk2Rel: true,
+    tblNoLnk: true,
+  });
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx } = appActiveState;
   const { collaborators } = window.app.state;
-
-  function handleRelationships(r: any) {
-    setActiveRelationships(r);
-    const updatedPresets = pluginDataStore.presets.map((preset) => {
-      if (preset._id === appActiveState.activePresetId) {
-        return {
-          ...preset,
-          customSettings: {
-            ...preset.customSettings,
-            relationship: r,
-          },
-        };
-      }
-      return preset;
-    });
-
-    window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
-      ...pluginDataStore,
-      presets: updatedPresets,
-    });
-  }
 
   useEffect(() => {
     initPluginDTableData();
@@ -167,7 +152,9 @@ const App: React.FC<IAppProps> = (props) => {
       const activePresetRelationship = pluginPresets.find((p) => {
         return p._id === pluginDataStore.activePresetId;
       })?.customSettings?.relationship;
-      setActiveRelationships(activePresetRelationship);
+      if (activePresetRelationship) {
+        setActiveRelationships(activePresetRelationship);
+      }
       return;
     } else {
       // If there are no presets, the default one is created
@@ -467,6 +454,27 @@ const App: React.FC<IAppProps> = (props) => {
       pluginContext.expandRow(insertedRow, table);
     }
   };
+
+  function handleRelationships(r: any) {
+    setActiveRelationships(r);
+    const updatedPresets = pluginDataStore.presets.map((preset) => {
+      if (preset._id === appActiveState.activePresetId) {
+        return {
+          ...preset,
+          customSettings: {
+            ...preset.customSettings,
+            relationship: r,
+          },
+        };
+      }
+      return preset;
+    });
+
+    window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
+      ...pluginDataStore,
+      presets: updatedPresets,
+    });
+  }
 
   if (!isShowPlugin) {
     return null;

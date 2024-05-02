@@ -51,6 +51,8 @@ export function filterRelationshipLinks(lnk: ILinksData[], relationship: Relatio
   return lnk;
 }
 
+
+
 export function generateNodes(allTables: TableArray): NodeResultItem[] {
   const numRows: number = 5;
   const numCols: number = 5;
