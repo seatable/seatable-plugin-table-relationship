@@ -28,6 +28,7 @@ import {
   generateLinks,
   generateNodes,
   filterRelationshipLinks,
+  filterNodesWithoutLinks,
 } from '../../utils/custom-utils/utils';
 import { PLUGIN_NAME } from '../../utils/template-constants';
 import { TableArray } from '../../utils/template-interfaces/Table.interface';
@@ -53,23 +54,24 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     React.Dispatch<React.SetStateAction<INodePositions>>,
   ] = useState({});
 
-  useEffect(() => {}, [nodes]);
-
   useEffect(() => {
-    console.log('tblNoLnk', activeRelationships.tblNoLnk);
-    // no need to set relationship state if there's no change (precautionary measure for infinite loop)
     if (JSON.stringify(activeRelationships) !== JSON.stringify(relationship)) {
       setRelationship(activeRelationships);
     }
-    // still not sure about where to put these guys
+
     let lnk = generateLinks(allTables);
     const filteredLinks = filterRelationshipLinks(lnk, activeRelationships);
+
     setLinks(filteredLinks);
     const PRESET_ID = appActiveState.activePresetId;
     const presetIndex = pluginDataStore.presets.findIndex((preset) => preset._id === PRESET_ID);
     const pluginPresetData = pluginDataStore.presets[presetIndex].customSettings;
-    setNodes(pluginPresetData?.nodes);
-    const es = generateEdges(filteredLinks, pluginPresetData?.nodes);
+    const nodesNoLinks =
+      activeRelationships.tblNoLnk === false
+        ? filterNodesWithoutLinks(nodes)
+        : pluginPresetData?.nodes;
+    setNodes(nodesNoLinks);
+    const es = generateEdges(filteredLinks, nodesNoLinks);
     setEdges(es);
   }, [activeRelationships, relationship]);
 
@@ -111,11 +113,11 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
 
           setPluginDataStoreFn(nodes, lnk, _es);
         }
-        setLinks(links); // filteredLinks
+        setLinks(links); 
         setNodes(nodes);
-        const _es = generateEdges(links, nodes); // filteredLinks
+        const _es = generateEdges(links, nodes); 
         setEdges(_es);
-        setPluginDataStoreFn(nodes, links, es); // filteredLinks
+        setPluginDataStoreFn(nodes, links, es); 
       } else {
         const missingIds = nsIds.filter((id) => !nodesIds.includes(id));
         const extraIds = nodesIds.filter((id: string) => !nsIds.includes(id));
@@ -132,7 +134,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
         setPluginDataStoreFn(filteredNodes, lnk, es);
       }
     } else {
-      // THIS IS THE FIRST TIME THE PLUGIN IS LOADED and there is no data in the pluginDataStore
+
       let lnk = generateLinks(allTables);
       const ns = generateNodes(allTables);
       const es = generateEdges(lnk, ns);
@@ -141,7 +143,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
       setLinks(lnk);
       setPluginDataStoreFn(ns, lnk, es);
     }
-  }, [JSON.stringify(allTables), appActiveState.activePresetId]); // relationship
+  }, [JSON.stringify(allTables), appActiveState.activePresetId]);
 
   function setPluginDataStoreFn(ns: any[], lnk: ILinksData[], es: Edge[]) {
     window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {

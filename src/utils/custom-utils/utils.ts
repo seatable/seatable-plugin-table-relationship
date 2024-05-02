@@ -51,7 +51,9 @@ export function filterRelationshipLinks(lnk: ILinksData[], relationship: Relatio
   return lnk;
 }
 
-
+export function filterNodesWithoutLinks(nodes: any[]) {
+  return nodes.filter((n) => n.data.columns.some((c: any) => c.type === LINK_TYPE.link));
+}
 
 export function generateNodes(allTables: TableArray): NodeResultItem[] {
   const numRows: number = 5;
@@ -156,10 +158,6 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
         sourceHandle: sourceHandle,
         targetHandle: targetHandle,
         type: 'simplebezier',
-        // label: labelString,
-        // labelShowBg: true,
-        // labelBgStyle: { fill: '#f5f5f5' },
-        // labelStyle: { fill: 'black', fontWeight: 500, fontSize: 14 },
         style: {
           strokeWidth: 2,
           stroke: color,
