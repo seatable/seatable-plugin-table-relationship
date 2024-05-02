@@ -1,6 +1,14 @@
 import React, { useEffect, useCallback, useState } from 'react';
 
-import ReactFlow, { useNodesState, useEdgesState, isNode, Edge, useReactFlow } from 'reactflow';
+import ReactFlow, {
+  useNodesState,
+  useEdgesState,
+  isNode,
+  Edge,
+  useReactFlow,
+  Controls,
+  useViewport,
+} from 'reactflow';
 import {
   IERDPluginProps,
   ILinksData,
@@ -33,7 +41,6 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
   allTables,
   pluginDataStore,
   activeRelationships,
-  setPluginDataStore,
 }) => {
   const [_allTables, setAllTables] = useState<TableArray>([]);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -45,7 +52,6 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     INodePositions,
     React.Dispatch<React.SetStateAction<INodePositions>>,
   ] = useState({});
-  const reactFlowInstance = useReactFlow();
 
   useEffect(() => {
     // no need to set relationship state if there's no change (precautionary measure for infinite loop)
@@ -65,7 +71,6 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
   }, [activeRelationships, relationship]);
 
   useEffect(() => {
-    console.log(1, links);
     const PRESET_ID = appActiveState.activePresetId;
     const presetIndex = pluginDataStore.presets.findIndex((preset) => preset._id === PRESET_ID);
     const pluginPresetData = pluginDataStore.presets[presetIndex].customSettings;
@@ -245,14 +250,8 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     [nodes]
   );
 
-  function onToggleView() {
-    console.log('toggle');
-    reactFlowInstance.fitView();
-  }
-
   return (
     <>
-      {/* <p>{allTables.length}</p> */}
       <ReactFlow
         key={nodes.length}
         nodes={nodes}
@@ -264,7 +263,8 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
         onNodeDragStop={onNodeDragStop}
         onEdgeClick={(event, edge) => console.log('edge clicked', edge)}
         fitView={true}
-        nodeTypes={nodeTypes}></ReactFlow>
+        nodeTypes={nodeTypes}
+        minZoom={0.01}></ReactFlow>
     </>
   );
 };

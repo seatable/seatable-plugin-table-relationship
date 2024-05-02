@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-
 import React, { useEffect, useState } from 'react';
 import { FaPlus } from 'react-icons/fa6';
 import info from '../src/plugin-config/info.json';
@@ -76,7 +75,6 @@ const App: React.FC<IAppProps> = (props) => {
   const { collaborators } = window.app.state;
 
   function handleRelationships(r: any) {
-    console.log('rel', 11, r);
     setActiveRelationships(r);
     const updatedPresets = pluginDataStore.presets.map((preset) => {
       if (preset._id === appActiveState.activePresetId) {
@@ -90,7 +88,7 @@ const App: React.FC<IAppProps> = (props) => {
       }
       return preset;
     });
-    console.log('updatedPresets', updatedPresets);
+
     window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
       ...pluginDataStore,
       presets: updatedPresets,
@@ -142,7 +140,6 @@ const App: React.FC<IAppProps> = (props) => {
   };
 
   const resetData = () => {
-    console.log('resetData');
     let allTables: TableArray = window.dtableSDK.getTables(); // All the Tables of the Base
     let activeTable: Table = window.dtableSDK.getActiveTable(); // How is the ActiveTable Set? allTables[0]?
     let activeTableViews: TableViewArray = activeTable.views; // All the Views of the specific Active Table

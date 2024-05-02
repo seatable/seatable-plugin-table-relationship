@@ -45,7 +45,6 @@ const Header: React.FC<IHeaderProps> = (props) => {
   };
 
   function onToggleView() {
-    console.log('toggle');
     reactFlowInstance.fitView();
   }
 

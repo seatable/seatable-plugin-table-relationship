@@ -10,7 +10,6 @@ import { truncateTableName } from '../../../utils/template-utils/utils';
 import { HiOutlineChevronDoubleRight } from 'react-icons/hi2';
 import intl from 'react-intl-universal';
 import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from '../../../locale';
-import { RelationshipState } from '../../../utils/custom-interfaces/ERDPlugin';
 import { SettingsOption } from '../../../utils/types';
 const { [DEFAULT_LOCALE]: d } = AVAILABLE_LOCALES;
 
@@ -31,10 +30,6 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
   const [viewOptions, setViewOptions] = useState<SelectOption[]>();
   const [tableSelectedOption, setTableSelectedOption] = useState<SelectOption>();
   const [viewSelectedOption, setViewSelectedOption] = useState<SelectOption>();
-
-  useEffect(() => {
-    console.log(33, activeRelationships);
-  }, [activeRelationships]);
 
   // Change options when active table or view changes
   useEffect(() => {
