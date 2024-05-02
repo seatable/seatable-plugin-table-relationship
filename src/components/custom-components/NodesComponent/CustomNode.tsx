@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { Handle, Position } from 'reactflow';
 import stylesCustom from '../../../styles/custom-styles/ERDPlugin.module.scss';
+import { LINK_TYPE } from '../../../utils/custom-constants/constants';
 
 function CustomNode({ id, data }: { id: string; data: any }) {
   return (
@@ -41,7 +42,13 @@ function CustomNode({ id, data }: { id: string; data: any }) {
             />
             <div className={stylesCustom.custom_node_row_content}>
               <div className={stylesCustom.custom_node_row_content_value}>{cl.name}</div>
-              <div className={stylesCustom.custom_node_row_content_id}>{cl.type}</div>
+              <div className={stylesCustom.custom_node_row_content_id}>
+                {cl.type}
+                {cl.type === LINK_TYPE.link ? (cl.isMultiple ? ' - ∞' : ' - 1') : ''}
+              </div>
+              {/* <div className={stylesCustom.custom_node_row_content_multiple}>
+                {cl.type === LINK_TYPE.link ? (cl.isMultiple ? '∞' : '1') : ''}
+              </div> */}
             </div>
           </div>
         ))}

@@ -45,6 +45,7 @@ interface NodeResultItem {
       key: string;
       name: string;
       type: string;
+      isMultiple: boolean;
     }[];
   };
 }
@@ -69,6 +70,7 @@ interface ILinksColumnData {
   srcT?: string;
   tgtT?: string;
   link_id?: string;
+  isMultiple?: boolean;
 }
 
 interface ILinksData {
