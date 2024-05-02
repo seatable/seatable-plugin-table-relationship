@@ -43,3 +43,6 @@ export interface IPluginDataStore
 export interface AvailableLocales {
   [key: string]: any;
 }
+export interface IActiveComponents {
+  [componentKey: string]: boolean;
+}

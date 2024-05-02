@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { FaPlus } from 'react-icons/fa6';
+import info from '../src/plugin-config/info.json';
 
 // Import of Component
 import Header from './components/template-components/Header';
@@ -13,6 +14,7 @@ import ERDPlugin from './components/custom-components/index';
 import {
   AppActiveState,
   AppIsShowState,
+  IActiveComponents,
   IAppProps,
   IPluginDataStore,
 } from './utils/template-interfaces/App.interface';
@@ -66,6 +68,7 @@ const App: React.FC<IAppProps> = (props) => {
   // appActiveState: Define the app's active Preset + (Table + View) state using the useState hook
   // For better understanding read the comments in the AppActiveState interface
   const [appActiveState, setAppActiveState] = useState<AppActiveState>(INITIAL_CURRENT_STATE);
+  const [activeComponents, setActiveComponents] = useState<IActiveComponents>({});
   const [activeRelationshipBtn, setActiveRelationshipBtn] = useState<RelationshipState>({
     recRel: true,
     lkRel: true,
@@ -127,6 +130,11 @@ const App: React.FC<IAppProps> = (props) => {
     let pluginDataStore: IPluginDataStore = getPluginDataStore(activeTable, PLUGIN_NAME);
     let pluginPresets: PresetsArray = pluginDataStore.presets; // An array with all the Presets
 
+    setActiveComponents((prevState) => ({
+      ...prevState,
+      settingsDropDowns: info.active_components.settings_dropdowns,
+      add_row_button: info.active_components.add_row_button,
+    }));
     setPluginDataStore(pluginDataStore);
     setAllTables(allTables);
     setPluginPresets(pluginPresets);
@@ -506,17 +514,20 @@ const App: React.FC<IAppProps> = (props) => {
               relationship={activeRelationshipBtn}
               pluginDataStore={pluginDataStore}
             />
-            <button className={styles.add_row} onClick={addRowItem}>
-              <FaPlus size={30} color="#fff" />
-              {isDevelopment && (
-                <div style={{ margin: 0 }} className={styles.add_row_toolTip}>
-                  <p>Adding a row only works in production</p>
-                </div>
-              )}
-            </button>
+            {activeComponents.add_row_button && (
+              <button className={styles.add_row} onClick={addRowItem}>
+                <FaPlus size={30} color="#fff" />
+                {isDevelopment && (
+                  <div style={{ margin: 0 }} className={styles.add_row_toolTip}>
+                    <p>Adding a row only works in production</p>
+                  </div>
+                )}
+              </button>
+            )}
           </div>
 
           <PluginSettings
+            activeComponents={activeComponents}
             isShowSettings={isShowSettings}
             allTables={allTables}
             appActiveState={appActiveState}

@@ -3,5 +3,9 @@
   "version": "0.1.0",
   "display_type": "overlay",
   "display_name": "Plugin ERD",
-  "description": "Design your own SeaTable plugin."
+  "description": "Design your own SeaTable plugin.",
+  "active_components": {
+    "settings_dropdowns": false,
+    "add_row_button": false
+  }
 }
