@@ -54,9 +54,11 @@ import {
 import { SettingsOption } from './utils/types';
 import pluginContext from './plugin-context';
 import { RelationshipState } from './utils/custom-interfaces/ERDPlugin';
+import { ReactFlowProvider } from 'reactflow';
 
 const App: React.FC<IAppProps> = (props) => {
   const { isDevelopment, lang } = props;
+
   // Boolean state to show/hide the plugin's components
   const [isShowState, setIsShowState] = useState<AppIsShowState>(INITIAL_IS_SHOW_STATE);
   const { isShowPlugin, isShowSettings, isLoading, isShowPresets } = isShowState;
@@ -479,68 +481,72 @@ const App: React.FC<IAppProps> = (props) => {
   return isLoading ? (
     <div></div>
   ) : (
-    <ResizableWrapper>
-      {/* presets  */}
-      <PluginPresets
-        allTables={allTables}
-        pluginPresets={pluginPresets}
-        activePresetIdx={activePresetIdx}
-        pluginDataStore={pluginDataStore}
-        isShowPresets={isShowPresets}
-        onTogglePresets={togglePresets}
-        onToggleSettings={toggleSettings}
-        onSelectPreset={onSelectPreset}
-        updatePresets={updatePresets}
-        updateActiveData={updateActiveData}
-      />
-      <div className={styles.plugin}>
-        <Header
-          presetName={findPresetName(pluginPresets, activePresetId)}
+    <ReactFlowProvider>
+      <ResizableWrapper>
+        {/* presets  */}
+        <PluginPresets
+          allTables={allTables}
+          pluginPresets={pluginPresets}
+          activePresetIdx={activePresetIdx}
+          pluginDataStore={pluginDataStore}
           isShowPresets={isShowPresets}
-          isShowSettings={isShowSettings}
           onTogglePresets={togglePresets}
-          toggleSettings={toggleSettings}
-          togglePlugin={onPluginToggle}
+          onToggleSettings={toggleSettings}
+          onSelectPreset={onSelectPreset}
+          updatePresets={updatePresets}
+          updateActiveData={updateActiveData}
         />
-        {/* main body  */}
-        <div
-          className="d-flex position-relative"
-          style={{ height: '100%', width: '100%', backgroundColor: '#f5f5f5' }}>
-          <div id={PLUGIN_ID} className={styles.body} style={{ padding: '10px', width: '100%' }}>
-            {/* Note: The CustomPlugin component serves as a placeholder and should be replaced with your custom plugin component. */}
-            <ERDPlugin
-              appActiveState={appActiveState}
-              allTables={allTables}
-              relationship={activeRelationshipBtn}
-              pluginDataStore={pluginDataStore}
-            />
-            {activeComponents.add_row_button && (
-              <button className={styles.add_row} onClick={addRowItem}>
-                <FaPlus size={30} color="#fff" />
-                {isDevelopment && (
-                  <div style={{ margin: 0 }} className={styles.add_row_toolTip}>
-                    <p>Adding a row only works in production</p>
-                  </div>
-                )}
-              </button>
-            )}
-          </div>
-
-          <PluginSettings
-            activeComponents={activeComponents}
+        <div className={styles.plugin}>
+          <Header
+            presetName={findPresetName(pluginPresets, activePresetId)}
+            isShowPresets={isShowPresets}
             isShowSettings={isShowSettings}
-            allTables={allTables}
-            appActiveState={appActiveState}
-            activeTableViews={activeTableViews}
-            pluginPresets={pluginPresets}
-            onTableOrViewChange={onTableOrViewChange}
-            onToggleSettings={toggleSettings}
-            relationship={activeRelationshipBtn}
-            setRelationship={onToggleRelationship}
+            onTogglePresets={togglePresets}
+            toggleSettings={toggleSettings}
+            togglePlugin={onPluginToggle}
           />
+          {/* main body  */}
+          <div
+            className="d-flex position-relative"
+            style={{ height: '100%', width: '100%', backgroundColor: '#f5f5f5' }}>
+            <div id={PLUGIN_ID} className={styles.body} style={{ padding: '10px', width: '100%' }}>
+              {/* Note: The CustomPlugin component serves as a placeholder and should be replaced with your custom plugin component. */}
+
+              <ERDPlugin
+                appActiveState={appActiveState}
+                allTables={allTables}
+                relationship={activeRelationshipBtn}
+                pluginDataStore={pluginDataStore}
+              />
+
+              {activeComponents.add_row_button && (
+                <button className={styles.add_row} onClick={addRowItem}>
+                  <FaPlus size={30} color="#fff" />
+                  {isDevelopment && (
+                    <div style={{ margin: 0 }} className={styles.add_row_toolTip}>
+                      <p>Adding a row only works in production</p>
+                    </div>
+                  )}
+                </button>
+              )}
+            </div>
+
+            <PluginSettings
+              activeComponents={activeComponents}
+              isShowSettings={isShowSettings}
+              allTables={allTables}
+              appActiveState={appActiveState}
+              activeTableViews={activeTableViews}
+              pluginPresets={pluginPresets}
+              onTableOrViewChange={onTableOrViewChange}
+              onToggleSettings={toggleSettings}
+              relationship={activeRelationshipBtn}
+              setRelationship={onToggleRelationship}
+            />
+          </div>
         </div>
-      </div>
-    </ResizableWrapper>
+      </ResizableWrapper>
+    </ReactFlowProvider>
   );
 };
 

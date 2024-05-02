@@ -6,10 +6,13 @@ import { jsPDF } from 'jspdf';
 import { IHeaderProps } from '../../../utils/template-interfaces/Header.interface';
 import { PLUGIN_ID } from '../../../utils/template-constants';
 import { HiOutlineChevronDoubleRight } from 'react-icons/hi2';
+import { FaPlus } from 'react-icons/fa6';
+import { useReactFlow } from 'reactflow';
 
 const Header: React.FC<IHeaderProps> = (props) => {
   const { presetName, isShowPresets, onTogglePresets, togglePlugin } = props;
   const [customComponentContent, setCustomComponentContent] = useState<string | null>(null);
+  const reactFlowInstance = useReactFlow();
 
   useEffect(() => {
     const input = document.getElementById(PLUGIN_ID);
@@ -41,6 +44,11 @@ const Header: React.FC<IHeaderProps> = (props) => {
     }
   };
 
+  function onToggleView() {
+    console.log('toggle');
+    reactFlowInstance.fitView();
+  }
+
   return (
     <div className={styles.plugin_header}>
       <div className={'d-flex align-items-center justify-content-start'}>
@@ -55,8 +63,12 @@ const Header: React.FC<IHeaderProps> = (props) => {
           <p className="font-weight-bold">{presetName}</p>
         </div>
       </div>
+
       <div
         className={`d-flex align-items-center justify-content-end ${styles.plugin_header_settings}`}>
+        <span className={styles.plugin_header_icon_btn} onClick={onToggleView}>
+          <span className="dtable-font dtable-icon-collapse-all"></span>
+        </span>
         <span className={styles.plugin_header_icon_btn} onClick={downloadPdfDocument}>
           <span className="dtable-font dtable-icon-download"></span>
         </span>
