@@ -1,15 +1,11 @@
 import { memo } from 'react';
 import { Handle, Position } from 'reactflow';
+import { CellType as CELL_TYPE, COLUMNS_ICON_CONFIG } from 'dtable-utils';
 import stylesCustom from '../../../styles/custom-styles/ERDPlugin.module.scss';
-import { LINK_TYPE } from '../../../utils/custom-constants/constants';
 
 function CustomNode({ id, data }: { id: string; data: any }) {
   return (
     <>
-      {/* <div
-        className={
-          !data.selected ? stylesCustom.custom_node_header : stylesCustom.custom_node_header_sel
-        }> */}
       <div className={stylesCustom.custom_node_header}>
         <strong>{data.name.substring(0, 25)}</strong>
       </div>
@@ -41,14 +37,16 @@ function CustomNode({ id, data }: { id: string; data: any }) {
               id={id + '_' + cl.key + '_r-src'}
             />
             <div className={stylesCustom.custom_node_row_content}>
-              <div className={stylesCustom.custom_node_row_content_value}>{cl.name}</div>
-              <div className={stylesCustom.custom_node_row_content_id}>
-                {cl.type}
-                {cl.type === LINK_TYPE.link ? (cl.isMultiple ? ' - ∞' : ' - 1') : ''}
+              <div>
+                <div className={stylesCustom.custom_node_row_content_icon}>
+                  <i
+                    className={`dtable-font ${
+                      COLUMNS_ICON_CONFIG[CELL_TYPE[cl.type.toUpperCase()]]
+                    }`}
+                    style={{ fontSize: '10px' }}></i>
+                </div>
               </div>
-              {/* <div className={stylesCustom.custom_node_row_content_multiple}>
-                {cl.type === LINK_TYPE.link ? (cl.isMultiple ? '∞' : '1') : ''}
-              </div> */}
+              <div className={stylesCustom.custom_node_row_content_value}>{cl.name}</div>
             </div>
           </div>
         ))}
