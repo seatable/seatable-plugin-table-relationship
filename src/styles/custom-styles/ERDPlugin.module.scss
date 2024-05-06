@@ -26,6 +26,10 @@
     background: #ff8000;
     padding: 8px 10px;
     border-bottom: 1px solid #e2e8f0;
+    color: #fff;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   &_header_sel {
@@ -41,6 +45,7 @@
     position: relative;
     display: flex;
     align-items: center;
+    padding-bottom: 3px;
 
     &_content {
       display: flex;
@@ -49,8 +54,11 @@
       width: 100%;
 
       &_value {
-        color: #000;
+        color: #212529;
         align-items: self-start;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
 
       &_id {
