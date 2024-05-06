@@ -6,8 +6,146 @@ import {
   NodeResultItem,
   RelationshipState,
 } from '../custom-interfaces/ERDPlugin';
+import { PLUGIN_NAME } from '../template-constants';
+import { IPluginDataStore } from '../template-interfaces/App.interface';
+import { PresetCustomSettings } from '../template-interfaces/PluginPresets/Presets.interface';
 import { TableArray, TableColumn } from '../template-interfaces/Table.interface';
-import { MarkerType, Edge, EdgeMarkerType, EdgeMarker } from 'reactflow';
+import { MarkerType, Edge, EdgeMarker } from 'reactflow';
+
+// Helper for Checking Data
+export function isCustomSettingsFn(
+  PDS: IPluginDataStore,
+  allTables: TableArray,
+  activePresetId: string
+) {
+  const activePresetCustomSettings = PDS.presets.find((preset) => preset._id === activePresetId)
+    ?.customSettings;
+  if (
+    activePresetCustomSettings === undefined ||
+    Object.keys(activePresetCustomSettings).length === 0
+  ) {
+    const defaultActivePresetCustomSettings = generateDefaultCustomSettings(allTables);
+    return { isPDSCS: false, customSettings: defaultActivePresetCustomSettings };
+  } else {
+    return { isPDSCS: true, customSettings: activePresetCustomSettings };
+  }
+}
+
+export function generateDefaultCustomSettings(allTables: TableArray) {
+  let defaultActivePresetCustomSettings: PresetCustomSettings;
+  let lnk = generateLinks(allTables);
+  const ns = generateNodes(allTables);
+  const es = generateEdges(lnk, ns);
+  defaultActivePresetCustomSettings = {
+    relationship: {
+      recRel: true,
+      lkRel: true,
+      lk2Rel: true,
+      tblNoLnk: true,
+    },
+    links: lnk,
+    nodes: ns,
+    edges: es,
+  };
+  return defaultActivePresetCustomSettings;
+}
+
+export function checkNodesVsTablesIds(
+  customSettings: PresetCustomSettings,
+  allTablesNodes: NodeResultItem[],
+  allTables: TableArray
+) {
+  const customNodesIds = customSettings?.nodes.map((node: NodeResultItem) => node.id);
+  const allTablesIds = allTablesNodes.map((node) => node.id);
+  const nodesVsTablesIds = customNodesIds.every((id: string) => allTablesIds.includes(id));
+  if (nodesVsTablesIds) {
+    // Even though the ids are the same, we need to check if the columns are equal
+    const updatedCustomSettings = checkIfColumnsAreEqual(customSettings, allTablesNodes, allTables);
+    return updatedCustomSettings;
+  }
+}
+
+export function checkIfColumnsAreEqual(
+  customSettings: PresetCustomSettings,
+  allTablesNodes: NodeResultItem[],
+  allTables: TableArray
+) {
+  const customNodes = customSettings.nodes;
+  const nodes = allTablesNodes;
+  const _nodes: NodeResultItem[] = [...customNodes];
+
+  for (let i = 0; i < nodes.length; i++) {
+    _nodes.find((n: NodeResultItem) => {
+      if (n.id === nodes[i].id && n.data.columns.length !== nodes[i].data.columns.length) {
+        n.data.columns = nodes[i].data.columns;
+      }
+    });
+  }
+
+  let _links = generateLinks(allTables);
+  const _es = generateEdges(_links, _nodes);
+  return { ...customSettings, links: _links, edges: _es, nodes: _nodes };
+}
+
+export function checkMissingOrExtraIds(
+  customSettings: PresetCustomSettings,
+  allTablesNodes: NodeResultItem[],
+  allTables: TableArray
+) {
+  // First we need to get the ids of the nodes in the customSettings and allTables
+  const customNodesIds = customSettings?.nodes.map((node: NodeResultItem) => node.id);
+  const allTablesIds = allTablesNodes.map((node) => node.id);
+  const missingIds = allTablesIds.filter((id) => !customNodesIds.includes(id));
+  const extraIds = customNodesIds.filter((id: string) => !allTablesIds.includes(id));
+  const _nodes: NodeResultItem[] = [...customSettings.nodes];
+  // Add missing nodes to customSettings.nodes
+  missingIds.forEach((missingId: string) => {
+    const nodeToAdd = allTablesNodes.find((node) => node.id === missingId);
+    if (nodeToAdd) {
+      _nodes.push(nodeToAdd);
+    }
+  });
+
+  // Remove extra nodes from customSettings.nodes
+  extraIds.forEach((extraId: string) => {
+    const nodeIndex = _nodes.findIndex((node: NodeResultItem) => node.id === extraId);
+    if (nodeIndex !== -1) {
+      _nodes.splice(nodeIndex, 1);
+    }
+  });
+
+  let _links = generateLinks(allTables);
+  const _es = generateEdges(_links, _nodes);
+  return { ...customSettings, links: _links, edges: _es, nodes: _nodes };
+}
+// This function is used to update the customSettings in the PluginDataStore
+export function setPluginDataStoreFn(
+  pluginDataStore: IPluginDataStore,
+  activeRelationships: RelationshipState,
+  activePresetId: string,
+  ns: any[],
+  lnk: ILinksData[],
+  es: Edge[]
+) {
+  window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
+    ...pluginDataStore,
+    presets: pluginDataStore.presets.map((preset) => {
+      if (preset._id === activePresetId) {
+        return {
+          ...preset,
+          customSettings: {
+            ...preset.customSettings,
+            nodes: ns,
+            links: lnk,
+            edges: es,
+            relationship: activeRelationships,
+          },
+        };
+      }
+      return preset;
+    }),
+  });
+}
 
 export function generateLinks(allTables: TableArray): ILinksData[] {
   const formulaCc: TableColumn[] = []; // Column 'link' type
@@ -100,12 +238,13 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
 
   links.forEach((link, index) => {
     const { sourceData, targetData1st, type } = link;
-
+    if (sourceData === null || targetData1st === null) {
+      return;
+    }
     const sourceTbl = sourceData.table_id;
     const targetTbl = targetData1st.table_id;
     const sourceNode = ns.find((n) => n.id === sourceTbl);
     const targetNode = ns.find((n) => n.id === targetTbl);
-
     let color: string;
 
     switch (type) {
@@ -141,9 +280,7 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
       sourceHandle = `${src.tId}_${src.cId}_${src.edgSide}${src.suffix}`;
       targetHandle = `${tgt.tId}_${tgt.cId}_${tgt.edgSide}${tgt.suffix}`;
     }
-    const labelString = `${sourceData.isMultiple ? '∞' : '1'} - ${
-      targetData1st.isMultiple ? '∞' : '1'
-    }`;
+
     const markerType: EdgeMarker = {
       type: MarkerType.ArrowClosed,
       width: 10,

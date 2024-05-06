@@ -31,10 +31,7 @@ export interface IPresetInfo {
   _id: string;
   name: string;
   settings?: PresetSettings;
-  customSettings?: {
-    relationship: RelationshipState;
-    [key: string]: any;
-  };
+  customSettings?: PresetCustomSettings;
 }
 
 export interface PresetSettings {
@@ -43,6 +40,10 @@ export interface PresetSettings {
   selectedTable?: SelectOption;
   selectedView?: SelectOption;
   show_field_names?: boolean;
+}
+export interface PresetCustomSettings {
+  relationship: RelationshipState;
+  [key: string]: any;
 }
 
 export type PresetsArray = IPresetInfo[];

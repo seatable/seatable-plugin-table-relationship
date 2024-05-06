@@ -1,19 +1,12 @@
 import React, { useEffect, useCallback, useState } from 'react';
 
-import ReactFlow, {
-  useNodesState,
-  useEdgesState,
-  isNode,
-  Edge,
-  useReactFlow,
-  Controls,
-  useViewport,
-} from 'reactflow';
+import ReactFlow, { useNodesState, useEdgesState, isNode } from 'reactflow';
 import {
   IERDPluginProps,
   ILinksData,
   INodePositions,
   NodeResultItem,
+  RelationshipState,
   nodeCts,
 } from '../../utils/custom-interfaces/ERDPlugin';
 import CustomNode from './NodesComponent/CustomNode';
@@ -24,14 +17,15 @@ import '../../styles/custom-styles/overview.css';
 
 // Import utils
 import {
-  generateEdges,
-  generateLinks,
   generateNodes,
-  filterRelationshipLinks,
-  filterNodesWithoutLinks,
+  isCustomSettingsFn,
+  setPluginDataStoreFn,
+  checkMissingOrExtraIds,
+  checkNodesVsTablesIds,
 } from '../../utils/custom-utils/utils';
-import { PLUGIN_NAME } from '../../utils/template-constants';
+
 import { TableArray } from '../../utils/template-interfaces/Table.interface';
+import { PresetCustomSettings } from '../../utils/template-interfaces/PluginPresets/Presets.interface';
 
 const nodeTypes = {
   custom: CustomNode,
@@ -53,118 +47,97 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     INodePositions,
     React.Dispatch<React.SetStateAction<INodePositions>>,
   ] = useState({});
+  let activeCustomSettings: PresetCustomSettings;
 
   useEffect(() => {
-    if (JSON.stringify(activeRelationships) !== JSON.stringify(relationship)) {
-      setRelationship(activeRelationships);
+    const allTablesNodes = generateNodes(allTables);
+    const { isPDSCS, customSettings } = isCustomSettingsFn(
+      pluginDataStore,
+      allTables,
+      appActiveState.activePresetId
+    );
+
+    activeCustomSettings = customSettings;
+    if (isPDSCS === false) {
+      // if custom settings are not found, we set nodes, links, edges and relationship
+      const { links, nodes, edges, relationship } = activeCustomSettings;
+      setStates(links, nodes, edges, relationship);
+      setPluginDataStoreFn(
+        pluginDataStore,
+        relationship,
+        appActiveState.activePresetId,
+        nodes,
+        links,
+        edges
+      );
     }
 
-    let lnk = generateLinks(allTables);
-    const filteredLinks = filterRelationshipLinks(lnk, activeRelationships);
+    // In any case and whenever there is a change in the Tables, we need to check if the nodes and tables are equal
+    const storedNodesVsTablesNodes = activeCustomSettings.nodes.length === allTablesNodes.length;
 
-    setLinks(filteredLinks);
-    const PRESET_ID = appActiveState.activePresetId;
-    const presetIndex = pluginDataStore.presets.findIndex((preset) => preset._id === PRESET_ID);
-    const pluginPresetData = pluginDataStore.presets[presetIndex].customSettings;
-    const nodesNoLinks =
-      activeRelationships.tblNoLnk === false
-        ? filterNodesWithoutLinks(nodes)
-        : pluginPresetData?.nodes;
-    setNodes(nodesNoLinks);
-    const es = generateEdges(filteredLinks, nodesNoLinks);
-    setEdges(es);
-  }, [activeRelationships, relationship]);
+    // If the nodes and tables are equal, we check if the ids and columns are equal
+    //else we find which nodes are missing or extra
+    const newCustomSettings = storedNodesVsTablesNodes
+      ? checkNodesVsTablesIds(activeCustomSettings, allTablesNodes, allTables)
+      : checkMissingOrExtraIds(activeCustomSettings, allTablesNodes, allTables);
 
-  useEffect(() => {
-    const PRESET_ID = appActiveState.activePresetId;
-    const presetIndex = pluginDataStore.presets.findIndex((preset) => preset._id === PRESET_ID);
-    const pluginPresetData = pluginDataStore.presets[presetIndex].customSettings;
-
-    if (pluginPresetData) {
-      const ns = generateNodes(allTables);
-      const es = generateEdges(links, ns);
-
-      const nodes = pluginPresetData.nodes;
-      const nsIds = ns.map((node) => node.id);
-      const nodesIds = nodes.map((node: NodeResultItem) => node.id);
-
-      if (nsIds.length === nodesIds.length && nsIds.every((id) => nodesIds.includes(id))) {
-        let differingObjects = [];
-
-        for (let i = 0; i < ns.length; i++) {
-          if (ns[i].data.columns.length !== nodes[i].data.columns.length) {
-            differingObjects.push(ns[i]);
-          }
-        }
-
-        if (differingObjects.length > 0) {
-          differingObjects.forEach((obj) => {
-            const correspondingNode = nodes.find((node: NodeResultItem) => node.id === obj.id);
-
-            if (correspondingNode) {
-              correspondingNode.data.columns = obj.data.columns;
-            }
-          });
-        } else {
-          setNodes(nodes);
-          const _es = generateEdges(links, nodes);
-          setEdges(_es);
-          let lnk = generateLinks(allTables);
-
-          setPluginDataStoreFn(nodes, lnk, _es);
-        }
-        setLinks(links); 
-        setNodes(nodes);
-        const _es = generateEdges(links, nodes); 
-        setEdges(_es);
-        setPluginDataStoreFn(nodes, links, es); 
-      } else {
-        const missingIds = nsIds.filter((id) => !nodesIds.includes(id));
-        const extraIds = nodesIds.filter((id: string) => !nsIds.includes(id));
-        const updatedNodes = [...nodes, ...ns.filter((node) => missingIds.includes(node.id))];
-        const filteredNodes = updatedNodes.filter(
-          (node: NodeResultItem) => !extraIds.includes(node.id)
-        );
-        let lnk = generateLinks(allTables);
-
-        const es = generateEdges(lnk, filteredNodes);
-        setNodes(filteredNodes);
-        setEdges(es);
-        setLinks(lnk);
-        setPluginDataStoreFn(filteredNodes, lnk, es);
-      }
-    } else {
-
-      let lnk = generateLinks(allTables);
-      const ns = generateNodes(allTables);
-      const es = generateEdges(lnk, ns);
-      setNodes(ns);
-      setEdges(es);
-      setLinks(lnk);
-      setPluginDataStoreFn(ns, lnk, es);
-    }
+    const { links, nodes, edges, relationship } = newCustomSettings as PresetCustomSettings;
+    setStates(links, nodes, edges, relationship);
+    setPluginDataStoreFn(
+      pluginDataStore,
+      relationship,
+      appActiveState.activePresetId,
+      nodes,
+      links,
+      edges
+    );
   }, [JSON.stringify(allTables), appActiveState.activePresetId]);
 
-  function setPluginDataStoreFn(ns: any[], lnk: ILinksData[], es: Edge[]) {
-    window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
-      ...pluginDataStore,
-      presets: pluginDataStore.presets.map((preset) => {
-        if (preset._id === appActiveState.activePresetId) {
-          return {
-            ...preset,
-            customSettings: {
-              ...preset.customSettings,
-              nodes: ns,
-              links: lnk,
-              edges: es,
-              relationship: activeRelationships,
-            },
-          };
-        }
-        return preset;
-      }),
-    });
+  // This function sets the states of the nodes, links, edges and relationship in the ERD Plugin component
+  function setStates(_links: any, _nodes: any, _edges: any, _relationship: RelationshipState) {
+    setLinks(_links);
+    setNodes(_nodes);
+    setEdges(_edges);
+    setRelationship(_relationship);
+    setPluginDataStoreFn(
+      pluginDataStore,
+      _relationship,
+      appActiveState.activePresetId,
+      _nodes,
+      _links,
+      _edges
+    );
   }
+
+  // useEffect(() => {
+  //   console.log('nodes', nodes);
+  // }, [nodes]);
+  // useEffect(() => {
+  //   // no need to set relationship state if there's no change (precautionary measure for infinite loop)
+  //   if (JSON.stringify(activeRelationships) !== JSON.stringify(relationship)) {
+  //     setRelationship(activeRelationships);
+  //   }
+
+  //   let lnk = generateLinks(allTables);
+  //   const filteredLinks = filterRelationshipLinks(lnk, activeRelationships);
+
+  //   setLinks(filteredLinks);
+  //   const PRESET_ID = appActiveState.activePresetId;
+  //   const presetIndex = pluginDataStore.presets.findIndex((preset) => preset._id === PRESET_ID);
+  //   const pluginPresetData = pluginDataStore.presets[presetIndex].customSettings;
+  //   console.log('pluginPresetData', pluginPresetData);
+  //   const nodesNoLinks =
+  //     activeRelationships.tblNoLnk === false
+  //       ? filterNodesWithoutLinks(nodes)
+  //       : pluginPresetData?.nodes;
+  //   // setEdges(es);
+
+  //   setNodes(nodesNoLinks);
+  //   // setNodes(pluginPresetData?.nodes);
+  //   const es = generateEdges(filteredLinks, nodesNoLinks);
+  //   // const es = generateEdges(filteredLinks, pluginPresetData?.nodes);
+  //   setEdges(es);
+  // }, [activeRelationships, relationship]);
 
   const onNodeDragStart = useCallback(
     (event, node) => {
@@ -250,7 +223,14 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
       }) as NodeResultItem[];
 
       setNodes(updatedNodes);
-      setPluginDataStoreFn(updatedNodes, links, edges);
+      setPluginDataStoreFn(
+        pluginDataStore,
+        activeRelationships,
+        appActiveState.activePresetId,
+        updatedNodes,
+        links,
+        edges
+      );
     },
     [nodes]
   );
