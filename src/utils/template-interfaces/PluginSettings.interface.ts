@@ -12,8 +12,8 @@ interface IPluginSettingsProps {
   onTableOrViewChange: (type: SettingsOption, option: SelectOption) => void;
   onToggleSettings: () => void;
   isShowSettings: boolean;
-  relationship: RelationshipState;
-  setRelationship: (t: any) => void;
+  activeRelationships: RelationshipState;
+  handleRelationships: (t: any) => void;
   activeComponents: IActiveComponents;
 }
 

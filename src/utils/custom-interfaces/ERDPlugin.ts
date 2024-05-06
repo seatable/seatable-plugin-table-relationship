@@ -5,9 +5,10 @@ interface IERDPluginProps {
   appActiveState: AppActiveState;
   pluginDataStore: IPluginDataStore;
   allTables: TableArray;
-  relationship: RelationshipState;
   nodes?: Node[];
   links?: Link[];
+  activeRelationships: RelationshipState;
+  setPluginDataStore: (t: any) => void;
 }
 interface ITableVisualizationProps {
   appActiveState: AppActiveState;

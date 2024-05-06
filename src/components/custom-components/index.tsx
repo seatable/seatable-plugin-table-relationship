@@ -1,15 +1,13 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import { FaPlus } from 'react-icons/fa6';
 
 import ReactFlow, {
-  Controls,
   useNodesState,
   useEdgesState,
   isNode,
   Edge,
-  ControlButton,
   useReactFlow,
-  ReactFlowProvider,
+  Controls,
+  useViewport,
 } from 'reactflow';
 import {
   IERDPluginProps,
@@ -33,7 +31,6 @@ import {
 } from '../../utils/custom-utils/utils';
 import { PLUGIN_NAME } from '../../utils/template-constants';
 import { TableArray } from '../../utils/template-interfaces/Table.interface';
-import { zoom } from 'd3';
 
 const nodeTypes = {
   custom: CustomNode,
@@ -43,28 +40,44 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
   appActiveState,
   allTables,
   pluginDataStore,
-  relationship,
+  activeRelationships,
 }) => {
   const [_allTables, setAllTables] = useState<TableArray>([]);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [links, setLinks] = useState<ILinksData[]>([]);
   const [nodesCts, setNodesCts] = useState<nodeCts[]>([]);
+  const [relationship, setRelationship] = useState(activeRelationships);
   const [prevNodePositions, setPrevNodePositions]: [
     INodePositions,
     React.Dispatch<React.SetStateAction<INodePositions>>,
   ] = useState({});
-  const reactFlowInstance = useReactFlow();
+
+  useEffect(() => {
+    // no need to set relationship state if there's no change (precautionary measure for infinite loop)
+    if (JSON.stringify(activeRelationships) !== JSON.stringify(relationship)) {
+      setRelationship(activeRelationships);
+    }
+    // still not sure about where to put these guys
+    let lnk = generateLinks(allTables);
+    const filteredLinks = filterRelationshipLinks(lnk, activeRelationships);
+    setLinks(filteredLinks);
+    const PRESET_ID = appActiveState.activePresetId;
+    const presetIndex = pluginDataStore.presets.findIndex((preset) => preset._id === PRESET_ID);
+    const pluginPresetData = pluginDataStore.presets[presetIndex].customSettings;
+    setNodes(pluginPresetData?.nodes);
+    const es = generateEdges(filteredLinks, pluginPresetData?.nodes);
+    setEdges(es);
+  }, [activeRelationships, relationship]);
 
   useEffect(() => {
     const PRESET_ID = appActiveState.activePresetId;
     const presetIndex = pluginDataStore.presets.findIndex((preset) => preset._id === PRESET_ID);
     const pluginPresetData = pluginDataStore.presets[presetIndex].customSettings;
+
     if (pluginPresetData) {
-      let lnk = generateLinks(allTables);
-      const filteredLinks = filterRelationshipLinks(lnk, relationship);
-      const ns = generateNodes(allTables, relationship);
-      const es = generateEdges(filteredLinks, ns);
+      const ns = generateNodes(allTables);
+      const es = generateEdges(links, ns);
 
       const nodes = pluginPresetData.nodes;
       const nsIds = ns.map((node) => node.id);
@@ -89,15 +102,17 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
           });
         } else {
           setNodes(nodes);
-          const _es = generateEdges(lnk, nodes);
+          const _es = generateEdges(links, nodes);
           setEdges(_es);
-          setPluginDataStore(nodes, lnk, _es);
+          let lnk = generateLinks(allTables);
+
+          setPluginDataStoreFn(nodes, lnk, _es);
         }
-        setLinks(filteredLinks);
+        setLinks(links); // filteredLinks
         setNodes(nodes);
-        const _es = generateEdges(filteredLinks, nodes);
+        const _es = generateEdges(links, nodes); // filteredLinks
         setEdges(_es);
-        setPluginDataStore(nodes, filteredLinks, es);
+        setPluginDataStoreFn(nodes, links, es); // filteredLinks
       } else {
         const missingIds = nsIds.filter((id) => !nodesIds.includes(id));
         const extraIds = nodesIds.filter((id: string) => !nsIds.includes(id));
@@ -111,7 +126,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
         setNodes(filteredNodes);
         setEdges(es);
         setLinks(lnk);
-        setPluginDataStore(filteredNodes, lnk, es);
+        setPluginDataStoreFn(filteredNodes, lnk, es);
       }
     } else {
       // THIS IS THE FIRST TIME THE PLUGIN IS LOADED and there is no data in the pluginDataStore
@@ -121,11 +136,11 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
       setNodes(ns);
       setEdges(es);
       setLinks(lnk);
-      setPluginDataStore(ns, lnk, es);
+      setPluginDataStoreFn(ns, lnk, es);
     }
-  }, [JSON.stringify(allTables), relationship, appActiveState.activePresetId]);
+  }, [JSON.stringify(allTables), appActiveState.activePresetId]); // relationship
 
-  function setPluginDataStore(ns: any[], lnk: ILinksData[], es: Edge[]) {
+  function setPluginDataStoreFn(ns: any[], lnk: ILinksData[], es: Edge[]) {
     window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
       ...pluginDataStore,
       presets: pluginDataStore.presets.map((preset) => {
@@ -137,7 +152,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
               nodes: ns,
               links: lnk,
               edges: es,
-              relationship: relationship,
+              relationship: activeRelationships,
             },
           };
         }
@@ -230,7 +245,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
       }) as NodeResultItem[];
 
       setNodes(updatedNodes);
-      setPluginDataStore(updatedNodes, links, edges);
+      setPluginDataStoreFn(updatedNodes, links, edges);
     },
     [nodes]
   );
@@ -248,7 +263,8 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
         onNodeDragStop={onNodeDragStop}
         onEdgeClick={(event, edge) => console.log('edge clicked', edge)}
         fitView={true}
-        nodeTypes={nodeTypes}></ReactFlow>
+        nodeTypes={nodeTypes}
+        minZoom={0.01}></ReactFlow>
     </>
   );
 };
