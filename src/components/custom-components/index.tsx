@@ -131,13 +131,33 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
   //       ? filterNodesWithoutLinks(nodes)
   //       : pluginPresetData?.nodes;
   //   // setEdges(es);
-
   //   setNodes(nodesNoLinks);
   //   // setNodes(pluginPresetData?.nodes);
   //   const es = generateEdges(filteredLinks, nodesNoLinks);
   //   // const es = generateEdges(filteredLinks, pluginPresetData?.nodes);
   //   setEdges(es);
   // }, [activeRelationships, relationship]);
+
+  function setPluginDataStoreFn(ns: any[], lnk: ILinksData[], es: Edge[]) {
+    window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
+      ...pluginDataStore,
+      presets: pluginDataStore.presets.map((preset) => {
+        if (preset._id === appActiveState.activePresetId) {
+          return {
+            ...preset,
+            customSettings: {
+              ...preset.customSettings,
+              nodes: ns,
+              links: lnk,
+              edges: es,
+              relationship: activeRelationships,
+            },
+          };
+        }
+        return preset;
+      }),
+    });
+  }
 
   const onNodeDragStart = useCallback(
     (event, node) => {
