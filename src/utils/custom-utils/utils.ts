@@ -408,7 +408,23 @@ function reduceLinkCcData(linkCc: ILinksColumnData[]) {
     }
   );
 
-  return filteredDataResult;
+  return removeUndefinedOrNull(filteredDataResult);
+}
+
+function removeUndefinedOrNull(
+  arr: {
+    type: string;
+    sourceData: ILinksColumnData;
+    targetData1st: ILinksColumnData;
+  }[]
+) {
+  return arr.filter(
+    (obj) =>
+      obj.sourceData !== undefined &&
+      obj.sourceData !== null &&
+      obj.targetData1st !== undefined &&
+      obj.targetData1st !== null
+  );
 }
 
 function createFormulaCcData(data: TableColumn[], allTables: TableArray) {

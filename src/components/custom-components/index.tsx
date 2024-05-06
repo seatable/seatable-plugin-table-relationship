@@ -22,6 +22,10 @@ import {
   setPluginDataStoreFn,
   checkMissingOrExtraIds,
   checkNodesVsTablesIds,
+  filterRelationshipLinks,
+  filterNodesWithoutLinks,
+  generateEdges,
+  generateLinks,
 } from '../../utils/custom-utils/utils';
 
 import { TableArray } from '../../utils/template-interfaces/Table.interface';
@@ -48,6 +52,38 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     React.Dispatch<React.SetStateAction<INodePositions>>,
   ] = useState({});
   let activeCustomSettings: PresetCustomSettings;
+
+  useEffect(() => {
+    let _edges = edges;
+    let _links = generateLinks(allTables);
+
+    const pluginPresetData =
+      pluginDataStore.presets[
+        pluginDataStore.presets.findIndex((preset) => preset._id === appActiveState.activePresetId)
+      ].customSettings;
+
+    //   // no need to set relationship state if there's no change (precautionary measure for infinite loop)
+    if (JSON.stringify(activeRelationships) !== JSON.stringify(relationship)) {
+      setRelationship(activeRelationships);
+    }
+    // Filtering the links based on the active relationships
+    const filteredLinks = filterRelationshipLinks(_links, activeRelationships);
+
+    // Filtering the nodes based on the active relationships
+    const nodesNoLinks =
+      activeRelationships.tblNoLnk === false
+        ? filterNodesWithoutLinks(nodes)
+        : pluginPresetData?.nodes;
+    // Further filtering the nodes to remove any nodes without a type
+    const validNodes = nodesNoLinks.filter(
+      (node: any) => node.type !== undefined
+    ) as NodeResultItem[];
+    _edges = generateEdges(filteredLinks, validNodes);
+
+    setLinks(filteredLinks);
+    setNodes(validNodes);
+    setEdges(_edges);
+  }, [activeRelationships, relationship]);
 
   useEffect(() => {
     const allTablesNodes = generateNodes(allTables);
@@ -82,6 +118,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
       : checkMissingOrExtraIds(activeCustomSettings, allTablesNodes, allTables);
 
     const { links, nodes, edges, relationship } = newCustomSettings as PresetCustomSettings;
+    // const filteredLinks = filterRelationshipLinks(links, activeRelationships);
     setStates(links, nodes, edges, relationship);
     setPluginDataStoreFn(
       pluginDataStore,
@@ -108,36 +145,6 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
       _edges
     );
   }
-
-  // useEffect(() => {
-  //   console.log('nodes', nodes);
-  // }, [nodes]);
-  // useEffect(() => {
-  //   // no need to set relationship state if there's no change (precautionary measure for infinite loop)
-  //   if (JSON.stringify(activeRelationships) !== JSON.stringify(relationship)) {
-  //     setRelationship(activeRelationships);
-  //   }
-
-  //   let lnk = generateLinks(allTables);
-  //   const filteredLinks = filterRelationshipLinks(lnk, activeRelationships);
-
-  //   setLinks(filteredLinks);
-  //   const PRESET_ID = appActiveState.activePresetId;
-  //   const presetIndex = pluginDataStore.presets.findIndex((preset) => preset._id === PRESET_ID);
-  //   const pluginPresetData = pluginDataStore.presets[presetIndex].customSettings;
-  //   console.log('pluginPresetData', pluginPresetData);
-  //   const nodesNoLinks =
-  //     activeRelationships.tblNoLnk === false
-  //       ? filterNodesWithoutLinks(nodes)
-  //       : pluginPresetData?.nodes;
-  //   // setEdges(es);
-
-  //   setNodes(nodesNoLinks);
-  //   // setNodes(pluginPresetData?.nodes);
-  //   const es = generateEdges(filteredLinks, nodesNoLinks);
-  //   // const es = generateEdges(filteredLinks, pluginPresetData?.nodes);
-  //   setEdges(es);
-  // }, [activeRelationships, relationship]);
 
   const onNodeDragStart = useCallback(
     (event, node) => {
