@@ -75,7 +75,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
         ? filterNodesWithoutLinks(nodes)
         : pluginPresetData?.nodes;
 
-    console.log('nodesNoLinks', nodesNoLinks);
+
     // Further filtering the nodes to remove any nodes without a type
     const validNodes =
       nodesNoLinks !== undefined
