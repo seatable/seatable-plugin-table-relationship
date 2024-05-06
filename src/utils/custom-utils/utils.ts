@@ -51,7 +51,10 @@ export function filterRelationshipLinks(lnk: ILinksData[], relationship: Relatio
   return lnk;
 }
 
-export function generateNodes(allTables: TableArray): NodeResultItem[] {
+export function generateNodes(
+  allTables: TableArray,
+  relationship: RelationshipState
+): NodeResultItem[] {
   const numRows: number = 5;
   const numCols: number = 5;
 
@@ -59,31 +62,39 @@ export function generateNodes(allTables: TableArray): NodeResultItem[] {
 
   for (let i = 0; i < allTables.length; i++) {
     const table = allTables[i];
-    const info = table.columns.map((cl) => ({
-      key: cl.key,
-      type: cl.type,
-      name: cl.name,
-      isMultiple: cl.data === undefined || cl.data === null ? false : cl.data.is_multiple,
-    }));
+    let hasLinkType = table.columns.some((c) => c.type === LINK_TYPE.link);
+    if (relationship.tblNoLinks) {
+      hasLinkType = true;
+    }
+    if (hasLinkType) {
+      const info = table.columns.map((cl) => ({
+        key: cl.key,
+        type: cl.type,
+        name: cl.name,
+        isMultiple: cl.data === undefined || cl.data === null ? false : cl.data.is_multiple,
+      }));
 
-    // Calculate position
-    const rowIndex = Math.floor(i / numCols);
-    const colIndex = i % numCols;
-    const x = 100 + colIndex * 250;
-    const y = 100 + rowIndex * 250;
+      // Calculate position
+      const rowIndex = Math.floor(i / numCols);
+      const colIndex = i % numCols;
+      const x = 100 + colIndex * 250;
+      const y = 100 + rowIndex * 250;
 
-    const activeNode: NodeResultItem = {
-      id: table._id.toString(),
-      type: 'custom',
-      position: { x, y },
-      data: {
-        name: table.name.toString(),
-        columns: info,
+      const activeNode: NodeResultItem = {
+        id: table._id.toString(),
+        type: 'custom',
         position: { x, y },
-      },
-    };
+        data: {
+          name: table.name.toString(),
+          columns: info,
+          position: { x, y },
+        },
+      };
 
-    ns.push(activeNode);
+      ns.push(activeNode);
+    } else {
+      continue;
+    }
   }
 
   return ns;

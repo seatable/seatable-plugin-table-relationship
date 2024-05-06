@@ -75,6 +75,7 @@ const App: React.FC<IAppProps> = (props) => {
     recRel: true,
     lkRel: true,
     lk2Rel: true,
+    tblNoLinks: false,
   });
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx, activeViewRows, activeTableView } =
@@ -227,7 +228,7 @@ const App: React.FC<IAppProps> = (props) => {
       // TO CHANGE
       const activeCustomRelationship = activePreset?.customSettings?.relationship;
       setActiveRelationshipBtn(
-        activeCustomRelationship || { recRel: true, lkRel: true, lk2Rel: true }
+        activeCustomRelationship || { recRel: true, lkRel: true, lk2Rel: true, tblNoLinks: false }
       );
       updatePluginDataStore({
         ...pluginDataStore,
