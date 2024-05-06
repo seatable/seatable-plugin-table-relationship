@@ -131,7 +131,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     } else {
       // THIS IS THE FIRST TIME THE PLUGIN IS LOADED and there is no data in the pluginDataStore
       let lnk = generateLinks(allTables);
-      const ns = generateNodes(allTables);
+      const ns = generateNodes(allTables, relationship);
       const es = generateEdges(lnk, ns);
       setNodes(ns);
       setEdges(es);

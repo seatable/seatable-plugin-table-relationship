@@ -164,6 +164,20 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
                 } `}></button>
             </div>
           </div>
+          <div className={'mt-2'}>
+            <div className="mb-2 d-flex align-items-center justify-content-between">
+              <p>Show Tables with no links</p>
+              <button
+                onClick={() => {
+                  handleSetRelationship({ ...relationship, tblNoLinks: !relationship.tblNoLinks });
+                }}
+                className={`${
+                  relationship.tblNoLinks
+                    ? stylesPSettings.settings_fields_toggle_btns_active
+                    : stylesPSettings.settings_fields_toggle_btns
+                } `}></button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

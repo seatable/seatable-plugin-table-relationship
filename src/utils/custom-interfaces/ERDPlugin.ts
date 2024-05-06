@@ -26,6 +26,7 @@ interface RelationshipState {
   recRel: boolean;
   lkRel: boolean;
   lk2Rel: boolean;
+  tblNoLinks: boolean;
 }
 
 interface NodeResultItem {
