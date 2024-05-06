@@ -41,23 +41,25 @@
     position: relative;
     display: flex;
     align-items: center;
+
     &_content {
       display: flex;
-      justify-content: start;
+      justify-content: space-between; /* Adjusted to space between */
       align-items: center;
       width: 100%;
+
       &_value {
         color: #000;
         align-items: self-start;
       }
+
       &_id {
         color: #000;
         align-items: center;
-      }
-      &_multiple {
-        color: #000;
         align-items: self-end;
+        margin-left: auto;
       }
+
       &_icon {
         margin-right: 5px;
         color: #b8b8b8;
@@ -65,6 +67,7 @@
       }
     }
   }
+
   &_select {
     position: relative;
     margin-bottom: 10px;
