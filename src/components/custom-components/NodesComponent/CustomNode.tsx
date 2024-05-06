@@ -4,12 +4,10 @@ import { CellType, COLUMNS_ICON_CONFIG } from 'dtable-utils';
 import stylesCustom from '../../../styles/custom-styles/ERDPlugin.module.scss';
 import { LINK_TYPE } from '../../../utils/custom-constants/constants';
 
-function getKeyByValue(object: any, value: any) {
-  const t = Object.keys(object).find((key) => object[key] === value);
-  console.log('t', CellType[t as string]);
-  const v = COLUMNS_ICON_CONFIG[CellType[t as string] as keyof typeof COLUMNS_ICON_CONFIG];
-  console.log('v', v);
-  return v;
+function getIconByType(ct: any, t: any) {
+  const C_T = Object.keys(ct).find((key) => ct[key] === t);
+  const i = COLUMNS_ICON_CONFIG[CellType[C_T as string] as keyof typeof COLUMNS_ICON_CONFIG];
+  return i;
 }
 
 function CustomNode({ id, data }: { id: string; data: any }) {
@@ -48,7 +46,7 @@ function CustomNode({ id, data }: { id: string; data: any }) {
             <div className={stylesCustom.custom_node_row_content}>
               <div className={stylesCustom.custom_node_row_content_icon}>
                 <i
-                  className={`dtable-font ${getKeyByValue(CellType, cl.type as string) as string}`}
+                  className={`dtable-font ${getIconByType(CellType, cl.type)}`}
                   style={{ fontSize: '10px' }}></i>
               </div>
               <div className={stylesCustom.custom_node_row_content_value}>{cl.type}</div>
