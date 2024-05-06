@@ -49,7 +49,6 @@ function CustomNode({ id, data }: { id: string; data: any }) {
                   className={`dtable-font ${getIconByType(CellType, cl.type)}`}
                   style={{ fontSize: '10px' }}></i>
               </div>
-              <div className={stylesCustom.custom_node_row_content_value}>{cl.type}</div>
               <div className={stylesCustom.custom_node_row_content_value}>{cl.name}</div>
               <div className={stylesCustom.custom_node_row_content_id}>
                 {cl.type === LINK_TYPE.link ? (cl.isMultiple ? '∞' : '1') : ''}
