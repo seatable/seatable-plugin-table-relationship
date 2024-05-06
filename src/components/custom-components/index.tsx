@@ -74,10 +74,14 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
       activeRelationships.tblNoLnk === false
         ? filterNodesWithoutLinks(nodes)
         : pluginPresetData?.nodes;
+
+    console.log('nodesNoLinks', nodesNoLinks);
     // Further filtering the nodes to remove any nodes without a type
-    const validNodes = nodesNoLinks.filter(
-      (node: any) => node.type !== undefined
-    ) as NodeResultItem[];
+    const validNodes =
+      nodesNoLinks !== undefined
+        ? (nodesNoLinks.filter((node: any) => node.type !== undefined) as NodeResultItem[])
+        : [];
+
     _edges = generateEdges(filteredLinks, validNodes);
 
     setLinks(filteredLinks);
