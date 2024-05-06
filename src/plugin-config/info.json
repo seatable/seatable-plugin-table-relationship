@@ -1,9 +1,9 @@
 {
-  "name": "plugin-erd",
+  "name": "table-relationships",
   "version": "0.1.0",
   "display_type": "overlay",
-  "display_name": "Plugin ERD",
-  "description": "Design your own SeaTable plugin.",
+  "display_name": "Table relationships",
+  "description": "Display the relations between the tables in a base.",
   "active_components": {
     "settings_dropdowns": false,
     "add_row_button": false
