@@ -1,8 +1,16 @@
 import { memo } from 'react';
 import { Handle, Position } from 'reactflow';
-import { CellType as CELL_TYPE, COLUMNS_ICON_CONFIG } from 'dtable-utils';
+import { CellType, COLUMNS_ICON_CONFIG } from 'dtable-utils';
 import stylesCustom from '../../../styles/custom-styles/ERDPlugin.module.scss';
 import { LINK_TYPE } from '../../../utils/custom-constants/constants';
+
+function getKeyByValue(object: any, value: any) {
+  const t = Object.keys(object).find((key) => object[key] === value);
+  console.log('t', CellType[t as string]);
+  const v = COLUMNS_ICON_CONFIG[CellType[t as string] as keyof typeof COLUMNS_ICON_CONFIG];
+  console.log('v', v);
+  return v;
+}
 
 function CustomNode({ id, data }: { id: string; data: any }) {
   return (
@@ -40,9 +48,10 @@ function CustomNode({ id, data }: { id: string; data: any }) {
             <div className={stylesCustom.custom_node_row_content}>
               <div className={stylesCustom.custom_node_row_content_icon}>
                 <i
-                  className={`dtable-font ${COLUMNS_ICON_CONFIG[CELL_TYPE[cl.type.toUpperCase()]]}`}
+                  className={`dtable-font ${getKeyByValue(CellType, cl.type as string) as string}`}
                   style={{ fontSize: '10px' }}></i>
               </div>
+              <div className={stylesCustom.custom_node_row_content_value}>{cl.type}</div>
               <div className={stylesCustom.custom_node_row_content_value}>{cl.name}</div>
               <div className={stylesCustom.custom_node_row_content_id}>
                 {cl.type === LINK_TYPE.link ? (cl.isMultiple ? '∞' : '1') : ''}
