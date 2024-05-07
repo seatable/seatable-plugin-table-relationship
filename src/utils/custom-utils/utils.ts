@@ -255,10 +255,10 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
         strokeDasharray: '0',
       },
       formula: {
-        strokeDasharray: '3 3',
+        strokeDasharray: '5 3',
       },
       formula2nd: {
-        strokeDasharray: '1 3',
+        strokeDasharray: '1 5',
       },
     };
 
