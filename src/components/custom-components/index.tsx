@@ -75,7 +75,6 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
         ? filterNodesWithoutLinks(nodes)
         : pluginPresetData?.nodes;
 
-
     // Further filtering the nodes to remove any nodes without a type
     const validNodes =
       nodesNoLinks !== undefined
@@ -187,6 +186,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
         const nodeDataArray = updatedNodes.map((node) => {
           return { n: node.id, cts: node.position.x };
         });
+        console.log('updatedNodes', updatedNodes);
         setNodesCts(nodeDataArray);
 
         const updatedEdges = edges.map((e) => {

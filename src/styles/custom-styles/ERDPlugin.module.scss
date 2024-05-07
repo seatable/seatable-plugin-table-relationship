@@ -41,6 +41,17 @@
   &_body {
     padding: 10px;
   }
+  &_label {
+    position: absolute;
+    // right: 172px;
+    top: 0px;
+    right: -20px;
+    font-weight: bold;
+    color: #0080ff;
+    background-color: #fff;
+    height: 5px;
+    align-items: center;
+  }
   &_row {
     position: relative;
     display: flex;
@@ -49,7 +60,7 @@
 
     &_content {
       display: flex;
-      justify-content: space-between; /* Adjusted to space between */
+      justify-content: start; /* Adjusted to space between */
       align-items: center;
       width: 100%;
 

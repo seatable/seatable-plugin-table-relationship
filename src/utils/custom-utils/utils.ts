@@ -236,7 +236,6 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
   const es: Edge[] = [];
   let sourceHandle = '';
   let targetHandle = '';
-
   links.forEach((link, index) => {
     const { sourceData, targetData1st, type } = link;
     if (sourceData === null || targetData1st === null) {
@@ -246,6 +245,9 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
     const targetTbl = targetData1st.table_id;
     const sourceNode = ns.find((n) => n.id === sourceTbl);
     const targetNode = ns.find((n) => n.id === targetTbl);
+    const labelString = `${sourceData.isMultiple ? 'n' : '1'}:${
+      targetData1st.isMultiple ? 'n' : '1'
+    }`;
 
     let lineStyle: any;
     const lineStylesOptions = {
@@ -313,6 +315,7 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
           stroke: '#212529',
           strokeDasharray: lineStyle.strokeDasharray,
         },
+        label: type === LINK_TYPE.link ? labelString : '',
         markerStart: type === LINK_TYPE.link ? markerType : '',
         markerEnd: markerType,
       });
