@@ -1,3 +1,4 @@
+import { line } from 'd3';
 import { LINK_TYPE } from '../custom-constants/constants';
 import {
   ILinksColumnData,
@@ -245,22 +246,33 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
     const targetTbl = targetData1st.table_id;
     const sourceNode = ns.find((n) => n.id === sourceTbl);
     const targetNode = ns.find((n) => n.id === targetTbl);
-    let color: string;
+
+    let lineStyle: any;
+    const lineStylesOptions = {
+      link: {
+        strokeDasharray: '0',
+      },
+      formula: {
+        strokeDasharray: '3 3',
+      },
+      formula2nd: {
+        strokeDasharray: '1 3',
+      },
+    };
 
     switch (type) {
       case LINK_TYPE.link:
-        color = '#000';
-
+        lineStyle = lineStylesOptions.link;
         break;
       case LINK_TYPE.formula:
-        color = '#ff8000';
-
+        lineStyle = lineStylesOptions.formula;
         break;
       case LINK_TYPE.formula2nd:
-        color = '#ADD8E6';
+        lineStyle = lineStylesOptions.formula2nd;
         break;
       default:
-        color = '#000';
+        lineStyle = lineStylesOptions.link;
+
         break;
     }
     if (sourceNode && targetNode) {
@@ -285,8 +297,9 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
       type: MarkerType.ArrowClosed,
       width: 10,
       height: 10,
-      color: color,
+      color: '#212529',
     };
+
     if (sourceTbl && targetTbl) {
       es.push({
         id: String(es.length),
@@ -297,7 +310,8 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
         type: 'simplebezier',
         style: {
           strokeWidth: 1,
-          stroke: color,
+          stroke: '#212529',
+          strokeDasharray: lineStyle.strokeDasharray,
         },
         markerStart: type === LINK_TYPE.link ? markerType : '',
         markerEnd: markerType,
