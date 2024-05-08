@@ -186,7 +186,6 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
         const nodeDataArray = updatedNodes.map((node) => {
           return { n: node.id, cts: node.position.x };
         });
-        console.log('updatedNodes', updatedNodes);
         setNodesCts(nodeDataArray);
 
         const updatedEdges = edges.map((e) => {
@@ -245,6 +244,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     },
     [nodes]
   );
+  const proOptions = { hideAttribution: true };
 
   return (
     <>
@@ -259,6 +259,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
         onNodeDragStop={onNodeDragStop}
         onEdgeClick={(event, edge) => console.log('edge clicked', edge)}
         fitView={true}
+        proOptions={proOptions}
         nodeTypes={nodeTypes}
         minZoom={0.01}></ReactFlow>
     </>

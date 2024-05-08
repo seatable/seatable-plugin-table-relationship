@@ -11,7 +11,6 @@ function getIconByType(ct: any, t: any) {
 }
 
 function CustomNode({ id, data }: { id: string; data: any }) {
-  console.log('c n', id);
   return (
     <>
       <div className={stylesCustom.custom_node_header}>
@@ -20,10 +19,6 @@ function CustomNode({ id, data }: { id: string; data: any }) {
       <div className={stylesCustom.custom_node_body}>
         {data.columns.map((cl: any) => (
           <div key={cl.key} id={cl.key} className={stylesCustom.custom_node_row}>
-            {/* <div className={stylesCustom.custom_node_label}>
-              {' '}
-              {cl.type === LINK_TYPE.link ? (cl.isMultiple ? 'n' : '1') : ''}
-            </div> */}
             <Handle
               type="source"
               position={Position.Left}
@@ -55,9 +50,9 @@ function CustomNode({ id, data }: { id: string; data: any }) {
                   style={{ fontSize: '10px' }}></i>
               </div>
               <div className={stylesCustom.custom_node_row_content_value}>{cl.name}</div>
-              {/* <div className={stylesCustom.custom_node_row_content_id}>
-                {cl.type === LINK_TYPE.link ? (cl.isMultiple ? 'n' : '1') : ''}
-              </div> */}
+              <div className={stylesCustom.custom_node_row_content_ref}>
+                {cl.type === LINK_TYPE.link ? (cl.isMultiple ? '[n]' : '[1]') : ''}
+              </div>
             </div>
           </div>
         ))}
