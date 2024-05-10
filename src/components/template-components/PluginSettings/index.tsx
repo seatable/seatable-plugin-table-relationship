@@ -100,7 +100,7 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
               </div>
 
               <div>
-                <p className="d-inline-block mb-2 mt-3">{intl.get('view').d(`${d.view}/`)}</p>
+                <p className="d-inline-block mb-2 mt-3">{intl.get('view').d(`${d.view}`)}</p>
                 {/* Toggle table view */}
                 <DtableSelect
                   value={viewSelectedOption}

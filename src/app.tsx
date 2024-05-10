@@ -35,7 +35,6 @@ import './assets/css/plugin-layout.css';
 import {
   INITIAL_IS_SHOW_STATE,
   INITIAL_CURRENT_STATE,
-  PLUGIN_ID,
   PLUGIN_NAME,
   DEFAULT_PLUGIN_DATA,
 } from './utils/template-constants';
@@ -54,9 +53,12 @@ import { SettingsOption } from './utils/types';
 import pluginContext from './plugin-context';
 import { ReactFlowProvider } from 'reactflow';
 import { RelationshipState } from './utils/custom-interfaces/ERDPlugin';
+import intl from 'react-intl-universal';
+import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from './locale';
 
 const App: React.FC<IAppProps> = (props) => {
   const { isDevelopment, lang } = props;
+  const { [DEFAULT_LOCALE]: d } = AVAILABLE_LOCALES;
 
   // Boolean state to show/hide the plugin's components
   const [isShowState, setIsShowState] = useState<AppIsShowState>(INITIAL_IS_SHOW_STATE);
@@ -530,7 +532,7 @@ const App: React.FC<IAppProps> = (props) => {
                   <FaPlus size={30} color="#fff" />
                   {isDevelopment && (
                     <div style={{ margin: 0 }} className={styles.add_row_toolTip}>
-                      <p>Adding a row only works in production</p>
+                      <p>{intl.get('add_row').d(`${d.add_row}`)}</p>
                     </div>
                   )}
                 </button>

@@ -7,6 +7,7 @@
   "preset_duplicate": "Duplicate",
   "preset_delete": "Delete",
   "preset_warn_exist": "Please enter a unique name",
+  "add_row": "Adding a row only works in production",
   "custom_plugin": {
     "rel_links": "Show linked record relationship",
     "rel_lookup": "Show lookup relationship",

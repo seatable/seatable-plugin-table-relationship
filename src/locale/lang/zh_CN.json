@@ -7,6 +7,7 @@
   "preset_duplicate": "复制预置",
   "preset_delete": "删除预设",
   "preset_warn_exist": "请输入唯一的预设名称",
+  "add_row": "添加行仅在生产环境中有效",
   "custom_plugin": {
     "rel_links": "显示链接记录关系",
     "rel_lookup": "显示查找关系",

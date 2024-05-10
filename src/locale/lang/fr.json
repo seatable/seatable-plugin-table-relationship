@@ -7,6 +7,7 @@
   "preset_duplicate": "Dupliquer",
   "preset_delete": "Supprimmer",
   "preset_warn_exist": "Veuillez saisir un nom de préréglage unique",
+  "add_row": "L'ajout d'une ligne ne fonctionne que en production",
   "custom_plugin": {
     "rel_links": "Afficher la relation de lien de l'enregistrement",
     "rel_lookup": "Afficher la relation de recherche",
