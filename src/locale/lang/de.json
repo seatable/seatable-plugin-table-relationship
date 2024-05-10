@@ -6,5 +6,11 @@
   "preset_rename": "Umbenennen",
   "preset_duplicate": "Duplizieren",
   "preset_delete": "Löschen",
-  "preset_warn_exist": "Bitte wählen Sie einen einzigartigen Namen"
+  "preset_warn_exist": "Bitte wählen Sie einen einzigartigen Namen",
+  "custom_plugin": {
+    "rel_links": "Verknüpfte Datensatzbeziehung anzeigen",
+    "rel_lookup": "Lookup-Beziehung anzeigen",
+    "rel_lookup2nd": "2. Ebenen-Lookup-Beziehung anzeigen",
+    "tbl_noLinks": "Tabellen ohne Verknüpfungen anzeigen"
+  }
 }

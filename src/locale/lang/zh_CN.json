@@ -6,5 +6,11 @@
   "preset_rename": "重命名预置",
   "preset_duplicate": "复制预置",
   "preset_delete": "删除预设",
-  "preset_warn_exist": "请输入唯一的预设名称"
+  "preset_warn_exist": "请输入唯一的预设名称",
+  "custom_plugin": {
+    "rel_links": "显示链接记录关系",
+    "rel_lookup": "显示查找关系",
+    "rel_lookup2nd": "显示二级查找关系",
+    "tbl_noLinks": "显示没有链接的表"
+  }
 }

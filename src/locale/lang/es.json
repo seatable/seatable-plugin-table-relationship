@@ -6,5 +6,11 @@
   "preset_rename": "Renombrar",
   "preset_duplicate": "Duplicado",
   "preset_delete": "Borrar",
-  "preset_warn_exist": "Introduzca un nombre único para la preajuste"
+  "preset_warn_exist": "Introduzca un nombre único para la preajuste",
+  "custom_plugin": {
+    "rel_links": "Mostrar relación de registro vinculado",
+    "rel_lookup": "Mostrar relación de búsqueda",
+    "rel_lookup2nd": "Mostrar relación de búsqueda de segundo nivel",
+    "tbl_noLinks": "Mostrar tablas sin enlaces"
+  }
 }

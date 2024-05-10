@@ -6,5 +6,11 @@
   "preset_rename": "Renommer",
   "preset_duplicate": "Dupliquer",
   "preset_delete": "Supprimmer",
-  "preset_warn_exist": "Veuillez saisir un nom de préréglage unique"
+  "preset_warn_exist": "Veuillez saisir un nom de préréglage unique",
+  "custom_plugin": {
+    "rel_links": "Afficher la relation de lien de l'enregistrement",
+    "rel_lookup": "Afficher la relation de recherche",
+    "rel_lookup2nd": "Afficher la relation de recherche de 2e niveau",
+    "tbl_noLinks": "Afficher les tables sans liens"
+  }
 }
