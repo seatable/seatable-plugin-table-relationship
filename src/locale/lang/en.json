@@ -6,5 +6,8 @@
   "preset_rename": "Rename",
   "preset_duplicate": "Duplicate",
   "preset_delete": "Delete",
-  "preset_warn_exist": "Please enter a unique name"
+  "preset_warn_exist": "Please enter a unique name",
+  "custom_plugin": {
+    "rel_links": "Show linked record relationship"
+  }
 }

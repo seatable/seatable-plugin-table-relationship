@@ -116,6 +116,7 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
           <div className={'mt-2'}>
             <div className="mb-2 d-flex align-items-center justify-content-between">
               <p>Show linked record relationship</p>
+              {intl.get('preset_add').d(`${d.preset_add}`)}
               <button
                 onClick={() => {
                   handleRelationships({
