@@ -15,7 +15,7 @@ const PLUGIN_ID = `${info.name}-component`;
 
 // Table and Preset Defaults
 const TABLE_NAME = 'table_name';
-const DEFAULT_PRESET_NAME = 'Default Preset';
+const DEFAULT_PRESET_NAME = 'Table relationship';
 
 // Default Select Option
 const DEFAULT_SELECT_OPTION = {
@@ -65,7 +65,7 @@ const INITIAL_IS_SHOW_STATE: AppIsShowState = {
   isShowPlugin: true,
   isShowSettings: false,
   isLoading: true,
-  isShowPresets: false,
+  isShowPresets: true,
 };
 
 const INITIAL_CURRENT_STATE: AppActiveState = {

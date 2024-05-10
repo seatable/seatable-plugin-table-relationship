@@ -296,7 +296,7 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
         targetHandle: targetHandle,
         type: 'simplebezier',
         style: {
-          strokeWidth: 2,
+          strokeWidth: 1,
           stroke: color,
         },
         markerStart: type === LINK_TYPE.link ? markerType : '',
@@ -342,24 +342,32 @@ function findSourceAndFirstLinkedTableId(key: string, allTables: TableArray) {
   allTables.forEach((t) => {
     t.columns.forEach((c) => {
       if (c.key === key) {
-        result = { firstLinkTableId: c.data.other_table_id, sourceTableId: t._id };
+        result = {
+          firstLinkTableId:
+            c.data.other_table_id === t._id ? c.data.table_id : c.data.other_table_id,
+          sourceTableId: c.data.table_id === t._id ? c.data.table_id : c.data.other_table_id,
+        };
       }
     });
   });
+
   return result;
 }
 
 function findSecondLinkedTableId(tableKey: string, columnKey: string, allTables: TableArray) {
   let targetColumns: TableColumn[] = [];
   let result: string = '';
+  let tId = '';
   allTables.forEach((t) => {
     if (t._id === tableKey) {
+      tId = t._id;
       targetColumns = t.columns;
     }
   });
+
   targetColumns?.forEach((c: TableColumn) => {
     if (c.key === columnKey) {
-      result = c.data.other_table_id;
+      result = c.data.other_table_id === tId ? c.data.table_id : c.data.other_table_id;
     }
   });
 
@@ -408,7 +416,23 @@ function reduceLinkCcData(linkCc: ILinksColumnData[]) {
     }
   );
 
-  return filteredDataResult;
+  return removeUndefinedOrNull(filteredDataResult);
+}
+
+function removeUndefinedOrNull(
+  arr: {
+    type: string;
+    sourceData: ILinksColumnData;
+    targetData1st: ILinksColumnData;
+  }[]
+) {
+  return arr.filter(
+    (obj) =>
+      obj.sourceData !== undefined &&
+      obj.sourceData !== null &&
+      obj.targetData1st !== undefined &&
+      obj.targetData1st !== null
+  );
 }
 
 function createFormulaCcData(data: TableColumn[], allTables: TableArray) {

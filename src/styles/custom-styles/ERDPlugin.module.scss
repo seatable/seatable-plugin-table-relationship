@@ -26,6 +26,10 @@
     background: #ff8000;
     padding: 8px 10px;
     border-bottom: 1px solid #e2e8f0;
+    color: #fff;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   &_header_sel {
@@ -41,25 +45,37 @@
     position: relative;
     display: flex;
     align-items: center;
+    padding-bottom: 3px;
+
     &_content {
       display: flex;
-      justify-content: space-between;
+      justify-content: space-between; /* Adjusted to space between */
       align-items: center;
       width: 100%;
+
       &_value {
-        color: #000;
+        color: #212529;
         align-items: self-start;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
+
       &_id {
         color: #000;
         align-items: center;
-      }
-      &_multiple {
-        color: #000;
         align-items: self-end;
+        margin-left: auto;
+      }
+
+      &_icon {
+        margin-right: 5px;
+        color: #b8b8b8;
+        align-items: self-start;
       }
     }
   }
+
   &_select {
     position: relative;
     margin-bottom: 10px;
