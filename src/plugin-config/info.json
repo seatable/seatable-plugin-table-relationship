@@ -1,6 +1,6 @@
 {
   "name": "table-relationships",
-  "version": "0.1.0",
+  "version": "0.9.5",
   "display_type": "overlay",
   "display_name": "Table relationships",
   "description": "Display the relations between the tables in a base.",
