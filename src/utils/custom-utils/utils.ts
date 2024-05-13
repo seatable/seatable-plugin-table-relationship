@@ -315,7 +315,7 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
           stroke: '#212529',
           strokeDasharray: lineStyle.strokeDasharray,
         },
-        label: type === LINK_TYPE.link ? labelString : '',
+        // label: type === LINK_TYPE.link ? labelString : '',
         markerStart: type === LINK_TYPE.link ? markerType : '',
         markerEnd: markerType,
       });
