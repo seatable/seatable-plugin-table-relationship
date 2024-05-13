@@ -2,11 +2,11 @@
   "settings_headline": "Configurações",
   "table": "Tabela",
   "view": "Vista",
-  "preset_add": "Adicionar predefinição",
+  "preset_add": "Adicionar nova relação de tabela",
   "preset_rename": "Renomear",
   "preset_duplicate": "Duplicado",
   "preset_delete": "Excluir",
-  "preset_warn_exist": "Introduza um nome de predefinição único",
+  "preset_warn_exist": "Introduza um nome único",
   "add_row": "Adicionar uma linha só funciona em produção",
   "custom_plugin": {
     "rel_links": "Mostrar relação de registro vinculado",

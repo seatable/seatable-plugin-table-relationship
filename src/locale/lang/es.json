@@ -2,11 +2,11 @@
   "settings_headline": "Configuración",
   "table": "Tabla",
   "view": "Vista",
-  "preset_add": "Añadir preajuste",
+  "preset_add": "Añadir nueva relación de tablas",
   "preset_rename": "Renombrar",
   "preset_duplicate": "Duplicado",
   "preset_delete": "Borrar",
-  "preset_warn_exist": "Introduzca un nombre único para la preajuste",
+  "preset_warn_exist": "Introduzca un nombre único",
   "add_row": "Agregar una fila solo funciona en producción",
   "custom_plugin": {
     "rel_links": "Mostrar relación de registro vinculado",
