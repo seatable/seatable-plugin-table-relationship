@@ -148,7 +148,7 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
           </div>
           <div className={'mt-2'}>
             <div className="mb-2 d-flex align-items-center justify-content-between">
-              <p>{intl.get('custom_plugin.rel_lookup2ns').d(`${d.custom_plugin.rel_lookup2nd}`)}</p>
+              <p>{intl.get('custom_plugin.rel_lookup2nd').d(`${d.custom_plugin.rel_lookup2nd}`)}</p>
               <button
                 onClick={() => {
                   handleRelationships({

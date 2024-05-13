@@ -2,16 +2,16 @@
   "settings_headline": "Paramètres",
   "table": "Tableau",
   "view": "Vue",
-  "preset_add": "Nouvelle préréglage",
+  "preset_add": "Ajouter une nouvelle relation de table",
   "preset_rename": "Renommer",
   "preset_duplicate": "Dupliquer",
   "preset_delete": "Supprimmer",
   "preset_warn_exist": "Veuillez saisir un nom de préréglage unique",
   "add_row": "L'ajout d'une ligne ne fonctionne que en production",
   "custom_plugin": {
-    "rel_links": "Afficher la relation de lien de l'enregistrement",
-    "rel_lookup": "Afficher la relation de recherche",
-    "rel_lookup2nd": "Afficher la relation de recherche de 2e niveau",
+    "rel_links": "Afficher le lien vers d'autres enregistrement",
+    "rel_lookup": "Afficher la formule pour les liens",
+    "rel_lookup2nd": "Afficher la formule pour les liens de 2e niveau",
     "tbl_noLinks": "Afficher les tables sans liens"
   }
 }
