@@ -358,7 +358,7 @@ function findSourceAndFirstLinkedTableId(key: string, allTables: TableArray) {
   let result: ISrcFrstTblId = { firstLinkTableId: '', sourceTableId: '' };
   allTables.forEach((t) => {
     t.columns.forEach((c) => {
-      if (c.key === key) {
+      if (c.key === key && c.type === LINK_TYPE.link) {
         result = {
           firstLinkTableId:
             c.data.other_table_id === t._id ? c.data.table_id : c.data.other_table_id,
@@ -383,7 +383,7 @@ function findSecondLinkedTableId(tableKey: string, columnKey: string, allTables:
   });
 
   targetColumns?.forEach((c: TableColumn) => {
-    if (c.key === columnKey) {
+    if (c.key === columnKey && c.type === LINK_TYPE.link) {
       result = c.data.other_table_id === tId ? c.data.table_id : c.data.other_table_id;
     }
   });
