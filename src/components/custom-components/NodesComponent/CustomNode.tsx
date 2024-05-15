@@ -22,25 +22,25 @@ function CustomNode({ id, data }: { id: string; data: any }) {
             <Handle
               type="source"
               position={Position.Left}
-              style={{ left: '-10px' }}
+              style={{ left: '-10px', visibility: 'hidden' }}
               id={id + '_' + cl.key + '_l-src'}
             />
             <Handle
               type="target"
               position={Position.Right}
-              style={{ right: '-10px' }}
+              style={{ right: '-10px', visibility: 'hidden' }}
               id={id + '_' + cl.key + '_r-tgt'}
             />
             <Handle
               type="target"
               position={Position.Left}
-              style={{ left: '-10px' }}
+              style={{ left: '-10px', visibility: 'hidden' }}
               id={id + '_' + cl.key + '_l-tgt'}
             />
             <Handle
               type="source"
               position={Position.Right}
-              style={{ right: '-10px' }}
+              style={{ right: '-10px', visibility: 'hidden' }}
               id={id + '_' + cl.key + '_r-src'}
             />
             <div className={stylesCustom.custom_node_row_content}>
@@ -50,8 +50,8 @@ function CustomNode({ id, data }: { id: string; data: any }) {
                   style={{ fontSize: '10px' }}></i>
               </div>
               <div className={stylesCustom.custom_node_row_content_value}>{cl.name}</div>
-              <div className={stylesCustom.custom_node_row_content_id}>
-                {cl.type === LINK_TYPE.link ? (cl.isMultiple ? '∞' : '1') : ''}
+              <div className={stylesCustom.custom_node_row_content_ref}>
+                {cl.type === LINK_TYPE.link ? (cl.isMultiple ? '[n]' : '[1]') : ''}
               </div>
             </div>
           </div>

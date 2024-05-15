@@ -2,6 +2,7 @@ import { AppActiveState, IPluginDataStore } from '../template-interfaces/App.int
 import { TableArray } from '../template-interfaces/Table.interface';
 
 interface IERDPluginProps {
+  id?: string;
   appActiveState: AppActiveState;
   pluginDataStore: IPluginDataStore;
   allTables: TableArray;

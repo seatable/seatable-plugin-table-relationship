@@ -6,5 +6,12 @@
   "preset_rename": "Rename",
   "preset_duplicate": "Duplicate",
   "preset_delete": "Delete",
-  "preset_warn_exist": "Please enter a unique name"
+  "preset_warn_exist": "Please enter a unique name",
+  "add_row": "Adding a row only works in production",
+  "custom_plugin": {
+    "rel_links": "Show linked record relationship",
+    "rel_lookup": "Show lookup relationship",
+    "rel_lookup2nd": "Show 2nd level lookup relationship",
+    "tbl_noLinks": "Show tables without links"
+  }
 }

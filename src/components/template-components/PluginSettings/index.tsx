@@ -98,9 +98,8 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
                   }}
                 />
               </div>
-
               <div>
-                <p className="d-inline-block mb-2 mt-3">{intl.get('view').d(`${d.view}/`)}</p>
+                <p className="d-inline-block mb-2 mt-3">{intl.get('view').d(`${d.view}`)}</p>
                 {/* Toggle table view */}
                 <DtableSelect
                   value={viewSelectedOption}
@@ -115,7 +114,7 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
           )}
           <div className={'mt-2'}>
             <div className="mb-2 d-flex align-items-center justify-content-between">
-              <p>Show linked record relationship</p>
+              <p>{intl.get('custom_plugin.rel_links').d(`${d.custom_plugin.rel_links}`)}</p>
               <button
                 onClick={() => {
                   handleRelationships({
@@ -132,7 +131,7 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
           </div>
           <div className={'mt-2'}>
             <div className="mb-2 d-flex align-items-center justify-content-between">
-              <p>Show lookup relationship</p>
+              <p>{intl.get('custom_plugin.rel_lookup').d(`${d.custom_plugin.rel_lookup}`)}</p>
               <button
                 onClick={() => {
                   handleRelationships({
@@ -149,7 +148,7 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
           </div>
           <div className={'mt-2'}>
             <div className="mb-2 d-flex align-items-center justify-content-between">
-              <p>Show 2nd level lookup relationship</p>
+              <p>{intl.get('custom_plugin.rel_lookup2nd').d(`${d.custom_plugin.rel_lookup2nd}`)}</p>
               <button
                 onClick={() => {
                   handleRelationships({
@@ -166,7 +165,7 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
           </div>
           <div className={'mt-2'}>
             <div className="mb-2 d-flex align-items-center justify-content-between">
-              <p>Show tables without links</p>
+              <p>{intl.get('custom_plugin.tbl_noLinks').d(`${d.custom_plugin.tbl_noLinks}`)}</p>
               <button
                 onClick={() => {
                   handleRelationships({

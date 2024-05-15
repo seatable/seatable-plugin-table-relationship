@@ -3,10 +3,12 @@ import styles from '../../../styles/template-styles/Plugin.module.scss';
 import stylesPPresets from '../../../styles/template-styles/PluginPresets.module.scss';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import * as htmlToImage from 'html-to-image';
+import download from 'downloadjs';
 import { IHeaderProps } from '../../../utils/template-interfaces/Header.interface';
-import { PLUGIN_ID } from '../../../utils/template-constants';
+import { PLUGIN_ID, PLUGIN_NAME } from '../../../utils/template-constants';
 import { HiOutlineChevronDoubleRight } from 'react-icons/hi2';
-import { FaPlus } from 'react-icons/fa6';
+
 import { useReactFlow } from 'reactflow';
 
 const Header: React.FC<IHeaderProps> = (props) => {
@@ -21,27 +23,40 @@ const Header: React.FC<IHeaderProps> = (props) => {
     }
   }, []);
 
-  const printPdfDocument = () => {
-    const originalContents = document.body.innerHTML;
-    // document.body.innerHTML = customComponentContent || '';
-    window.print();
-    // document.body.innerHTML = originalContents;
-  };
-
   const downloadPdfDocument = () => {
-    const input = document.getElementById(PLUGIN_ID);
-    if (input) {
-      html2canvas(input, {
-        logging: true,
-        allowTaint: false,
-        useCORS: true,
-      }).then((canvas: HTMLCanvasElement) => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('l', 'mm', 'a4', true);
-        pdf.addImage(imgData, 'JPEG', 0, 0, 230, 200);
-        pdf.save(`${PLUGIN_ID} .pdf`);
+    const input = document.getElementById(PLUGIN_NAME);
+
+    // Step 1: Capture component as an image
+    htmlToImage
+      .toPng(input as HTMLElement)
+      .then(function (dataUrl) {
+        // Step 2: Convert image to PDF
+        const img = new Image();
+        img.src = dataUrl;
+        img.onload = function () {
+          const pdf = new jsPDF('l', 'mm', [420, 297]);
+
+          // Step 3: Add background color to the entire PDF
+          pdf.setFillColor('#f5f5f5');
+          pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight(), 'F');
+
+          // Step 4: Add image to PDF
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = pdf.internal.pageSize.getHeight();
+
+          const imgWidth = pdfWidth;
+          const imgHeight = (img.height * imgWidth) / img.width;
+          const yPos = (pdfHeight - imgHeight) / 2;
+
+          pdf.addImage(dataUrl, 'PNG', 0, yPos, imgWidth, imgHeight);
+
+          // Step 5: Download PDF
+          pdf.save(`${presetName}.pdf`);
+        };
+      })
+      .catch(function (error) {
+        console.error('Oops, something went wrong!', error);
       });
-    }
   };
 
   function onToggleView() {
@@ -71,9 +86,9 @@ const Header: React.FC<IHeaderProps> = (props) => {
         <span className={styles.plugin_header_icon_btn} onClick={downloadPdfDocument}>
           <span className="dtable-font dtable-icon-download"></span>
         </span>
-        <span className={styles.plugin_header_icon_btn} onClick={printPdfDocument}>
+        {/* <span className={styles.plugin_header_icon_btn} onClick={printPdfDocument}>
           <span className="dtable-font dtable-icon-print"></span>
-        </span>
+        </span> */}
         <span className={styles.plugin_header_icon_btn} onClick={togglePlugin}>
           <span className="dtable-font dtable-icon-x btn-close"></span>
         </span>

@@ -75,7 +75,6 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
         ? filterNodesWithoutLinks(nodes)
         : pluginPresetData?.nodes;
 
-
     // Further filtering the nodes to remove any nodes without a type
     const validNodes =
       nodesNoLinks !== undefined
@@ -245,6 +244,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     },
     [nodes]
   );
+  const proOptions = { hideAttribution: true };
 
   return (
     <>
@@ -259,6 +259,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
         onNodeDragStop={onNodeDragStop}
         onEdgeClick={(event, edge) => console.log('edge clicked', edge)}
         fitView={true}
+        proOptions={proOptions}
         nodeTypes={nodeTypes}
         minZoom={0.01}></ReactFlow>
     </>
