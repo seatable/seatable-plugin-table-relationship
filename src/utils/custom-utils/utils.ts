@@ -1,12 +1,12 @@
-import { line } from 'd3';
 import { LINK_TYPE } from '../custom-constants/constants';
 import {
   ILinksColumnData,
   ILinksData,
   ISrcFrstTblId,
+  IViewPort,
   NodeResultItem,
   RelationshipState,
-} from '../custom-interfaces/ERDPlugin';
+} from '../custom-interfaces/PluginTR';
 import { PLUGIN_NAME } from '../template-constants';
 import { IPluginDataStore } from '../template-interfaces/App.interface';
 import { PresetCustomSettings } from '../template-interfaces/PluginPresets/Presets.interface';
@@ -119,6 +119,7 @@ export function checkMissingOrExtraIds(
   const _es = generateEdges(_links, _nodes);
   return { ...customSettings, links: _links, edges: _es, nodes: _nodes };
 }
+
 // This function is used to update the customSettings in the PluginDataStore
 export function setPluginDataStoreFn(
   pluginDataStore: IPluginDataStore,
@@ -140,6 +141,28 @@ export function setPluginDataStoreFn(
             links: lnk,
             edges: es,
             relationship: activeRelationships,
+          },
+        };
+      }
+      return preset;
+    }),
+  });
+}
+
+export function setViewportPluginDataStoreFn(
+  pluginDataStore: IPluginDataStore,
+  activePresetId: string,
+  vp: IViewPort
+) {
+  window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
+    ...pluginDataStore,
+    presets: pluginDataStore.presets.map((preset) => {
+      if (preset._id === activePresetId) {
+        return {
+          ...preset,
+          customSettings: {
+            ...preset.customSettings,
+            vp: vp,
           },
         };
       }

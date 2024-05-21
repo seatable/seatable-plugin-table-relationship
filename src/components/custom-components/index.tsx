@@ -1,14 +1,26 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 
-import ReactFlow, { useNodesState, useEdgesState, isNode } from 'reactflow';
+import ReactFlow, {
+  useNodesState,
+  useEdgesState,
+  isNode,
+  useReactFlow,
+  useStore,
+  useViewport,
+  ReactFlowInstance,
+  OnConnect,
+  addEdge,
+  Controls,
+} from 'reactflow';
 import {
-  IERDPluginProps,
+  IPluginTRProps,
   ILinksData,
   INodePositions,
+  IViewPort,
   NodeResultItem,
   RelationshipState,
   nodeCts,
-} from '../../utils/custom-interfaces/ERDPlugin';
+} from '../../utils/custom-interfaces/PluginTR';
 import CustomNode from './NodesComponent/CustomNode';
 
 // Import styles once
@@ -26,16 +38,20 @@ import {
   filterNodesWithoutLinks,
   generateEdges,
   generateLinks,
+  setViewportPluginDataStoreFn,
 } from '../../utils/custom-utils/utils';
 
 import { TableArray } from '../../utils/template-interfaces/Table.interface';
-import { PresetCustomSettings } from '../../utils/template-interfaces/PluginPresets/Presets.interface';
+import {
+  IPresetInfo,
+  PresetCustomSettings,
+} from '../../utils/template-interfaces/PluginPresets/Presets.interface';
 
 const nodeTypes = {
   custom: CustomNode,
 };
-
-const ERDPlugin: React.FC<IERDPluginProps> = ({
+// Plugin Table Relationships Component
+const PluginTR: React.FC<IPluginTRProps> = ({
   appActiveState,
   allTables,
   pluginDataStore,
@@ -47,11 +63,21 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
   const [links, setLinks] = useState<ILinksData[]>([]);
   const [nodesCts, setNodesCts] = useState<nodeCts[]>([]);
   const [relationship, setRelationship] = useState(activeRelationships);
+  // const [viewPort, setViewPort] = useState({} as IViewPort);
   const [prevNodePositions, setPrevNodePositions]: [
     INodePositions,
     React.Dispatch<React.SetStateAction<INodePositions>>,
   ] = useState({});
   let activeCustomSettings: PresetCustomSettings;
+
+  const viewPortState = useViewport();
+
+  const pluginVPDataStore =
+    pluginDataStore.presets[appActiveState.activePresetIdx].customSettings?.vp;
+
+  useEffect(() => {
+    setViewportPluginDataStoreFn(pluginDataStore, appActiveState.activePresetId, viewPortState);
+  }, [viewPortState]);
 
   useEffect(() => {
     let _edges = edges;
@@ -59,7 +85,9 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
 
     const pluginPresetData =
       pluginDataStore.presets[
-        pluginDataStore.presets.findIndex((preset) => preset._id === appActiveState.activePresetId)
+        pluginDataStore.presets.findIndex(
+          (preset: IPresetInfo) => preset._id === appActiveState.activePresetId
+        )
       ];
     const cs = pluginPresetData?.customSettings;
     //   // no need to set relationship state if there's no change (precautionary measure for infinite loop)
@@ -242,8 +270,8 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     },
     [nodes]
   );
-  const proOptions = { hideAttribution: true };
 
+  const proOptions = { hideAttribution: true };
   return (
     <>
       <ReactFlow
@@ -254,14 +282,12 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
         onEdgesChange={onEdgesChange}
         onNodeDragStart={onNodeDragStart}
         onNodeDrag={onNodeDrag}
+        defaultViewport={pluginVPDataStore}
         onNodeDragStop={onNodeDragStop}
-        onEdgeClick={(event, edge) => console.log('edge clicked', edge)}
-        fitView={true}
         proOptions={proOptions}
-        nodeTypes={nodeTypes}
-        minZoom={0.01}></ReactFlow>
+        nodeTypes={nodeTypes}></ReactFlow>
     </>
   );
 };
 
-export default ERDPlugin;
+export default PluginTR;

@@ -8,7 +8,7 @@ import Header from './components/template-components/Header';
 import PluginSettings from './components/template-components/PluginSettings';
 import PluginPresets from './components/template-components/PluginPresets';
 import ResizableWrapper from './components/template-components/ResizableWrapper';
-import ERDPlugin from './components/custom-components/index';
+import PluginTR from './components/custom-components/index';
 // Import of Interfaces
 import {
   AppActiveState,
@@ -52,7 +52,7 @@ import {
 import { SettingsOption } from './utils/types';
 import pluginContext from './plugin-context';
 import { ReactFlowProvider } from 'reactflow';
-import { RelationshipState } from './utils/custom-interfaces/ERDPlugin';
+import { RelationshipState } from './utils/custom-interfaces/PluginTR';
 import intl from 'react-intl-universal';
 import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from './locale';
 
@@ -517,7 +517,7 @@ const App: React.FC<IAppProps> = (props) => {
               className={styles.body}
               style={{ padding: '10px', width: '100%' }}>
               {/* Note: The CustomPlugin component serves as a placeholder and should be replaced with your custom plugin component. */}
-              <ERDPlugin
+              <PluginTR
                 appActiveState={appActiveState}
                 allTables={allTables}
                 pluginDataStore={pluginDataStore}

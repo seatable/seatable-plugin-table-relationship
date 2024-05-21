@@ -1,5 +1,5 @@
 import { SettingsOption } from '../types';
-import { RelationshipState } from '../custom-interfaces/ERDPlugin';
+import { RelationshipState } from '../custom-interfaces/PluginTR';
 import { AppActiveState, IActiveComponents } from './App.interface';
 import { PresetSettings, PresetsArray } from './PluginPresets/Presets.interface';
 import { TableArray, TableViewArray } from './Table.interface';

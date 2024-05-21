@@ -1,4 +1,4 @@
-import { RelationshipState } from '../../custom-interfaces/ERDPlugin';
+import { RelationshipState } from '../../custom-interfaces/PluginTR';
 import { AppActiveState, IPluginDataStore } from '../App.interface';
 import { SelectOption } from '../PluginSettings.interface';
 import { TableArray } from '../Table.interface';
