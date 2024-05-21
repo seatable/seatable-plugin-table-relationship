@@ -60,8 +60,8 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
     const pluginPresetData =
       pluginDataStore.presets[
         pluginDataStore.presets.findIndex((preset) => preset._id === appActiveState.activePresetId)
-      ].customSettings;
-
+      ];
+    const cs = pluginPresetData?.customSettings;
     //   // no need to set relationship state if there's no change (precautionary measure for infinite loop)
     if (JSON.stringify(activeRelationships) !== JSON.stringify(relationship)) {
       setRelationship(activeRelationships);
@@ -71,9 +71,7 @@ const ERDPlugin: React.FC<IERDPluginProps> = ({
 
     // Filtering the nodes based on the active relationships
     const nodesNoLinks =
-      activeRelationships.tblNoLnk === false
-        ? filterNodesWithoutLinks(nodes)
-        : pluginPresetData?.nodes;
+      activeRelationships.tblNoLnk === false ? filterNodesWithoutLinks(nodes) : cs?.nodes;
 
     // Further filtering the nodes to remove any nodes without a type
     const validNodes =
