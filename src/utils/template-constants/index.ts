@@ -15,7 +15,7 @@ const PLUGIN_ID = `${info.name}-component`;
 
 // Table and Preset Defaults
 const TABLE_NAME = 'table_name';
-const DEFAULT_PRESET_NAME = 'Table relationship';
+const DEFAULT_PRESET_NAME = 'Unnamed relationship chart';
 
 // Default Select Option
 const DEFAULT_SELECT_OPTION = {
