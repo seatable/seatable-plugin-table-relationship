@@ -1,7 +1,7 @@
 import { AppActiveState, IPluginDataStore } from '../template-interfaces/App.interface';
 import { TableArray } from '../template-interfaces/Table.interface';
 
-interface IERDPluginProps {
+interface IPluginTRProps {
   id?: string;
   appActiveState: AppActiveState;
   pluginDataStore: IPluginDataStore;
@@ -95,8 +95,18 @@ interface ISrcFrstTblId {
   sourceTableId: string;
 }
 
+interface IViewPort {
+  x: number;
+  y: number;
+  zoom: number;
+}
+
+type PositionLoggerNodeData = {
+  label?: string;
+};
+
 export type {
-  IERDPluginProps,
+  IPluginTRProps,
   ITableVisualizationProps,
   Link,
   NodeResultItem,
@@ -107,4 +117,6 @@ export type {
   ILinksData,
   srcOrTgtData,
   ISrcFrstTblId,
+  IViewPort,
+  PositionLoggerNodeData,
 };

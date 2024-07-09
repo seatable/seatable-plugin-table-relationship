@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Handle, Position } from 'reactflow';
 import { CellType, COLUMNS_ICON_CONFIG } from 'dtable-utils';
-import stylesCustom from '../../../styles/custom-styles/ERDPlugin.module.scss';
+import stylesCustom from '../../../styles/custom-styles/PluginTR.module.scss';
 import { LINK_TYPE } from '../../../utils/custom-constants/constants';
 
 function getIconByType(ct: any, t: any) {
