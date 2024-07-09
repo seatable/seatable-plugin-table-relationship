@@ -2,9 +2,16 @@
   "settings_headline": "设置",
   "table": "子表",
   "view": "视图",
-  "preset_add": "添加预设",
+  "preset_add": "添加新的表格关系",
   "preset_rename": "重命名预置",
   "preset_duplicate": "复制预置",
   "preset_delete": "删除预设",
-  "preset_warn_exist": "请输入唯一的预设名称"
+  "preset_warn_exist": "请选择一个独特的名称",
+  "add_row": "添加行仅在生产环境中有效",
+  "custom_plugin": {
+    "rel_links": "显示链接记录关系",
+    "rel_lookup": "显示查找关系",
+    "rel_lookup2nd": "显示二级查找关系",
+    "tbl_noLinks": "显示没有链接的表"
+  }
 }

@@ -1,19 +1,22 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-
 import React, { useEffect, useState } from 'react';
 import { FaPlus } from 'react-icons/fa6';
+import info from '../src/plugin-config/info.json';
+
 // Import of Component
-import Header from './components/Header';
-import PluginSettings from './components/PluginSettings';
-import PluginPresets from './components/PluginPresets';
-import ResizableWrapper from './components/ResizableWrapper';
+import Header from './components/template-components/Header';
+import PluginSettings from './components/template-components/PluginSettings';
+import PluginPresets from './components/template-components/PluginPresets';
+import ResizableWrapper from './components/template-components/ResizableWrapper';
+import PluginTR from './components/custom-components/index';
 // Import of Interfaces
 import {
   AppActiveState,
   AppIsShowState,
+  IActiveComponents,
   IAppProps,
   IPluginDataStore,
-} from './utils/Interfaces/App.interface';
+} from './utils/template-interfaces/App.interface';
 import {
   TableArray,
   TableViewArray,
@@ -22,9 +25,9 @@ import {
   TableRow,
   IActiveTableAndView,
   TableColumn,
-} from './utils/Interfaces/Table.interface';
-import { PresetsArray } from './utils/Interfaces/PluginPresets/Presets.interface';
-import { SelectOption } from './utils/Interfaces/PluginSettings.interface';
+} from './utils/template-interfaces/Table.interface';
+import { PresetsArray } from './utils/template-interfaces/PluginPresets/Presets.interface';
+import { SelectOption } from './utils/template-interfaces/PluginSettings.interface';
 // Import of CSS
 import styles from './styles/template-styles/Plugin.module.scss';
 import './assets/css/plugin-layout.css';
@@ -32,27 +35,31 @@ import './assets/css/plugin-layout.css';
 import {
   INITIAL_IS_SHOW_STATE,
   INITIAL_CURRENT_STATE,
-  PLUGIN_ID,
   PLUGIN_NAME,
   DEFAULT_PLUGIN_DATA,
-} from './utils/constants';
+} from './utils/template-constants';
 import './locale';
 import {
   createDefaultPluginDataStore,
   findPresetName,
   getActiveStateSafeGuard,
   getActiveTableAndActiveView,
+  getDefaultLinkColumn,
   getPluginDataStore,
   isMobile,
   parsePluginDataToActiveState,
-} from './utils/utils';
+} from './utils/template-utils/utils';
 import { SettingsOption } from './utils/types';
 import pluginContext from './plugin-context';
-
-import CustomPlugin from './CustomPlugin';
+import { ReactFlowProvider } from 'reactflow';
+import { RelationshipState } from './utils/custom-interfaces/PluginTR';
+import intl from 'react-intl-universal';
+import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from './locale';
 
 const App: React.FC<IAppProps> = (props) => {
   const { isDevelopment, lang } = props;
+  const { [DEFAULT_LOCALE]: d } = AVAILABLE_LOCALES;
+
   // Boolean state to show/hide the plugin's components
   const [isShowState, setIsShowState] = useState<AppIsShowState>(INITIAL_IS_SHOW_STATE);
   const { isShowPlugin, isShowSettings, isLoading, isShowPresets } = isShowState;
@@ -64,9 +71,15 @@ const App: React.FC<IAppProps> = (props) => {
   // appActiveState: Define the app's active Preset + (Table + View) state using the useState hook
   // For better understanding read the comments in the AppActiveState interface
   const [appActiveState, setAppActiveState] = useState<AppActiveState>(INITIAL_CURRENT_STATE);
+  const [activeComponents, setActiveComponents] = useState<IActiveComponents>({});
+  const [activeRelationships, setActiveRelationships] = useState<RelationshipState>({
+    recRel: true,
+    lkRel: true,
+    lk2Rel: true,
+    tblNoLnk: true,
+  });
   // Destructure properties from the app's active state for easier access
-  const { activeTable, activePresetId, activePresetIdx, activeViewRows, activeTableView } =
-    appActiveState;
+  const { activeTable, activePresetId, activePresetIdx } = appActiveState;
   const { collaborators } = window.app.state;
 
   useEffect(() => {
@@ -109,7 +122,6 @@ const App: React.FC<IAppProps> = (props) => {
   const onDTableConnect = () => {
     resetData();
   };
-
   const onDTableChanged = () => {
     resetData();
   };
@@ -121,6 +133,11 @@ const App: React.FC<IAppProps> = (props) => {
     let pluginDataStore: IPluginDataStore = getPluginDataStore(activeTable, PLUGIN_NAME);
     let pluginPresets: PresetsArray = pluginDataStore.presets; // An array with all the Presets
 
+    setActiveComponents((prevState) => ({
+      ...prevState,
+      settingsDropDowns: info.active_components.settings_dropdowns,
+      add_row_button: info.active_components.add_row_button,
+    }));
     setPluginDataStore(pluginDataStore);
     setAllTables(allTables);
     setPluginPresets(pluginPresets);
@@ -134,6 +151,12 @@ const App: React.FC<IAppProps> = (props) => {
       );
 
       onSelectPreset(pluginDataStore.activePresetId, appActiveState);
+      const activePresetRelationship = pluginPresets.find((p) => {
+        return p._id === pluginDataStore.activePresetId;
+      })?.customSettings?.relationship;
+      if (activePresetRelationship) {
+        setActiveRelationships(activePresetRelationship);
+      }
       return;
     } else {
       // If there are no presets, the default one is created
@@ -182,6 +205,7 @@ const App: React.FC<IAppProps> = (props) => {
     let updatedActiveState: AppActiveState;
     let updatedActiveTableViews: TableView[];
     const _activePresetIdx = pluginPresets.findIndex((preset) => preset._id === presetId);
+
     if (newPresetActiveState !== undefined) {
       updatedActiveState = {
         ...newPresetActiveState,
@@ -319,6 +343,7 @@ const App: React.FC<IAppProps> = (props) => {
           activeTableName: _activeTable.name,
           activeTableView: _activeTable.views[0],
           activeViewRows: _activeViewRows,
+          activeRelationship: getDefaultLinkColumn(_activeTable),
         }));
 
         updatedPluginPresets = pluginPresets.map((preset) =>
@@ -327,6 +352,7 @@ const App: React.FC<IAppProps> = (props) => {
                 ...preset,
                 settings: {
                   ...preset.settings,
+                  relationship: getDefaultLinkColumn(_activeTable),
                   selectedTable: { value: _activeTable._id, label: _activeTable.name },
                   selectedView: {
                     value: _activeTable.views[0]._id,
@@ -391,11 +417,10 @@ const App: React.FC<IAppProps> = (props) => {
   const onInsertRow = (table: Table, view: TableView, rowData: any) => {
     let columns = window.dtableSDK.getColumns(table);
     let newRowData: { [key: string]: any } = {};
-    console.log('columns', columns);
+
     for (let key in rowData) {
-      console.log('key', key);
       let column = columns.find((column: TableColumn) => column.name === key);
-      console.log('column.type', column.type);
+
       if (!column) {
         continue;
       }
@@ -432,68 +457,104 @@ const App: React.FC<IAppProps> = (props) => {
     }
   };
 
+  function handleRelationships(r: any) {
+    setActiveRelationships(r);
+    const updatedPresets = pluginDataStore.presets.map((preset) => {
+      if (preset._id === appActiveState.activePresetId) {
+        return {
+          ...preset,
+          customSettings: {
+            ...preset.customSettings,
+            relationship: r,
+          },
+        };
+      }
+      return preset;
+    });
+
+    window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
+      ...pluginDataStore,
+      presets: updatedPresets,
+    });
+  }
+
   if (!isShowPlugin) {
     return null;
   }
   return isLoading ? (
     <div></div>
   ) : (
-    <ResizableWrapper>
-      {/* presets  */}
-      <PluginPresets
-        allTables={allTables}
-        pluginPresets={pluginPresets}
-        activePresetIdx={activePresetIdx}
-        pluginDataStore={pluginDataStore}
-        isShowPresets={isShowPresets}
-        onTogglePresets={togglePresets}
-        onToggleSettings={toggleSettings}
-        onSelectPreset={onSelectPreset}
-        updatePresets={updatePresets}
-        updateActiveData={updateActiveData}
-      />
-      <div className={styles.plugin}>
-        <Header
-          presetName={findPresetName(pluginPresets, activePresetId)}
+    <ReactFlowProvider>
+      <ResizableWrapper>
+        {/* presets  */}
+        <PluginPresets
+          allTables={allTables}
+          pluginPresets={pluginPresets}
+          activePresetIdx={activePresetIdx}
+          pluginDataStore={pluginDataStore}
           isShowPresets={isShowPresets}
-          isShowSettings={isShowSettings}
           onTogglePresets={togglePresets}
-          toggleSettings={toggleSettings}
-          togglePlugin={onPluginToggle}
+          onToggleSettings={toggleSettings}
+          onSelectPreset={onSelectPreset}
+          updatePresets={updatePresets}
+          updateActiveData={updateActiveData}
         />
-        {/* main body  */}
-        <div
-          className="d-flex position-relative"
-          style={{ height: '100%', width: '100%', backgroundColor: '#f5f5f5' }}>
-          <div id={PLUGIN_ID} className={styles.body} style={{ padding: '10px', width: '100%' }}>
-            {/* Note: The CustomPlugin component serves as a placeholder and should be replaced with your custom plugin component. */}
-            <CustomPlugin
-              pluginPresets={pluginPresets}
-              appActiveState={appActiveState}
-              activeViewRows={activeViewRows}
-            />
-            <button className={styles.add_row} onClick={addRowItem}>
-              <FaPlus size={30} color="#fff" />
-              {isDevelopment && (
-                <div style={{ margin: 0 }} className={styles.add_row_toolTip}>
-                  <p>Adding a row only works in production</p>
-                </div>
-              )}
-            </button>
-          </div>
-
-          <PluginSettings
+        <div className={styles.plugin}>
+          <Header
+            presetName={findPresetName(pluginPresets, activePresetId)}
+            isShowPresets={isShowPresets}
             isShowSettings={isShowSettings}
-            allTables={allTables}
-            appActiveState={appActiveState}
-            activeTableViews={activeTableViews}
-            pluginPresets={pluginPresets}
-            onTableOrViewChange={onTableOrViewChange}
-            onToggleSettings={toggleSettings}
+            onTogglePresets={togglePresets}
+            toggleSettings={toggleSettings}
+            togglePlugin={onPluginToggle}
           />
+          {/* main body  */}
+          <div
+            className="d-flex position-relative"
+            style={{ height: '94%', width: '100%', backgroundColor: '#f5f5f5' }}>
+            <div
+              id={PLUGIN_NAME}
+              className={styles.body}
+              style={{ padding: '10px', width: '100%' }}>
+              {/* Note: The CustomPlugin component serves as a placeholder and should be replaced with your custom plugin component. */}
+              <PluginTR
+                appActiveState={appActiveState}
+                allTables={allTables}
+                pluginDataStore={pluginDataStore}
+                activeRelationships={
+                  pluginPresets[activePresetIdx].customSettings?.relationship || activeRelationships
+                }
+                setPluginDataStore={setPluginDataStore}
+              />
+
+              {activeComponents.add_row_button && (
+                <button className={styles.add_row} onClick={addRowItem}>
+                  <FaPlus size={30} color="#fff" />
+                  {isDevelopment && (
+                    <div style={{ margin: 0 }} className={styles.add_row_toolTip}>
+                      <p>{intl.get('add_row').d(`${d.add_row}`)}</p>
+                    </div>
+                  )}
+                </button>
+              )}
+            </div>
+
+            <PluginSettings
+              activeComponents={activeComponents}
+              isShowSettings={isShowSettings}
+              allTables={allTables}
+              appActiveState={appActiveState}
+              activeTableViews={activeTableViews}
+              pluginPresets={pluginPresets}
+              onTableOrViewChange={onTableOrViewChange}
+              onToggleSettings={toggleSettings}
+              activeRelationships={activeRelationships}
+              handleRelationships={handleRelationships}
+            />
+          </div>
         </div>
-      </div>
-    </ResizableWrapper>
+      </ResizableWrapper>
+    </ReactFlowProvider>
   );
 };
 
