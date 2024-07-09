@@ -8,7 +8,7 @@ This visualization helps users easily understand the structure and connections w
 
 ## What is a SeaTable Plugin?
 
-SeaTable, the world-leading no-code app-building platform, supports plugins. Plugins provide additional visualization or interaction possibilities within a SeaTable base. Examples of SeaTable Plugins include the Gallery, the Map Plugin, or the Kanban board. You can find a list of all publicly available plugins at the [SeaTable Marketplace](https://market.seatable.io).
+SeaTable, the world-leading no-code app-building platform, supports plugins. Plugins provide additional visualization or interaction possibilities within a SeaTable base. Examples of SeaTable Plugins include the Gallery, the Map Plugin, or the Kanban board. You can find a list of all publicly available plugins [here](https://cloud.seatable.io/apps/custom/plugin-archive).
 
 ## How to install
 
