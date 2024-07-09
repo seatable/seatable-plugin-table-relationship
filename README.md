@@ -1,6 +1,8 @@
 # SeaTable Plugin Table Relationship
 
-**Table Relationship** is a SeaTable Server plugin, to visualize which tables are linked to each other via which columns in a base.
+**Table Relationship** is a SeaTable Server plugin that visualizes how tables are linked to each other through specific columns within a base.
+
+This visualization helps users easily understand the structure and connections within their data, facilitating more efficient data management. By clearly displaying relationships, it also aids in identifying potential data inconsistencies and optimizing database design.
 
 ![Screenshot of Table Relationship](./table_relationship.png)
 
