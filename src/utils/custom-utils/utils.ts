@@ -62,7 +62,11 @@ export function checkNodesVsTablesIds(
   if (nodesVsTablesIds) {
     // Even though the ids are the same, we need to check if the columns are equal
     const updatedCustomSettings = checkIfColumnsAreEqual(customSettings, allTablesNodes, allTables);
-    return updatedCustomSettings;
+    const updatedCustomSettingsWithNodesAndColName = checkNodesNames(
+      updatedCustomSettings,
+      allTablesNodes
+    );
+    return updatedCustomSettingsWithNodesAndColName;
   }
 }
 
@@ -77,8 +81,18 @@ export function checkIfColumnsAreEqual(
 
   for (let i = 0; i < nodes.length; i++) {
     _nodes.find((n: NodeResultItem) => {
-      if (n.id === nodes[i].id && n.data.columns.length !== nodes[i].data.columns.length) {
-        n.data.columns = nodes[i].data.columns;
+      // Ensure column names are the same
+      if (n.id === nodes[i].id) {
+        if (n.data.columns.length !== nodes[i].data.columns.length) {
+          n.data.columns = nodes[i].data.columns;
+        } else {
+          // Update column names if they are not the same
+          for (let j = 0; j < n.data.columns.length; j++) {
+            if (n.data.columns[j].name !== nodes[i].data.columns[j].name) {
+              n.data.columns[j].name = nodes[i].data.columns[j].name;
+            }
+          }
+        }
       }
     });
   }
@@ -118,6 +132,30 @@ export function checkMissingOrExtraIds(
   let _links = generateLinks(allTables);
   const _es = generateEdges(_links, _nodes);
   return { ...customSettings, links: _links, edges: _es, nodes: _nodes };
+}
+
+export function checkNodesNames(
+  customSettings: PresetCustomSettings,
+  allTablesNodes: NodeResultItem[]
+): PresetCustomSettings {
+  const nodes = allTablesNodes;
+  const _nodes: NodeResultItem[] = [...customSettings.nodes];
+
+  for (let i = 0; i < _nodes.length; i++) {
+    const name1 = nodes[i].data.name;
+    const name2 = _nodes[i].data.name;
+
+    if (name1 !== name2) {
+      _nodes[i].data.name = name1;
+    }
+  }
+
+  const updatedCustomSettings = {
+    ...customSettings,
+    nodes: _nodes,
+  };
+
+  return updatedCustomSettings;
 }
 
 // This function is used to update the customSettings in the PluginDataStore
