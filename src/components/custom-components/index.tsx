@@ -27,7 +27,6 @@ import {
   generateEdges,
   generateLinks,
   setViewportPluginDataStoreFn,
-  checkNodesNames,
 } from '../../utils/custom-utils/utils';
 
 import { TableArray } from '../../utils/template-interfaces/Table.interface';
@@ -63,10 +62,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
 
   const pluginVPDataStore =
     pluginDataStore.presets[appActiveState.activePresetIdx].customSettings?.vp;
-
-  useEffect(() => {
-    setViewportPluginDataStoreFn(pluginDataStore, appActiveState.activePresetId, viewPortState);
-  }, [viewPortState]);
 
   useEffect(() => {
     let _edges = edges;
@@ -274,6 +269,13 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         defaultViewport={pluginVPDataStore}
         onNodeDragStop={onNodeDragStop}
         proOptions={proOptions}
+        onMoveEnd={(e) => {
+          setViewportPluginDataStoreFn(
+            pluginDataStore,
+            appActiveState.activePresetId,
+            viewPortState
+          );
+        }}
         nodeTypes={nodeTypes}></ReactFlow>
     </>
   );
