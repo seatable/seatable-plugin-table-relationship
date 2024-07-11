@@ -1,6 +1,13 @@
 import React, { useEffect, useCallback, useState, useRef } from 'react';
 
-import ReactFlow, { useNodesState, useEdgesState, isNode, useViewport } from 'reactflow';
+import ReactFlow, {
+  useNodesState,
+  useEdgesState,
+  isNode,
+  useViewport,
+  useOnViewportChange,
+  useReactFlow,
+} from 'reactflow';
 import {
   IPluginTRProps,
   ILinksData,
@@ -56,12 +63,11 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     INodePositions,
     React.Dispatch<React.SetStateAction<INodePositions>>,
   ] = useState({});
-  let activeCustomSettings: PresetCustomSettings;
-
   const viewPortState = useViewport();
+  const reactFlow = useReactFlow();
 
-  const pluginVPDataStore =
-    pluginDataStore.presets[appActiveState.activePresetIdx].customSettings?.vp;
+  const [_pluginVPDataStore, setPluginVPDataStore] = useState(viewPortState);
+  let activeCustomSettings: PresetCustomSettings;
 
   useEffect(() => {
     let _edges = edges;
@@ -97,6 +103,19 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     setNodes(validNodes);
     setEdges(_edges);
   }, [activeRelationships, relationship]);
+
+  useEffect(() => {
+    const pluginVPDataStore =
+      pluginDataStore.presets[appActiveState.activePresetIdx].customSettings?.vp;
+    reactFlow.setViewport(
+      pluginVPDataStore ?? {
+        x: -100,
+        y: 250,
+        zoom: 0.5,
+      }
+    );
+    setPluginVPDataStore(pluginVPDataStore);
+  }, [appActiveState.activePresetId]);
 
   useEffect(() => {
     const allTablesNodes = generateNodes(allTables);
@@ -266,7 +285,8 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         onEdgesChange={onEdgesChange}
         onNodeDragStart={onNodeDragStart}
         onNodeDrag={onNodeDrag}
-        defaultViewport={pluginVPDataStore}
+        defaultViewport={_pluginVPDataStore}
+        fitView={false}
         onNodeDragStop={onNodeDragStop}
         proOptions={proOptions}
         onMoveEnd={(e) => {
