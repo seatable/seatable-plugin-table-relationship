@@ -158,6 +158,36 @@ export function checkNodesNames(
   return updatedCustomSettings;
 }
 
+export function updatePositions(
+  allTablesNodes: NodeResultItem[],
+  customSettingsNodes: NodeResultItem[]
+): NodeResultItem[] {
+  const nodes = allTablesNodes;
+  const _nodes = customSettingsNodes;
+
+  // Create objects to store the indices of the first and second arrays based on their ids
+  const positionsMap1: { [key: string]: number } = {};
+  for (let i = 0; i < nodes.length; i++) {
+    positionsMap1[nodes[i].id] = i;
+  }
+
+  const positionsMap2: { [key: string]: number } = {};
+  for (let i = 0; i < _nodes.length; i++) {
+    positionsMap2[_nodes[i].id] = i;
+  }
+
+  // Create a new array with updated positions
+  const updatedArray: NodeResultItem[] = [];
+  for (const item of _nodes) {
+    const originalItem = nodes.find((i) => i.id === item.id);
+    if (originalItem) {
+      updatedArray.push({ ...originalItem, position: item.position });
+    }
+  }
+
+  return updatedArray;
+}
+
 // This function is used to update the customSettings in the PluginDataStore
 export function setPluginDataStoreFn(
   pluginDataStore: IPluginDataStore,

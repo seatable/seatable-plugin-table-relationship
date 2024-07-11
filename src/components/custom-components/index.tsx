@@ -34,6 +34,7 @@ import {
   generateEdges,
   generateLinks,
   setViewportPluginDataStoreFn,
+  updatePositions,
 } from '../../utils/custom-utils/utils';
 
 import { TableArray } from '../../utils/template-interfaces/Table.interface';
@@ -58,7 +59,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   const [links, setLinks] = useState<ILinksData[]>([]);
   const [nodesCts, setNodesCts] = useState<nodeCts[]>([]);
   const [relationship, setRelationship] = useState(activeRelationships);
-  // const [viewPort, setViewPort] = useState({} as IViewPort);
   const [prevNodePositions, setPrevNodePositions]: [
     INodePositions,
     React.Dispatch<React.SetStateAction<INodePositions>>,
@@ -118,7 +118,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   }, [appActiveState.activePresetId]);
 
   useEffect(() => {
-    const allTablesNodes = generateNodes(allTables);
+    let allTablesNodes = generateNodes(allTables);
     const { isPDSCS, customSettings } = isCustomSettingsFn(
       pluginDataStore,
       allTables,
@@ -143,6 +143,10 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     // In any case and whenever there is a change in the Tables, we need to check if the nodes and tables are equal
     const storedNodesVsTablesNodes = activeCustomSettings.nodes.length === allTablesNodes.length;
 
+    if (storedNodesVsTablesNodes) {
+      const newArr = updatePositions(allTablesNodes, activeCustomSettings.nodes);
+      allTablesNodes = newArr;
+    }
     // If the nodes and tables are equal, we check if the ids and columns are equal
     //else we find which nodes are missing or extra
     const newCustomSettings = storedNodesVsTablesNodes
