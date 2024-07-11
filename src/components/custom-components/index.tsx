@@ -1,22 +1,10 @@
 import React, { useEffect, useCallback, useState, useRef } from 'react';
 
-import ReactFlow, {
-  useNodesState,
-  useEdgesState,
-  isNode,
-  useReactFlow,
-  useStore,
-  useViewport,
-  ReactFlowInstance,
-  OnConnect,
-  addEdge,
-  Controls,
-} from 'reactflow';
+import ReactFlow, { useNodesState, useEdgesState, isNode, useViewport } from 'reactflow';
 import {
   IPluginTRProps,
   ILinksData,
   INodePositions,
-  IViewPort,
   NodeResultItem,
   RelationshipState,
   nodeCts,
@@ -39,6 +27,7 @@ import {
   generateEdges,
   generateLinks,
   setViewportPluginDataStoreFn,
+  checkNodesNames,
 } from '../../utils/custom-utils/utils';
 
 import { TableArray } from '../../utils/template-interfaces/Table.interface';
@@ -147,7 +136,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       : checkMissingOrExtraIds(activeCustomSettings, allTablesNodes, allTables);
 
     const { links, nodes, edges, relationship } = newCustomSettings as PresetCustomSettings;
-    // const filteredLinks = filterRelationshipLinks(links, activeRelationships);
+
     setStates(links, nodes, edges, relationship);
     setPluginDataStoreFn(
       pluginDataStore,
