@@ -34,7 +34,6 @@ import {
   generateEdges,
   generateLinks,
   setViewportPluginDataStoreFn,
-  updatePositions,
 } from '../../utils/custom-utils/utils';
 
 import { TableArray } from '../../utils/template-interfaces/Table.interface';
@@ -107,18 +106,16 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   useEffect(() => {
     const pluginVPDataStore =
       pluginDataStore.presets[appActiveState.activePresetIdx].customSettings?.vp;
-    reactFlow.setViewport(
-      pluginVPDataStore ?? {
-        x: -100,
-        y: 250,
-        zoom: 0.5,
-      }
-    );
+    if (pluginVPDataStore === undefined) {
+      reactFlow.fitView();
+    } else {
+      reactFlow.setViewport(pluginVPDataStore);
+    }
     setPluginVPDataStore(pluginVPDataStore);
   }, [appActiveState.activePresetId]);
 
   useEffect(() => {
-    let allTablesNodes = generateNodes(allTables);
+    const allTablesNodes = generateNodes(allTables);
     const { isPDSCS, customSettings } = isCustomSettingsFn(
       pluginDataStore,
       allTables,
@@ -143,10 +140,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     // In any case and whenever there is a change in the Tables, we need to check if the nodes and tables are equal
     const storedNodesVsTablesNodes = activeCustomSettings.nodes.length === allTablesNodes.length;
 
-    if (storedNodesVsTablesNodes) {
-      const newArr = updatePositions(allTablesNodes, activeCustomSettings.nodes);
-      allTablesNodes = newArr;
-    }
     // If the nodes and tables are equal, we check if the ids and columns are equal
     //else we find which nodes are missing or extra
     const newCustomSettings = storedNodesVsTablesNodes

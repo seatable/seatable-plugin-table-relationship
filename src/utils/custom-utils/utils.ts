@@ -79,27 +79,11 @@ export function checkIfColumnsAreEqual(
   const nodes = allTablesNodes;
   const _nodes: NodeResultItem[] = [...customNodes];
 
-  for (let i = 0; i < nodes.length; i++) {
-    _nodes.find((n: NodeResultItem) => {
-      // Ensure column names are the same
-      if (n.id === nodes[i].id) {
-        if (n.data.columns.length !== nodes[i].data.columns.length) {
-          n.data.columns = nodes[i].data.columns;
-        } else {
-          // Update column names if they are not the same
-          for (let j = 0; j < n.data.columns.length; j++) {
-            if (n.data.columns[j].name !== nodes[i].data.columns[j].name) {
-              n.data.columns[j].name = nodes[i].data.columns[j].name;
-            }
-          }
-        }
-      }
-    });
-  }
+  const newNodes = checkColumnsPosition(nodes, _nodes);
 
   let _links = generateLinks(allTables);
-  const _es = generateEdges(_links, _nodes);
-  return { ...customSettings, links: _links, edges: _es, nodes: _nodes };
+  const _es = generateEdges(_links, newNodes);
+  return { ...customSettings, links: _links, edges: _es, nodes: newNodes };
 }
 
 export function checkMissingOrExtraIds(
@@ -138,15 +122,16 @@ export function checkNodesNames(
   customSettings: PresetCustomSettings,
   allTablesNodes: NodeResultItem[]
 ): PresetCustomSettings {
-  const nodes = allTablesNodes;
+  const nodesMap = new Map<string, NodeResultItem>(allTablesNodes.map((node) => [node.id, node]));
+
   const _nodes: NodeResultItem[] = [...customSettings.nodes];
 
   for (let i = 0; i < _nodes.length; i++) {
-    const name1 = nodes[i].data.name;
-    const name2 = _nodes[i].data.name;
+    const currentNode = _nodes[i];
+    const correspondingNode = nodesMap.get(currentNode.id);
 
-    if (name1 !== name2) {
-      _nodes[i].data.name = name1;
+    if (correspondingNode && currentNode.data.name !== correspondingNode.data.name) {
+      currentNode.data.name = correspondingNode.data.name;
     }
   }
 
@@ -158,34 +143,41 @@ export function checkNodesNames(
   return updatedCustomSettings;
 }
 
-export function updatePositions(
-  allTablesNodes: NodeResultItem[],
-  customSettingsNodes: NodeResultItem[]
+function checkColumnsPosition(
+  array1: NodeResultItem[],
+  array2: NodeResultItem[]
 ): NodeResultItem[] {
-  const nodes = allTablesNodes;
-  const _nodes = customSettingsNodes;
+  // Create a new array to store the merged results
+  const mergedArray: NodeResultItem[] = [];
 
-  // Create objects to store the indices of the first and second arrays based on their ids
-  const positionsMap1: { [key: string]: number } = {};
-  for (let i = 0; i < nodes.length; i++) {
-    positionsMap1[nodes[i].id] = i;
-  }
+  for (let i = 0; i < array1.length; i++) {
+    const item1 = array1[i];
+    const item2 = array2.find((item) => item.id === item1.id);
 
-  const positionsMap2: { [key: string]: number } = {};
-  for (let i = 0; i < _nodes.length; i++) {
-    positionsMap2[_nodes[i].id] = i;
-  }
+    if (item2) {
+      // Compare and merge columns
+      const mergedColumns = item1.data.columns.map((col, index) => {
+        const col2 = item2.data.columns[index];
+        if (JSON.stringify(col) !== JSON.stringify(col2)) {
+          return col;
+        }
+        return col2;
+      });
 
-  // Create a new array with updated positions
-  const updatedArray: NodeResultItem[] = [];
-  for (const item of _nodes) {
-    const originalItem = nodes.find((i) => i.id === item.id);
-    if (originalItem) {
-      updatedArray.push({ ...originalItem, position: item.position });
+      // Create merged item
+      const mergedItem: NodeResultItem = {
+        ...item2,
+        data: {
+          ...item2.data,
+          columns: mergedColumns,
+        },
+      };
+
+      mergedArray.push(mergedItem);
     }
   }
 
-  return updatedArray;
+  return mergedArray;
 }
 
 // This function is used to update the customSettings in the PluginDataStore
