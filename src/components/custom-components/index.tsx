@@ -58,7 +58,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   const [links, setLinks] = useState<ILinksData[]>([]);
   const [nodesCts, setNodesCts] = useState<nodeCts[]>([]);
   const [relationship, setRelationship] = useState(activeRelationships);
-  // const [viewPort, setViewPort] = useState({} as IViewPort);
   const [prevNodePositions, setPrevNodePositions]: [
     INodePositions,
     React.Dispatch<React.SetStateAction<INodePositions>>,
@@ -107,13 +106,11 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   useEffect(() => {
     const pluginVPDataStore =
       pluginDataStore.presets[appActiveState.activePresetIdx].customSettings?.vp;
-    reactFlow.setViewport(
-      pluginVPDataStore ?? {
-        x: -100,
-        y: 250,
-        zoom: 0.5,
-      }
-    );
+    if (pluginVPDataStore === undefined) {
+      reactFlow.fitView();
+    } else {
+      reactFlow.setViewport(pluginVPDataStore);
+    }
     setPluginVPDataStore(pluginVPDataStore);
   }, [appActiveState.activePresetId]);
 
