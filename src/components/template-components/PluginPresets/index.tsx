@@ -215,7 +215,7 @@ const PluginPresets: React.FC<IPresetsProps> = ({
       activePresetIdx = newPluginPresets.length - 1;
     }
     pluginDataStore.presets = newPluginPresets;
-    updatePresets(0, newPluginPresets, pluginDataStore, PresetHandleAction.delete);
+    updatePresets(0, newPluginPresets, pluginDataStore, pluginDataStore.presets[0]._id);
     updateActiveData();
   };
 

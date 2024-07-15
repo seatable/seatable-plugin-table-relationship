@@ -4,19 +4,14 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   isNode,
-  useReactFlow,
-  useStore,
   useViewport,
-  ReactFlowInstance,
-  OnConnect,
-  addEdge,
-  Controls,
+  useOnViewportChange,
+  useReactFlow,
 } from 'reactflow';
 import {
   IPluginTRProps,
   ILinksData,
   INodePositions,
-  IViewPort,
   NodeResultItem,
   RelationshipState,
   nodeCts,
@@ -63,21 +58,15 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   const [links, setLinks] = useState<ILinksData[]>([]);
   const [nodesCts, setNodesCts] = useState<nodeCts[]>([]);
   const [relationship, setRelationship] = useState(activeRelationships);
-  // const [viewPort, setViewPort] = useState({} as IViewPort);
   const [prevNodePositions, setPrevNodePositions]: [
     INodePositions,
     React.Dispatch<React.SetStateAction<INodePositions>>,
   ] = useState({});
-  let activeCustomSettings: PresetCustomSettings;
-
   const viewPortState = useViewport();
+  const reactFlow = useReactFlow();
 
-  const pluginVPDataStore =
-    pluginDataStore.presets[appActiveState.activePresetIdx].customSettings?.vp;
-
-  useEffect(() => {
-    setViewportPluginDataStoreFn(pluginDataStore, appActiveState.activePresetId, viewPortState);
-  }, [viewPortState]);
+  const [_pluginVPDataStore, setPluginVPDataStore] = useState(viewPortState);
+  let activeCustomSettings: PresetCustomSettings;
 
   useEffect(() => {
     let _edges = edges;
@@ -115,6 +104,17 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   }, [activeRelationships, relationship]);
 
   useEffect(() => {
+    const pluginVPDataStore =
+      pluginDataStore.presets[appActiveState.activePresetIdx].customSettings?.vp;
+    if (pluginVPDataStore === undefined) {
+      reactFlow.fitView();
+    } else {
+      reactFlow.setViewport(pluginVPDataStore);
+    }
+    setPluginVPDataStore(pluginVPDataStore);
+  }, [appActiveState.activePresetId]);
+
+  useEffect(() => {
     const allTablesNodes = generateNodes(allTables);
     const { isPDSCS, customSettings } = isCustomSettingsFn(
       pluginDataStore,
@@ -147,7 +147,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       : checkMissingOrExtraIds(activeCustomSettings, allTablesNodes, allTables);
 
     const { links, nodes, edges, relationship } = newCustomSettings as PresetCustomSettings;
-    // const filteredLinks = filterRelationshipLinks(links, activeRelationships);
+
     setStates(links, nodes, edges, relationship);
     setPluginDataStoreFn(
       pluginDataStore,
@@ -282,9 +282,17 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         onEdgesChange={onEdgesChange}
         onNodeDragStart={onNodeDragStart}
         onNodeDrag={onNodeDrag}
-        defaultViewport={pluginVPDataStore}
+        defaultViewport={_pluginVPDataStore}
+        fitView={false}
         onNodeDragStop={onNodeDragStop}
         proOptions={proOptions}
+        onMoveEnd={(e) => {
+          setViewportPluginDataStoreFn(
+            pluginDataStore,
+            appActiveState.activePresetId,
+            viewPortState
+          );
+        }}
         nodeTypes={nodeTypes}></ReactFlow>
     </>
   );

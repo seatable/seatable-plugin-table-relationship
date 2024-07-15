@@ -62,7 +62,11 @@ export function checkNodesVsTablesIds(
   if (nodesVsTablesIds) {
     // Even though the ids are the same, we need to check if the columns are equal
     const updatedCustomSettings = checkIfColumnsAreEqual(customSettings, allTablesNodes, allTables);
-    return updatedCustomSettings;
+    const updatedCustomSettingsWithNodesAndColName = checkNodesNames(
+      updatedCustomSettings,
+      allTablesNodes
+    );
+    return updatedCustomSettingsWithNodesAndColName;
   }
 }
 
@@ -75,17 +79,11 @@ export function checkIfColumnsAreEqual(
   const nodes = allTablesNodes;
   const _nodes: NodeResultItem[] = [...customNodes];
 
-  for (let i = 0; i < nodes.length; i++) {
-    _nodes.find((n: NodeResultItem) => {
-      if (n.id === nodes[i].id && n.data.columns.length !== nodes[i].data.columns.length) {
-        n.data.columns = nodes[i].data.columns;
-      }
-    });
-  }
+  const newNodes = checkColumnsPosition(nodes, _nodes);
 
   let _links = generateLinks(allTables);
-  const _es = generateEdges(_links, _nodes);
-  return { ...customSettings, links: _links, edges: _es, nodes: _nodes };
+  const _es = generateEdges(_links, newNodes);
+  return { ...customSettings, links: _links, edges: _es, nodes: newNodes };
 }
 
 export function checkMissingOrExtraIds(
@@ -118,6 +116,68 @@ export function checkMissingOrExtraIds(
   let _links = generateLinks(allTables);
   const _es = generateEdges(_links, _nodes);
   return { ...customSettings, links: _links, edges: _es, nodes: _nodes };
+}
+
+export function checkNodesNames(
+  customSettings: PresetCustomSettings,
+  allTablesNodes: NodeResultItem[]
+): PresetCustomSettings {
+  const nodesMap = new Map<string, NodeResultItem>(allTablesNodes.map((node) => [node.id, node]));
+
+  const _nodes: NodeResultItem[] = [...customSettings.nodes];
+
+  for (let i = 0; i < _nodes.length; i++) {
+    const currentNode = _nodes[i];
+    const correspondingNode = nodesMap.get(currentNode.id);
+
+    if (correspondingNode && currentNode.data.name !== correspondingNode.data.name) {
+      currentNode.data.name = correspondingNode.data.name;
+    }
+  }
+
+  const updatedCustomSettings = {
+    ...customSettings,
+    nodes: _nodes,
+  };
+
+  return updatedCustomSettings;
+}
+
+function checkColumnsPosition(
+  array1: NodeResultItem[],
+  array2: NodeResultItem[]
+): NodeResultItem[] {
+  // Create a new array to store the merged results
+  const mergedArray: NodeResultItem[] = [];
+
+  for (let i = 0; i < array1.length; i++) {
+    const item1 = array1[i];
+    const item2 = array2.find((item) => item.id === item1.id);
+
+    if (item2) {
+      // Compare and merge columns
+      const mergedColumns = item1.data.columns.map((col, index) => {
+        const col2 = item2.data.columns[index];
+        if (JSON.stringify(col) !== JSON.stringify(col2)) {
+          return col;
+        }
+        return col2;
+      });
+
+      // Create merged item
+      const mergedItem: NodeResultItem = {
+        ...item2,
+        data: {
+          ...item2.data,
+          columns: mergedColumns,
+        },
+      };
+
+      mergedArray.push(mergedItem);
+    }
+  }
+
+  return mergedArray;
 }
 
 // This function is used to update the customSettings in the PluginDataStore
