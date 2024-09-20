@@ -1,6 +1,6 @@
 {
-  "name": "table-relationships",
-  "version": "1.0.1",
+  "name": "table-relationship",
+  "version": "1.0.2",
   "display_type": "overlay",
   "display_name": {
     "de": "Tabellenbeziehungen",

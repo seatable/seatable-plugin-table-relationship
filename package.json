@@ -1,6 +1,6 @@
 {
-  "name": "seatable-plugin-table-relationships",
-  "version": "1.0.1",
+  "name": "seatable-plugin-table-relationship",
+  "version": "1.0.2",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
