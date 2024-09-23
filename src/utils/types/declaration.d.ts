@@ -6,3 +6,4 @@ declare module '*.png' {
 }
 
 declare module 'downloadjs';
+declare module 'lodash';

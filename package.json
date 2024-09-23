@@ -66,6 +66,7 @@
     "@testing-library/user-event": "13.5.0",
     "@types/downloadjs": "^1.4.6",
     "@types/jest": "^29.5.10",
+    "@types/lodash": "^4.17.7",
     "@types/webpack-env": "^1.18.4",
     "autoprefixer": "10.4.5",
     "babel-jest": "^27.4.2",

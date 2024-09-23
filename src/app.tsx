@@ -127,6 +127,7 @@ const App: React.FC<IAppProps> = (props) => {
   };
 
   const resetData = () => {
+    console.log('Reset Data');
     let allTables: TableArray = window.dtableSDK.getTables(); // All the Tables of the Base
     let activeTable: Table = window.dtableSDK.getActiveTable(); // How is the ActiveTable Set? allTables[0]?
     let activeTableViews: TableViewArray = activeTable.views; // All the Views of the specific Active Table
