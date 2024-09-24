@@ -2,7 +2,7 @@
 export interface Table {
   _id: string;
   name: string;
-  rows: TableRow[];
+  rows?: TableRow[];
   columns: TableColumn[];
   view_structure: {
     folders: any[]; // AnyToFix

@@ -183,7 +183,6 @@ function checkColumnsPosition(
 // This function is used to update the customSettings in the PluginDataStore
 export function setPluginDataStoreFn(
   pluginDataStore: IPluginDataStore,
-  activeRelationships: RelationshipState,
   activePresetId: string,
   ns: any[],
   lnk: ILinksData[],
@@ -200,7 +199,6 @@ export function setPluginDataStoreFn(
             nodes: ns,
             links: lnk,
             edges: es,
-            relationship: activeRelationships,
           },
         };
       }

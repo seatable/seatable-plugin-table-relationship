@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useCallback, useState, useMemo, memo } from 'react';
 
 import ReactFlow, {
   useNodesState,
@@ -7,6 +7,7 @@ import ReactFlow, {
   useViewport,
   useReactFlow,
 } from 'reactflow';
+
 import {
   IPluginTRProps,
   ILinksData,
@@ -60,6 +61,14 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   const viewPortState = useViewport();
   const reactFlow = useReactFlow();
 
+  const now = new Date();
+  const time =
+    now.toLocaleTimeString('en-US', { hour12: false }) +
+    '.' +
+    now.getMilliseconds().toString().padStart(3, '0');
+  // console.log({ time });
+  // console.log({ 0: allTables });
+  // console.log({ time });
   const [_pluginVPDataStore, setPluginVPDataStore] = useState(viewPortState);
   let activeCustomSettings: PresetCustomSettings;
   // const someDependency: any[] = [];
@@ -67,10 +76,10 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     () => ({
       custom: CustomNode,
     }),
-    [] // Replace with actual dependencies
+    []
   );
   useEffect(() => {
-    console.log('activeRelationships');
+    // console.log('activeRelationships');
 
     let _edges = edges;
     let _links = generateLinks(allTables);
@@ -118,7 +127,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   }, [activeRelationships, relationship]);
 
   useEffect(() => {
-    console.log('appActiveState.activePresetId');
+    // console.log('appActiveState.activePresetId');
     const pluginVPDataStore =
       pluginDataStore.presets[appActiveState.activePresetIdx].customSettings?.vp;
     if (pluginVPDataStore === undefined) {
@@ -131,7 +140,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
 
   useEffect(() => {
     const allTablesNodes = generateNodes(allTables);
-    console.log({ allTablesNodes });
+    // console.log({ allTablesNodes });
     const { isPDSCS, customSettings } = isCustomSettingsFn(
       pluginDataStore,
       allTables,
@@ -143,14 +152,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       // if custom settings are not found, we set nodes, links, edges and relationship
       const { links, nodes, edges, relationship } = activeCustomSettings;
       setStates(links, nodes, edges, relationship);
-      setPluginDataStoreFn(
-        pluginDataStore,
-        relationship,
-        appActiveState.activePresetId,
-        nodes,
-        links,
-        edges
-      );
+      setPluginDataStoreFn(pluginDataStore, appActiveState.activePresetId, nodes, links, edges);
     }
 
     // In any case and whenever there is a change in the Tables, we need to check if the nodes and tables are equal
@@ -165,40 +167,26 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     const { links, nodes, edges, relationship } = newCustomSettings as PresetCustomSettings;
 
     setStates(links, nodes, edges, relationship);
-    setPluginDataStoreFn(
-      pluginDataStore,
-      relationship,
-      appActiveState.activePresetId,
-      nodes,
-      links,
-      edges
-    );
+    setPluginDataStoreFn(pluginDataStore, appActiveState.activePresetId, nodes, links, edges);
   }, [JSON.stringify(allTables), appActiveState.activePresetId]);
 
   // This function sets the states of the nodes, links, edges and relationship in the ERD Plugin component
   function setStates(_links: any, _nodes: any, _edges: any, _relationship: RelationshipState) {
-    console.log('setStates');
+    // console.log('setStates');
     setLinks(_links);
     setNodes(_nodes);
     setEdges(_edges);
     setRelationship(_relationship);
-    setPluginDataStoreFn(
-      pluginDataStore,
-      _relationship,
-      appActiveState.activePresetId,
-      _nodes,
-      _links,
-      _edges
-    );
+    setPluginDataStoreFn(pluginDataStore, appActiveState.activePresetId, _nodes, _links, _edges);
   }
 
-  const onNodeDragStart = useCallback((event, node) => {
+  const onNodeDragStart = useCallback((event: any, node: any) => {
     console.log('onNodeDragStart');
     setInitialPosition({ x: node.position.x, y: node.position.y });
   }, []);
 
   const onNodeDrag = useCallback(
-    (event, node) => {
+    (event: any, node: any) => {
       console.log('onNodeDrag');
       node.data.selected = true;
       if (isNode(node) && links && allTables) {
@@ -253,7 +241,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   );
 
   const onNodeDragStop = useCallback(
-    (event, node) => {
+    (event: any, node: any) => {
       console.log('onNodeDragStop');
 
       // Check if the node dragged has an initial position
@@ -281,7 +269,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
           setNodes(updatedNodes);
           setPluginDataStoreFn(
             pluginDataStore,
-            activeRelationships,
             appActiveState.activePresetId,
             updatedNodes,
             links,
@@ -331,4 +318,13 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   );
 };
 
-export default PluginTR;
+const areEqual = (prevProps: IPluginTRProps, nextProps: IPluginTRProps) => {
+  return (
+    prevProps.appActiveState.activePresetId === nextProps.appActiveState.activePresetId &&
+    JSON.stringify(prevProps.allTables) === JSON.stringify(nextProps.allTables) &&
+    prevProps.pluginDataStore === nextProps.pluginDataStore &&
+    JSON.stringify(prevProps.activeRelationships) === JSON.stringify(nextProps.activeRelationships)
+  );
+};
+
+export default memo(PluginTR, areEqual);
