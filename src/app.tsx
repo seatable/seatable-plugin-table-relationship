@@ -160,7 +160,9 @@ const App: React.FC<IAppProps> = (props) => {
       add_row_button: info.active_components.add_row_button,
     }));
     setPluginDataStore(pluginDataStore);
+    setAllTables(responseTables);
     setPluginPresets(pluginPresets);
+    setIsShowState((prevState) => ({ ...prevState, isLoading: false }));
 
     if (pluginDataStore.activePresetId) {
       const appActiveState = parsePluginDataToActiveState(
