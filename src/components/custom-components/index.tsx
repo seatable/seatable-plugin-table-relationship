@@ -51,18 +51,17 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   pluginDataStore,
   activeRelationships,
 }) => {
-  const [_allTables, setAllTables] = useState<TableArray>([]);
+  const [_allTables] = useState<TableArray>([]);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [links, setLinks] = useState<ILinksData[]>([]);
-  const [nodesCts, setNodesCts] = useState<nodeCts[]>([]);
   const [relationship, setRelationship] = useState(activeRelationships);
   const [initialPosition, setInitialPosition] = useState<any>(null);
   const viewPortState = useViewport();
   const reactFlow = useReactFlow();
   const [_pluginVPDataStore, setPluginVPDataStore] = useState(viewPortState);
   let activeCustomSettings: PresetCustomSettings;
-  // const someDependency: any[] = [];
+  console.log({ 0: pluginDataStore });
   const nodeTypes = useMemo(
     () => ({
       custom: CustomNode,
@@ -195,7 +194,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         const nodeDataArray = updatedNodes.map((node) => {
           return { n: node.id, cts: node.position.x };
         });
-        setNodesCts(nodeDataArray);
 
         const updatedEdges = edges.map((e) => {
           const sourceNode = nodeDataArray.find((node) => node.n === e.source);
@@ -228,10 +226,13 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     (event: any, node: any) => {
       // Check if the node dragged has an initial position
       if (initialPosition) {
+        console.log({ initialPosition });
+        console.log({ nodePos: node.position });
         // Check if the position has changed
         const positionChanged =
           initialPosition.x !== node.position.x || initialPosition.y !== node.position.y;
 
+        console.log({ positionChanged });
         if (positionChanged) {
           // Update the node's position only if it has changed
           const updatedNodes = nodes.map((n) =>
@@ -246,7 +247,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
                 }
               : n
           ) as NodeResultItem[];
-
+          console.log({ updatedNodes });
           // Update the state and plugin data store
           setNodes(updatedNodes);
           setPluginDataStoreFn(

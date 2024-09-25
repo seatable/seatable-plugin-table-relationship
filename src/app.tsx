@@ -114,12 +114,18 @@ const App: React.FC<IAppProps> = (props) => {
     }
 
     // Subscribe to table change events
-    unsubscribeLocalDtableChanged = window.dtableSDK.subscribe('local-dtable-changed', () => {
+    unsubscribeLocalDtableChanged = window.dtableSDK.subscribe('local-dtable-changed', async () => {
+      const metadata = await fetchMetaData(isDevelopment);
+      __allTables = metadata.tables;
+      setAllTables(metadata.tables);
       onDTableChanged(__allTables);
     });
-    unsubscribeRemoteDtableChanged = window.dtableSDK.subscribe('remote-dtable-changed', () => {
-      onDTableChanged(__allTables);
-    });
+    unsubscribeRemoteDtableChanged = window.dtableSDK.subscribe(
+      'remote-dtable-changed',
+      async () => {
+        onDTableChanged(__allTables);
+      }
+    );
 
     resetData(metadata.tables);
   };
@@ -146,6 +152,7 @@ const App: React.FC<IAppProps> = (props) => {
     let activeTableViews: TableViewArray = activeTable.views; // All the Views of the specific Active Table
     let pluginDataStore: IPluginDataStore = getPluginDataStore(activeTable, PLUGIN_NAME);
     let pluginPresets: PresetsArray = pluginDataStore.presets; // An array with all the Presets
+    console.log({ resetData: pluginDataStore });
 
     setActiveComponents((prevState) => ({
       ...prevState,
