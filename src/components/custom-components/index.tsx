@@ -60,15 +60,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   const [initialPosition, setInitialPosition] = useState<any>(null);
   const viewPortState = useViewport();
   const reactFlow = useReactFlow();
-
-  const now = new Date();
-  const time =
-    now.toLocaleTimeString('en-US', { hour12: false }) +
-    '.' +
-    now.getMilliseconds().toString().padStart(3, '0');
-  // console.log({ time });
-  // console.log({ 0: allTables });
-  // console.log({ time });
   const [_pluginVPDataStore, setPluginVPDataStore] = useState(viewPortState);
   let activeCustomSettings: PresetCustomSettings;
   // const someDependency: any[] = [];
@@ -79,8 +70,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     []
   );
   useEffect(() => {
-    // console.log('activeRelationships');
-
     let _edges = edges;
     let _links = generateLinks(allTables);
 
@@ -127,7 +116,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   }, [activeRelationships, relationship]);
 
   useEffect(() => {
-    // console.log('appActiveState.activePresetId');
     const pluginVPDataStore =
       pluginDataStore.presets[appActiveState.activePresetIdx].customSettings?.vp;
     if (pluginVPDataStore === undefined) {
@@ -140,7 +128,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
 
   useEffect(() => {
     const allTablesNodes = generateNodes(allTables);
-    // console.log({ allTablesNodes });
     const { isPDSCS, customSettings } = isCustomSettingsFn(
       pluginDataStore,
       allTables,
@@ -172,7 +159,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
 
   // This function sets the states of the nodes, links, edges and relationship in the ERD Plugin component
   function setStates(_links: any, _nodes: any, _edges: any, _relationship: RelationshipState) {
-    // console.log('setStates');
     setLinks(_links);
     setNodes(_nodes);
     setEdges(_edges);
@@ -181,13 +167,11 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   }
 
   const onNodeDragStart = useCallback((event: any, node: any) => {
-    console.log('onNodeDragStart');
     setInitialPosition({ x: node.position.x, y: node.position.y });
   }, []);
 
   const onNodeDrag = useCallback(
     (event: any, node: any) => {
-      console.log('onNodeDrag');
       node.data.selected = true;
       if (isNode(node) && links && allTables) {
         // Node position is continuously changing, update node's position in state
@@ -242,8 +226,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
 
   const onNodeDragStop = useCallback(
     (event: any, node: any) => {
-      console.log('onNodeDragStop');
-
       // Check if the node dragged has an initial position
       if (initialPosition) {
         // Check if the position has changed

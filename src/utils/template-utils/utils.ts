@@ -18,6 +18,39 @@ import {
   POSSIBLE,
   PresetHandleAction,
 } from '../template-constants';
+import info from '../../setting.local';
+
+export const fetchMetaData = async () => {
+  const { server, APIToken } = info;
+  try {
+    // Fetch the base UUID and token
+    const optionsToken = {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        authorization: `Bearer ${APIToken}`,
+      },
+    };
+    const tokenResponse = await fetch(`${server}/api/v2.1/dtable/app-access-token/`, optionsToken);
+    const { dtable_uuid: BASE_UUID, access_token: BASE_TOKEN } = await tokenResponse.json();
+    // Fetch the metadata using the obtained token and UUID
+    const optionsData = {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        authorization: `Bearer ${BASE_TOKEN}`,
+      },
+    };
+    const dataResponse = await fetch(
+      `${server}/api-gateway/api/v2/dtables/${BASE_UUID}/metadata/`,
+      optionsData
+    );
+    const response = await dataResponse.json();
+    return response.metadata;
+  } catch (err) {
+    console.error('Error fetching metadata:', err);
+  }
+};
 
 export const generatorBase64Code = (keyLength = 4) => {
   let key = '';
@@ -245,9 +278,6 @@ export const parsePluginDataToActiveState = (
     allTables.find((t) => t._id === pluginPresets[idx].settings?.selectedTable?.value) ||
     allTables[0];
   let tableName = table.name;
-  let tableView = table.views.find(
-    (v) => v._id === pluginPresets[idx].settings?.selectedView?.value
-  )!;
 
   // Create the appActiveState object with the extracted data
   const appActiveState = {
@@ -255,7 +285,7 @@ export const parsePluginDataToActiveState = (
     activePresetIdx: idx,
     activeTable: table,
     activeTableName: tableName,
-    activeTableView: tableView,
+    // activeTableView: tableView,
   };
 
   // Return the active state object

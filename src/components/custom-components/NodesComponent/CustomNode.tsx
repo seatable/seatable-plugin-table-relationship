@@ -11,7 +11,6 @@ function getIconByType(ct: any, t: any) {
 }
 
 function CustomNode({ id, data }: { id: string; data: any }) {
-  console.log('custom node called', data);
   return (
     <>
       <div className={stylesCustom.custom_node_header}>

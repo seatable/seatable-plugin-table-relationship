@@ -41,6 +41,7 @@ import {
 import './locale';
 import {
   createDefaultPluginDataStore,
+  fetchMetaData,
   findPresetName,
   getActiveStateSafeGuard,
   getActiveTableAndActiveView,
@@ -78,6 +79,8 @@ const App: React.FC<IAppProps> = (props) => {
     lk2Rel: true,
     tblNoLnk: true,
   });
+  const [loading, setLoading] = useState(true); // Add a loading state
+  let __allTables: any;
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx } = appActiveState;
   const { collaborators } = window.app.state;
@@ -97,19 +100,28 @@ const App: React.FC<IAppProps> = (props) => {
   }, []);
 
   const initPluginDTableData = async () => {
+    const metadata = await fetchMetaData();
+    __allTables = metadata.tables;
+    setAllTables(metadata.tables);
+    setLoading(false);
+
+    // Execute the second part of your code when the data is ready
     if (isDevelopment) {
-      // local develop //
+      // Local development
       window.dtableSDK.subscribe('dtable-connect', () => {
-        onDTableConnect();
+        onDTableConnect(__allTables);
       });
     }
+
+    // Subscribe to table change events
     unsubscribeLocalDtableChanged = window.dtableSDK.subscribe('local-dtable-changed', () => {
-      onDTableChanged();
+      onDTableChanged(__allTables);
     });
     unsubscribeRemoteDtableChanged = window.dtableSDK.subscribe('remote-dtable-changed', () => {
-      onDTableChanged();
+      onDTableChanged(__allTables);
     });
-    resetData();
+
+    resetData(metadata.tables);
   };
 
   let unsubscribeLocalDtableChanged = () => {
@@ -119,25 +131,14 @@ const App: React.FC<IAppProps> = (props) => {
     throw new Error('Method not implemented.');
   };
 
-  const onDTableConnect = () => {
-    console.log('DTable Connected');
-    resetData();
+  const onDTableConnect = (res: TableArray) => {
+    resetData(res);
   };
-  const onDTableChanged = () => {
-    console.log('DTable Changed');
-    resetData();
+  const onDTableChanged = (res: TableArray) => {
+    resetData(res);
   };
-  // console.log({ 1: allTables });
 
-  const resetData = () => {
-    console.log('Reset Data');
-    let allTables: TableArray = window.dtableSDK.getTables(); // All the Tables of the Base
-    // Remove the rows from the tables since in this Plugin we don't need them and make the data lighter
-    allTables.forEach((obj) => {
-      if (Array.isArray(obj.rows) && obj.rows.length > 0) {
-        obj.rows = [obj.rows[0]];
-      }
-    });
+  const resetData = (responseTables: TableArray) => {
     let activeTable: Table = window.dtableSDK.getActiveTable(); // How is the ActiveTable Set? allTables[0]?
     if (Array.isArray(activeTable.rows) && activeTable.rows.length > 0) {
       activeTable.rows = [activeTable.rows[0]];
@@ -152,15 +153,13 @@ const App: React.FC<IAppProps> = (props) => {
       add_row_button: info.active_components.add_row_button,
     }));
     setPluginDataStore(pluginDataStore);
-    setAllTables(allTables);
     setPluginPresets(pluginPresets);
-    setIsShowState((prevState) => ({ ...prevState, isLoading: false }));
 
     if (pluginDataStore.activePresetId) {
       const appActiveState = parsePluginDataToActiveState(
         pluginDataStore,
         pluginPresets,
-        allTables
+        responseTables
       );
 
       onSelectPreset(pluginDataStore.activePresetId, appActiveState);
@@ -477,7 +476,6 @@ const App: React.FC<IAppProps> = (props) => {
   };
 
   function handleRelationships(r: any) {
-    // console.log({ r });
     setActiveRelationships(r);
     localStorage.removeItem('presetRel:' + activePresetId);
     localStorage.setItem('presetRel:' + activePresetId, JSON.stringify(r));
@@ -486,7 +484,7 @@ const App: React.FC<IAppProps> = (props) => {
   if (!isShowPlugin) {
     return null;
   }
-  return isLoading ? (
+  return loading ? (
     <div></div>
   ) : (
     <ReactFlowProvider>
