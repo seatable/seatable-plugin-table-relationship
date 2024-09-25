@@ -19,8 +19,9 @@ export function isCustomSettingsFn(
   allTables: TableArray,
   activePresetId: string
 ) {
-  const activePresetCustomSettings = PDS.presets.find((preset) => preset._id === activePresetId)
-    ?.customSettings;
+  const activePresetCustomSettings = PDS.presets.find(
+    (preset) => preset._id === activePresetId
+  )?.customSettings;
   if (
     activePresetCustomSettings === undefined ||
     Object.keys(activePresetCustomSettings).length === 0

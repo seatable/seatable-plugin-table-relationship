@@ -52,16 +52,12 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   pluginDataStore,
   activeRelationships,
 }) => {
-  const [_allTables, setAllTables] = useState<TableArray>([]);
+  const [_allTables] = useState<TableArray>([]);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [links, setLinks] = useState<ILinksData[]>([]);
-  const [nodesCts, setNodesCts] = useState<nodeCts[]>([]);
   const [relationship, setRelationship] = useState(activeRelationships);
-  const [prevNodePositions, setPrevNodePositions]: [
-    INodePositions,
-    React.Dispatch<React.SetStateAction<INodePositions>>,
-  ] = useState({});
+  const [initialPosition, setInitialPosition] = useState<any>(null);
   const viewPortState = useViewport();
   const reactFlow = useReactFlow();
 
@@ -175,17 +171,9 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     );
   }
 
-  const onNodeDragStart = useCallback(
-    (event, node) => {
-      // Store the current position of all nodes when dragging starts
-      const positions: { [key: string]: { x: number; y: number } } = {};
-      nodes.forEach((n) => {
-        positions[n.id] = { x: n.position.x, y: n.position.y };
-      });
-      setPrevNodePositions(positions);
-    },
-    [nodes]
-  );
+  const onNodeDragStart = useCallback((event: any, node: any) => {
+    setInitialPosition({ x: node.position.x, y: node.position.y });
+  }, []);
 
   const onNodeDrag = useCallback(
     (event, node) => {
@@ -212,7 +200,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         const nodeDataArray = updatedNodes.map((node) => {
           return { n: node.id, cts: node.position.x };
         });
-        setNodesCts(nodeDataArray);
 
         const updatedEdges = edges.map((e) => {
           const sourceNode = nodeDataArray.find((node) => node.n === e.source);
@@ -238,7 +225,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         setEdges(updatedEdges);
       }
     },
-    [nodes, setNodes, prevNodePositions]
+    [nodes, setNodes]
   );
 
   const onNodeDragStop = useCallback(
