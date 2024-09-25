@@ -13,7 +13,6 @@ import {
   ILinksData,
   NodeResultItem,
   RelationshipState,
-  nodeCts,
   INodePositions,
 } from '../../utils/custom-interfaces/PluginTR';
 import CustomNode from './NodesComponent/CustomNode';
