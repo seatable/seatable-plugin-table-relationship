@@ -86,7 +86,7 @@ const App: React.FC<IAppProps> = (props) => {
   const { collaborators } = window.app.state;
 
   useEffect(() => {
-    initPluginDTableData();
+    initPluginDTableData(isDevelopment ?? false);
     return () => {
       unsubscribeLocalDtableChanged();
       unsubscribeRemoteDtableChanged();
@@ -99,8 +99,8 @@ const App: React.FC<IAppProps> = (props) => {
     }
   }, []);
 
-  const initPluginDTableData = async () => {
-    const metadata = await fetchMetaData();
+  const initPluginDTableData = async (isDevelopment: boolean) => {
+    const metadata = await fetchMetaData(isDevelopment);
     __allTables = metadata.tables;
     setAllTables(metadata.tables);
     setLoading(false);
@@ -257,13 +257,7 @@ const App: React.FC<IAppProps> = (props) => {
       });
     }
 
-    const activeViewRows: TableRow[] = window.dtableSDK.getViewRows(
-      updatedActiveState?.activeTableView,
-      updatedActiveState?.activeTable
-    );
-
     setActiveTableViews(updatedActiveTableViews);
-    setAppActiveState({ ...updatedActiveState, activeViewRows });
   };
 
   /**
