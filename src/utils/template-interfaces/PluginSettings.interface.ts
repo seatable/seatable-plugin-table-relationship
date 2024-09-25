@@ -1,4 +1,3 @@
-import { SettingsOption } from '../types';
 import { RelationshipState } from '../custom-interfaces/PluginTR';
 import { AppActiveState, IActiveComponents } from './App.interface';
 import { PresetSettings, PresetsArray } from './PluginPresets/Presets.interface';
@@ -9,7 +8,6 @@ interface IPluginSettingsProps {
   appActiveState: AppActiveState;
   activeTableViews: TableViewArray;
   pluginPresets: PresetsArray;
-  // onTableOrViewChange: (type: SettingsOption, option: SelectOption) => void;
   onToggleSettings: () => void;
   isShowSettings: boolean;
   activeRelationships: RelationshipState;

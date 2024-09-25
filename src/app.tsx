@@ -184,7 +184,6 @@ const App: React.FC<IAppProps> = (props) => {
         pluginPresets,
         activeTable,
         activeTableAndView
-
       );
 
       // At first we set the first Preset as the active one
