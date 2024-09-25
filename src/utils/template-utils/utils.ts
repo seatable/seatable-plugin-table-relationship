@@ -327,7 +327,7 @@ export const getActiveStateSafeGuard = (
     table: Table;
     view: TableView;
   },
-  activeViewRows: TableRow[]
+  activeViewRows?: TableRow[]
 ) => {
   // Create the checkForPresets object with the active state based on presets or default values
   const checkForPresets: AppActiveState = {

@@ -9,7 +9,7 @@ interface IPluginSettingsProps {
   appActiveState: AppActiveState;
   activeTableViews: TableViewArray;
   pluginPresets: PresetsArray;
-  onTableOrViewChange: (type: SettingsOption, option: SelectOption) => void;
+  // onTableOrViewChange: (type: SettingsOption, option: SelectOption) => void;
   onToggleSettings: () => void;
   isShowSettings: boolean;
   activeRelationships: RelationshipState;

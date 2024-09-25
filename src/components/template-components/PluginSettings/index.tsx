@@ -15,13 +15,8 @@ const { [DEFAULT_LOCALE]: d } = AVAILABLE_LOCALES;
 
 // PluginSettings component for managing table and view options
 const PluginSettings: React.FC<IPluginSettingsProps> = ({
-  activeComponents,
-  allTables,
-  appActiveState,
-  activeTableViews,
   isShowSettings,
   onToggleSettings,
-  onTableOrViewChange,
   activeRelationships,
   handleRelationships,
 }) => {
@@ -30,43 +25,6 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
   const [viewOptions, setViewOptions] = useState<SelectOption[]>();
   const [tableSelectedOption, setTableSelectedOption] = useState<SelectOption>();
   const [viewSelectedOption, setViewSelectedOption] = useState<SelectOption>();
-
-  // Change options when active table or view changes
-  useEffect(() => {
-    const { activeTableView } = appActiveState;
-
-    // Create options for tables
-    let tableOptions = allTables.map((item) => {
-      let value = item._id;
-      let label = truncateTableName(item.name);
-      return { value, label };
-    });
-
-    // Create options for views
-    let viewOptions = activeTableViews.map((item) => {
-      let value = item._id;
-      let label = truncateTableName(item.name);
-      return { value, label };
-    });
-
-    // Set selected options based on activeTable and activeTableView
-    let tableSelectedOption = {
-      value: appActiveState?.activeTable?._id!,
-      label: appActiveState.activeTableName,
-    };
-    let viewSelectedOption = viewOptions.find((item) => item.value === activeTableView?._id);
-
-    // Update state with new options and selected values
-    setTableOptions(tableOptions);
-    setTableSelectedOption(tableSelectedOption);
-    setViewOptions(viewOptions);
-    setViewSelectedOption(viewSelectedOption);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appActiveState]);
-
-  const handleShownFieldNames = (isShown: boolean) => {
-    console.log('isShown', isShown);
-  };
 
   return (
     <div
@@ -84,34 +42,6 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
           </button>
         </div>
         <div>
-          {activeComponents.settingsDropDowns && (
-            <div className={stylesPSettings.settings_dropdowns}>
-              <div>
-                <p className="d-inline-block mb-2">{intl.get('table').d(`${d.table}`)}</p>
-                {/* Toggle table view */}
-                <DtableSelect
-                  value={tableSelectedOption}
-                  options={tableOptions}
-                  onChange={(selectedOption: SelectOption) => {
-                    let type = 'table' as SettingsOption;
-                    onTableOrViewChange(type, selectedOption);
-                  }}
-                />
-              </div>
-              <div>
-                <p className="d-inline-block mb-2 mt-3">{intl.get('view').d(`${d.view}`)}</p>
-                {/* Toggle table view */}
-                <DtableSelect
-                  value={viewSelectedOption}
-                  options={viewOptions}
-                  onChange={(selectedOption: SelectOption) => {
-                    let type = 'view' as SettingsOption;
-                    onTableOrViewChange(type, selectedOption);
-                  }}
-                />
-              </div>
-            </div>
-          )}
           <div className={'mt-2'}>
             <div className="mb-2 d-flex align-items-center justify-content-between">
               <p>{intl.get('custom_plugin.rel_links').d(`${d.custom_plugin.rel_links}`)}</p>

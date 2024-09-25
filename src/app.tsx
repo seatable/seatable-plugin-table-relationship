@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
-import { FaPlus } from 'react-icons/fa6';
 import info from '../src/plugin-config/info.json';
 
 // Import of Component
@@ -22,12 +21,9 @@ import {
   TableViewArray,
   Table,
   TableView,
-  TableRow,
   IActiveTableAndView,
-  TableColumn,
 } from './utils/template-interfaces/Table.interface';
 import { PresetsArray } from './utils/template-interfaces/PluginPresets/Presets.interface';
-import { SelectOption } from './utils/template-interfaces/PluginSettings.interface';
 // Import of CSS
 import styles from './styles/template-styles/Plugin.module.scss';
 import './assets/css/plugin-layout.css';
@@ -45,21 +41,16 @@ import {
   findPresetName,
   getActiveStateSafeGuard,
   getActiveTableAndActiveView,
-  getDefaultLinkColumn,
   getPluginDataStore,
   isMobile,
   parsePluginDataToActiveState,
 } from './utils/template-utils/utils';
-import { SettingsOption } from './utils/types';
-import pluginContext from './plugin-context';
+
 import { ReactFlowProvider } from 'reactflow';
 import { RelationshipState } from './utils/custom-interfaces/PluginTR';
-import intl from 'react-intl-universal';
-import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from './locale';
 
 const App: React.FC<IAppProps> = (props) => {
   const { isDevelopment, lang } = props;
-  const { [DEFAULT_LOCALE]: d } = AVAILABLE_LOCALES;
 
   // Boolean state to show/hide the plugin's components
   const [isShowState, setIsShowState] = useState<AppIsShowState>(INITIAL_IS_SHOW_STATE);
@@ -79,7 +70,6 @@ const App: React.FC<IAppProps> = (props) => {
     lk2Rel: true,
     tblNoLnk: true,
   });
-  const [loading, setLoading] = useState(true); // Add a loading state
   let __allTables: any;
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx } = appActiveState;
@@ -103,7 +93,7 @@ const App: React.FC<IAppProps> = (props) => {
     const metadata = await fetchMetaData(isDevelopment);
     __allTables = metadata.tables;
     setAllTables(metadata.tables);
-    setLoading(false);
+    setIsShowState((prevState) => ({ ...prevState, isLoading: false }));
 
     // Execute the second part of your code when the data is ready
     if (isDevelopment) {
@@ -145,10 +135,7 @@ const App: React.FC<IAppProps> = (props) => {
   };
 
   const resetData = (responseTables: TableArray) => {
-    let activeTable: Table = window.dtableSDK.getActiveTable(); // How is the ActiveTable Set? allTables[0]?
-    if (Array.isArray(activeTable.rows) && activeTable.rows.length > 0) {
-      activeTable.rows = [activeTable.rows[0]];
-    }
+    let activeTable: Table = responseTables[0]; // How is the ActiveTable Set? allTables[0]?
     let activeTableViews: TableViewArray = activeTable.views; // All the Views of the specific Active Table
     let pluginDataStore: IPluginDataStore = getPluginDataStore(activeTable, PLUGIN_NAME);
     let pluginPresets: PresetsArray = pluginDataStore.presets; // An array with all the Presets
@@ -159,7 +146,7 @@ const App: React.FC<IAppProps> = (props) => {
       add_row_button: info.active_components.add_row_button,
     }));
     setPluginDataStore(pluginDataStore);
-    setAllTables(allTables);
+    setAllTables(responseTables);
     setPluginPresets(pluginPresets);
     setIsShowState((prevState) => ({ ...prevState, isLoading: false }));
 
@@ -167,7 +154,7 @@ const App: React.FC<IAppProps> = (props) => {
       const appActiveState = parsePluginDataToActiveState(
         pluginDataStore,
         pluginPresets,
-        allTables
+        responseTables
       );
 
       onSelectPreset(pluginDataStore.activePresetId, appActiveState);
@@ -192,17 +179,12 @@ const App: React.FC<IAppProps> = (props) => {
         pluginPresets,
         allTables
       );
-      // Get the activeViewRows from the window.dtableSDK
-      const activeViewRows: TableRow[] = window.dtableSDK.getViewRows(
-        activeTableAndView?.view || activeTableViews[0],
-        activeTableAndView?.table || activeTable
-      );
 
       const activeStateSafeGuard = getActiveStateSafeGuard(
         pluginPresets,
         activeTable,
-        activeTableAndView,
-        activeViewRows
+        activeTableAndView
+
       );
 
       // At first we set the first Preset as the active one
@@ -259,13 +241,7 @@ const App: React.FC<IAppProps> = (props) => {
       });
     }
 
-    const activeViewRows: TableRow[] = window.dtableSDK.getViewRows(
-      updatedActiveState?.activeTableView,
-      updatedActiveState?.activeTable
-    );
-
     setActiveTableViews(updatedActiveTableViews);
-    setAppActiveState({ ...updatedActiveState, activeViewRows });
   };
 
   /**
@@ -321,7 +297,6 @@ const App: React.FC<IAppProps> = (props) => {
       activeTable: table,
       activeTableName: table.name,
       activeTableView: view,
-      activeViewRows: window.dtableSDK.getViewRows(view, table),
     };
 
     setAppActiveState(newPresetActiveState);
@@ -343,138 +318,6 @@ const App: React.FC<IAppProps> = (props) => {
     }
 
     setIsShowState((prevState) => ({ ...prevState, isShowPresets: !prevState.isShowPresets }));
-  };
-
-  /**
-   * Handles the change of the active table or view, updating the application state and presets accordingly.
-   */
-  const onTableOrViewChange = (type: SettingsOption, option: SelectOption) => {
-    let _activeViewRows: TableRow[];
-    let updatedPluginPresets: PresetsArray;
-
-    switch (type) {
-      case 'table':
-        const _activeTable = allTables.find((s) => s._id === option.value)!;
-        _activeViewRows = window.dtableSDK.getViewRows(_activeTable.views[0], _activeTable);
-        setActiveTableViews(_activeTable.views);
-        setAppActiveState((prevState) => ({
-          ...prevState,
-          activeTable: _activeTable,
-          activeTableName: _activeTable.name,
-          activeTableView: _activeTable.views[0],
-          activeViewRows: _activeViewRows,
-          activeRelationship: getDefaultLinkColumn(_activeTable),
-        }));
-
-        updatedPluginPresets = pluginPresets.map((preset) =>
-          preset._id === activePresetId
-            ? {
-                ...preset,
-                settings: {
-                  ...preset.settings,
-                  relationship: getDefaultLinkColumn(_activeTable),
-                  selectedTable: { value: _activeTable._id, label: _activeTable.name },
-                  selectedView: {
-                    value: _activeTable.views[0]._id,
-                    label: _activeTable.views[0].name,
-                  },
-                },
-              }
-            : preset
-        );
-        break;
-
-      case 'view':
-        let _activeTableView =
-          activeTableViews.find((s) => s._id === option.value) || activeTableViews[0];
-        _activeViewRows = window.dtableSDK.getViewRows(_activeTableView, activeTable);
-        setAppActiveState((prevState) => ({
-          ...prevState,
-          activeTableView: _activeTableView,
-          activeViewRows: _activeViewRows,
-        }));
-
-        updatedPluginPresets = pluginPresets.map((preset) =>
-          preset._id === activePresetId
-            ? {
-                ...preset,
-                settings: {
-                  ...preset.settings,
-                  selectedView: { value: _activeTableView._id, label: _activeTableView.name },
-                },
-              }
-            : preset
-        );
-        break;
-    }
-
-    setPluginPresets(updatedPluginPresets);
-    updatePluginDataStore({ ...pluginDataStore, presets: updatedPluginPresets });
-  };
-
-  const getInsertedRowInitData = (view: TableView, table: Table, rowID: string) => {
-    return window.dtableSDK.getInsertedRowInitData(view, table, rowID);
-  };
-
-  // functions for add row functionality
-  const onAddItem = (view: TableView, table: Table, rowID: string) => {
-    let rowData = getInsertedRowInitData(view, table, rowID);
-    onInsertRow(table, view, rowData);
-  };
-
-  const addRowItem = () => {
-    if (isDevelopment) {
-      return;
-    }
-
-    let rows = appActiveState.activeViewRows;
-    if (rows) {
-      let row_id = rows.length > 0 ? rows[rows.length - 1]._id : '';
-      onAddItem(appActiveState.activeTableView!, appActiveState.activeTable!, row_id);
-    }
-  };
-
-  const onInsertRow = (table: Table, view: TableView, rowData: any) => {
-    let columns = window.dtableSDK.getColumns(table);
-    let newRowData: { [key: string]: any } = {};
-
-    for (let key in rowData) {
-      let column = columns.find((column: TableColumn) => column.name === key);
-
-      if (!column) {
-        continue;
-      }
-      switch (column.type) {
-        case 'single-select': {
-          newRowData[column.name] =
-            column.data.options.find((item: any) => item.name === rowData[key])?.name || '';
-          break;
-        }
-        case 'multiple-select': {
-          let multipleSelectNameList: any[] = [];
-          rowData[key].forEach((multiItemId: any) => {
-            let multiSelectItemName = column.data.options.find(
-              (multiItem: any) => multiItem.id === multiItemId
-            );
-            if (multiSelectItemName) {
-              multipleSelectNameList.push(multiSelectItemName.name);
-            }
-          });
-          newRowData[column.name] = multipleSelectNameList;
-          break;
-        }
-        default:
-          newRowData[column.name] = rowData[key];
-      }
-    }
-
-    let row_data = { ...newRowData };
-    window.dtableSDK.appendRow(table, row_data, view);
-    let viewRows = window.dtableSDK.getViewRows(view, table);
-    let insertedRow = viewRows[viewRows.length - 1];
-    if (insertedRow) {
-      pluginContext.expandRow(insertedRow, table);
-    }
   };
 
   function handleRelationships(r: any) {
@@ -546,17 +389,6 @@ const App: React.FC<IAppProps> = (props) => {
                 }
                 setPluginDataStore={setPluginDataStore}
               />
-
-              {activeComponents.add_row_button && (
-                <button className={styles.add_row} onClick={addRowItem}>
-                  <FaPlus size={30} color="#fff" />
-                  {isDevelopment && (
-                    <div style={{ margin: 0 }} className={styles.add_row_toolTip}>
-                      <p>{intl.get('add_row').d(`${d.add_row}`)}</p>
-                    </div>
-                  )}
-                </button>
-              )}
             </div>
 
             <PluginSettings
@@ -566,7 +398,6 @@ const App: React.FC<IAppProps> = (props) => {
               appActiveState={appActiveState}
               activeTableViews={activeTableViews}
               pluginPresets={pluginPresets}
-              onTableOrViewChange={onTableOrViewChange}
               onToggleSettings={toggleSettings}
               activeRelationships={activeRelationships}
               handleRelationships={handleRelationships}
