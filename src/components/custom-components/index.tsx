@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState, useMemo, memo } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 
 import ReactFlow, {
   useNodesState,
@@ -42,9 +42,9 @@ import {
   PresetCustomSettings,
 } from '../../utils/template-interfaces/PluginPresets/Presets.interface';
 
-// const nodeTypes = {
-//   custom: CustomNode,
-// };
+const nodeTypes = {
+  custom: CustomNode,
+};
 // Plugin Table Relationships Component
 const PluginTR: React.FC<IPluginTRProps> = ({
   appActiveState,
@@ -66,12 +66,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   const [_pluginVPDataStore, setPluginVPDataStore] = useState(viewPortState);
   let activeCustomSettings: PresetCustomSettings;
   console.log({ 0: pluginDataStore });
-  const nodeTypes = useMemo(
-    () => ({
-      custom: CustomNode,
-    }),
-    []
-  );
+
   useEffect(() => {
     let _edges = edges;
     let _links = generateLinks(allTables);
@@ -170,7 +165,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       });
       setPrevNodePositions(positions);
     },
-    [nodes, prevNodePositions]
+    [nodes]
   );
 
   const onNodeDrag = useCallback(
@@ -223,7 +218,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         setEdges(updatedEdges);
       }
     },
-    [nodes, setNodes]
+    [nodes, setNodes, prevNodePositions]
   );
 
   const onNodeDragStop = useCallback(
