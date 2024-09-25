@@ -57,7 +57,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [links, setLinks] = useState<ILinksData[]>([]);
   const [relationship, setRelationship] = useState(activeRelationships);
-  const [initialPosition, setInitialPosition] = useState<any>(null);
   const [prevNodePositions, setPrevNodePositions]: [
     INodePositions,
     React.Dispatch<React.SetStateAction<INodePositions>>,
@@ -170,7 +169,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         positions[n.id] = { x: n.position.x, y: n.position.y };
       });
       setPrevNodePositions(positions);
-      setInitialPosition({ x: node.position.x, y: node.position.y });
     },
     [nodes, prevNodePositions]
   );
