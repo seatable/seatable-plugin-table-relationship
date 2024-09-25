@@ -14,6 +14,7 @@ import {
   NodeResultItem,
   RelationshipState,
   nodeCts,
+  INodePositions,
 } from '../../utils/custom-interfaces/PluginTR';
 import CustomNode from './NodesComponent/CustomNode';
 
@@ -57,6 +58,10 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   const [links, setLinks] = useState<ILinksData[]>([]);
   const [relationship, setRelationship] = useState(activeRelationships);
   const [initialPosition, setInitialPosition] = useState<any>(null);
+  const [prevNodePositions, setPrevNodePositions]: [
+    INodePositions,
+    React.Dispatch<React.SetStateAction<INodePositions>>,
+  ] = useState({});
   const viewPortState = useViewport();
   const reactFlow = useReactFlow();
   const [_pluginVPDataStore, setPluginVPDataStore] = useState(viewPortState);
@@ -100,18 +105,9 @@ const PluginTR: React.FC<IPluginTRProps> = ({
 
     _edges = generateEdges(filteredLinks, validNodes);
 
-    // Only update links, nodes, and edges if they have changed
-    if (JSON.stringify(filteredLinks) !== JSON.stringify(links)) {
-      setLinks(filteredLinks);
-    }
-
-    if (JSON.stringify(validNodes) !== JSON.stringify(nodes)) {
-      setNodes(validNodes);
-    }
-
-    if (JSON.stringify(_edges) !== JSON.stringify(edges)) {
-      setEdges(_edges);
-    }
+    setLinks(filteredLinks);
+    setNodes(validNodes);
+    setEdges(_edges);
   }, [activeRelationships, relationship]);
 
   useEffect(() => {
@@ -127,6 +123,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
 
   useEffect(() => {
     const allTablesNodes = generateNodes(allTables);
+    console.log({ allTablesNodes });
     const { isPDSCS, customSettings } = isCustomSettingsFn(
       pluginDataStore,
       allTables,
@@ -165,9 +162,18 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     setPluginDataStoreFn(pluginDataStore, appActiveState.activePresetId, _nodes, _links, _edges);
   }
 
-  const onNodeDragStart = useCallback((event: any, node: any) => {
-    setInitialPosition({ x: node.position.x, y: node.position.y });
-  }, []);
+  const onNodeDragStart = useCallback(
+    (event: any, node: any) => {
+      // Store the current position of all nodes when dragging starts
+      const positions: { [key: string]: { x: number; y: number } } = {};
+      nodes.forEach((n) => {
+        positions[n.id] = { x: n.position.x, y: n.position.y };
+      });
+      setPrevNodePositions(positions);
+      setInitialPosition({ x: node.position.x, y: node.position.y });
+    },
+    [nodes, prevNodePositions]
+  );
 
   const onNodeDrag = useCallback(
     (event: any, node: any) => {
@@ -223,55 +229,32 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   );
 
   const onNodeDragStop = useCallback(
-    (event: any, node: any) => {
-      // Check if the node dragged has an initial position
-      if (initialPosition) {
-        console.log({ initialPosition });
-        console.log({ nodePos: node.position });
-        // Check if the position has changed
-        const positionChanged =
-          initialPosition.x !== node.position.x || initialPosition.y !== node.position.y;
+    (event, node) => {
+      const updatedNodes = nodes.map((n) => {
+        if (n.id === node.id) {
+          // Update node's position in state
+          return {
+            ...n,
 
-        console.log({ positionChanged });
-        if (positionChanged) {
-          // Update the node's position only if it has changed
-          const updatedNodes = nodes.map((n) =>
-            n.id === node.id
-              ? {
-                  ...n,
-                  position: node.position, // Update to new position
-                  data: {
-                    ...n.data,
-                    selected: false, // Deselect the node after drag stop
-                  },
-                }
-              : n
-          ) as NodeResultItem[];
-          console.log({ updatedNodes });
-          // Update the state and plugin data store
-          setNodes(updatedNodes);
-          setPluginDataStoreFn(
-            pluginDataStore,
-            appActiveState.activePresetId,
-            updatedNodes,
-            links,
-            edges
-          );
+            data: {
+              ...n.data,
+              selected: false,
+            },
+          };
         }
-      }
+        return n;
+      }) as NodeResultItem[];
 
-      // Reset the initial position after the drag stops
-      setInitialPosition(null);
+      setNodes(updatedNodes);
+      setPluginDataStoreFn(
+        pluginDataStore,
+        appActiveState.activePresetId,
+        updatedNodes,
+        links,
+        edges
+      );
     },
-    [
-      nodes,
-      pluginDataStore,
-      activeRelationships,
-      appActiveState.activePresetId,
-      links,
-      edges,
-      initialPosition,
-    ]
+    [nodes]
   );
 
   const proOptions = { hideAttribution: true };
@@ -301,13 +284,4 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   );
 };
 
-const areEqual = (prevProps: IPluginTRProps, nextProps: IPluginTRProps) => {
-  return (
-    prevProps.appActiveState.activePresetId === nextProps.appActiveState.activePresetId &&
-    JSON.stringify(prevProps.allTables) === JSON.stringify(nextProps.allTables) &&
-    prevProps.pluginDataStore === nextProps.pluginDataStore &&
-    JSON.stringify(prevProps.activeRelationships) === JSON.stringify(nextProps.activeRelationships)
-  );
-};
-
-export default memo(PluginTR, areEqual);
+export default PluginTR;

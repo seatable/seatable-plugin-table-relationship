@@ -27,11 +27,6 @@ export const fetchMetaData = async (isDevelopment: boolean) => {
   let BASE_TOKEN;
   let server = isDevelopment ? info.server : config.server;
 
-  console.log({ config });
-  console.log({ isDevelopment });
-  console.log({ server });
-  console.log({ APIToken });
-
   try {
     // Fetch the base UUID and token
     const optionsToken = {
@@ -46,8 +41,6 @@ export const fetchMetaData = async (isDevelopment: boolean) => {
     BASE_UUID = isDevelopment ? dtable_uuid : config.dtableUuid;
     BASE_TOKEN = isDevelopment ? access_token : config.accessToken;
     // Fetch the metadata using the obtained token and UUID
-    console.log({ token: BASE_TOKEN });
-    console.log({ uuid: BASE_UUID });
 
     const optionsData = {
       method: 'GET',
@@ -61,7 +54,7 @@ export const fetchMetaData = async (isDevelopment: boolean) => {
       optionsData
     );
     const response = await dataResponse.json();
-    console.log({ response });
+
     return response.metadata;
   } catch (err) {
     console.error('Error fetching metadata:', err);
