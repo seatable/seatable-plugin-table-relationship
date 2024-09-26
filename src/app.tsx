@@ -37,6 +37,7 @@ import {
   INITIAL_CURRENT_STATE,
   PLUGIN_NAME,
   DEFAULT_PLUGIN_DATA,
+  ACTIVE_PRESET_ID,
 } from './utils/template-constants';
 import './locale';
 import {
@@ -158,7 +159,7 @@ const App: React.FC<IAppProps> = (props) => {
     setPluginDataStore(pluginDataStore);
     setAllTables(responseTables);
     setPluginPresets(pluginPresets);
-    const localActivePresetId = localStorage.getItem('localActivePresetId');
+    const localActivePresetId = localStorage.getItem(ACTIVE_PRESET_ID);
     setIsShowState((prevState) => ({ ...prevState, isLoading: false }));
 
     if (localActivePresetId) {
@@ -220,7 +221,7 @@ const App: React.FC<IAppProps> = (props) => {
    * Handles the selection of a preset, updating the active state and associated data accordingly.
    */
   const onSelectPreset = (presetId: string, newPresetActiveState?: AppActiveState) => {
-    localStorage.setItem('localActivePresetId', presetId);
+    localStorage.setItem(ACTIVE_PRESET_ID, presetId);
     let updatedActiveState: AppActiveState;
     let updatedActiveTableViews: TableView[];
     const _activePresetIdx = pluginPresets.findIndex((preset) => preset._id === presetId);
