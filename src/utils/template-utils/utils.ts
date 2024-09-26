@@ -280,8 +280,12 @@ export const parsePluginDataToActiveState = (
   allTables: TableArray
 ) => {
   // Extract relevant data from the pluginDataStore and allTables arrays
-  let idx = pluginDataStore.activePresetIdx;
-  let id = pluginDataStore.activePresetId;
+  const id = localStorage.getItem('localActivePresetId') || pluginPresets[0]._id;
+  const idx =
+    pluginPresets.findIndex((p) => p._id === id) === -1
+      ? 0
+      : pluginPresets.findIndex((p) => p._id === id);
+
   let table =
     allTables.find((t) => t._id === pluginPresets[idx].settings?.selectedTable?.value) ||
     allTables[0];
