@@ -37,10 +37,12 @@ import {
   INITIAL_CURRENT_STATE,
   PLUGIN_NAME,
   DEFAULT_PLUGIN_DATA,
+  ACTIVE_PRESET_ID,
 } from './utils/template-constants';
 import './locale';
 import {
   createDefaultPluginDataStore,
+  fetchMetaData,
   findPresetName,
   getActiveStateSafeGuard,
   getActiveTableAndActiveView,
@@ -81,9 +83,11 @@ const App: React.FC<IAppProps> = (props) => {
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx } = appActiveState;
   const { collaborators } = window.app.state;
+  const [loading, setLoading] = useState(true); // Add a loading state
+  let __allTables: any;
 
   useEffect(() => {
-    initPluginDTableData();
+    initPluginDTableData(isDevelopment ?? false);
     return () => {
       unsubscribeLocalDtableChanged();
       unsubscribeRemoteDtableChanged();
@@ -96,20 +100,35 @@ const App: React.FC<IAppProps> = (props) => {
     }
   }, []);
 
-  const initPluginDTableData = async () => {
+  const initPluginDTableData = async (isDevelopment: boolean) => {
+    const metadata = await fetchMetaData(isDevelopment);
+    __allTables = metadata.tables;
+    setAllTables(metadata.tables);
+    setLoading(false);
+
+    // Execute the second part of your code when the data is ready
     if (isDevelopment) {
-      // local develop //
+      // Local development
       window.dtableSDK.subscribe('dtable-connect', () => {
-        onDTableConnect();
+        onDTableConnect(__allTables);
       });
     }
-    unsubscribeLocalDtableChanged = window.dtableSDK.subscribe('local-dtable-changed', () => {
-      onDTableChanged();
+
+    // Subscribe to table change events
+    unsubscribeLocalDtableChanged = window.dtableSDK.subscribe('local-dtable-changed', async () => {
+      const metadata = await fetchMetaData(isDevelopment);
+      __allTables = metadata.tables;
+      setAllTables(metadata.tables);
+      onDTableChanged(__allTables);
     });
-    unsubscribeRemoteDtableChanged = window.dtableSDK.subscribe('remote-dtable-changed', () => {
-      onDTableChanged();
-    });
-    resetData();
+    unsubscribeRemoteDtableChanged = window.dtableSDK.subscribe(
+      'remote-dtable-changed',
+      async () => {
+        onDTableChanged(__allTables);
+      }
+    );
+
+    resetData(metadata.tables);
   };
 
   let unsubscribeLocalDtableChanged = () => {
@@ -119,40 +138,43 @@ const App: React.FC<IAppProps> = (props) => {
     throw new Error('Method not implemented.');
   };
 
-  const onDTableConnect = () => {
-    resetData();
+  const onDTableConnect = (res: TableArray) => {
+    resetData(res);
   };
-  const onDTableChanged = () => {
-    resetData();
+  const onDTableChanged = (res: TableArray) => {
+    resetData(res);
   };
 
-  const resetData = () => {
-    let allTables: TableArray = window.dtableSDK.getTables(); // All the Tables of the Base
-    let activeTable: Table = window.dtableSDK.getActiveTable(); // How is the ActiveTable Set? allTables[0]?
+  const resetData = (responseTables: TableArray) => {
+    const activeTable = responseTables[0];
     let activeTableViews: TableViewArray = activeTable.views; // All the Views of the specific Active Table
     let pluginDataStore: IPluginDataStore = getPluginDataStore(activeTable, PLUGIN_NAME);
     let pluginPresets: PresetsArray = pluginDataStore.presets; // An array with all the Presets
-
+    let localActivePresetId = localStorage.getItem(ACTIVE_PRESET_ID);
+    if (!localActivePresetId) {
+      localActivePresetId = pluginPresets[0]._id;
+      localStorage.setItem(ACTIVE_PRESET_ID, localActivePresetId);
+    }
     setActiveComponents((prevState) => ({
       ...prevState,
       settingsDropDowns: info.active_components.settings_dropdowns,
       add_row_button: info.active_components.add_row_button,
     }));
     setPluginDataStore(pluginDataStore);
-    setAllTables(allTables);
+    setAllTables(responseTables);
     setPluginPresets(pluginPresets);
     setIsShowState((prevState) => ({ ...prevState, isLoading: false }));
 
-    if (pluginDataStore.activePresetId) {
+    if (localActivePresetId) {
       const appActiveState = parsePluginDataToActiveState(
         pluginDataStore,
         pluginPresets,
-        allTables
+        responseTables
       );
 
-      onSelectPreset(pluginDataStore.activePresetId, appActiveState);
+      onSelectPreset(localActivePresetId, appActiveState);
       const activePresetRelationship = pluginPresets.find((p) => {
-        return p._id === pluginDataStore.activePresetId;
+        return p._id === localActivePresetId;
       })?.customSettings?.relationship;
       if (activePresetRelationship) {
         setActiveRelationships(activePresetRelationship);
@@ -202,6 +224,7 @@ const App: React.FC<IAppProps> = (props) => {
    * Handles the selection of a preset, updating the active state and associated data accordingly.
    */
   const onSelectPreset = (presetId: string, newPresetActiveState?: AppActiveState) => {
+    localStorage.setItem(ACTIVE_PRESET_ID, presetId);
     let updatedActiveState: AppActiveState;
     let updatedActiveTableViews: TableView[];
     const _activePresetIdx = pluginPresets.findIndex((preset) => preset._id === presetId);
@@ -211,8 +234,10 @@ const App: React.FC<IAppProps> = (props) => {
         ...newPresetActiveState,
       };
       updatedActiveTableViews = newPresetActiveState?.activeTable?.views!;
+      setAppActiveState(updatedActiveState);
     } else {
       const activePreset = pluginPresets.find((preset) => preset._id === presetId);
+      console.log({ activePreset });
       const selectedTable = activePreset?.settings?.selectedTable;
       const selectedView = activePreset?.settings?.selectedView;
 
@@ -231,21 +256,16 @@ const App: React.FC<IAppProps> = (props) => {
         activePresetId: presetId,
         activePresetIdx: _activePresetIdx,
       };
-
+      console.log({ updatedActiveState });
       updatePluginDataStore({
         ...pluginDataStore,
         activePresetId: presetId,
         activePresetIdx: _activePresetIdx,
       });
+      setAppActiveState(updatedActiveState);
     }
 
-    const activeViewRows: TableRow[] = window.dtableSDK.getViewRows(
-      updatedActiveState?.activeTableView,
-      updatedActiveState?.activeTable
-    );
-
     setActiveTableViews(updatedActiveTableViews);
-    setAppActiveState({ ...updatedActiveState, activeViewRows });
   };
 
   /**
@@ -274,6 +294,7 @@ const App: React.FC<IAppProps> = (props) => {
 
   // Update plugin data store (old plugin settings)
   const updatePluginDataStore = (pluginDataStore: IPluginDataStore) => {
+    console.log('updatePluginDataStore', pluginDataStore);
     window.dtableSDK.updatePluginSettings(PLUGIN_NAME, pluginDataStore);
   };
 

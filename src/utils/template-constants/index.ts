@@ -12,6 +12,8 @@ const PLUGIN_NAME = info.name
   .replace(/-([a-z])/g, (_, match) => ' ' + match.toUpperCase())
   .replace(/^./, (str) => str.toUpperCase());
 const PLUGIN_ID = `${info.name}-component`;
+const DTABLE_UUID = window.dtablePluginConfig.dtableUuid;
+export const ACTIVE_PRESET_ID = 'localActivePresetId_' + DTABLE_UUID.slice(0, 7) + '_' + PLUGIN_NAME;
 
 // Table and Preset Defaults
 const TABLE_NAME = 'table_name';
