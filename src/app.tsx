@@ -150,7 +150,11 @@ const App: React.FC<IAppProps> = (props) => {
     let activeTableViews: TableViewArray = activeTable.views; // All the Views of the specific Active Table
     let pluginDataStore: IPluginDataStore = getPluginDataStore(activeTable, PLUGIN_NAME);
     let pluginPresets: PresetsArray = pluginDataStore.presets; // An array with all the Presets
-
+    let localActivePresetId = localStorage.getItem(ACTIVE_PRESET_ID);
+    if (!localActivePresetId) {
+      localActivePresetId = pluginPresets[0]._id;
+      localStorage.setItem(ACTIVE_PRESET_ID, localActivePresetId);
+    }
     setActiveComponents((prevState) => ({
       ...prevState,
       settingsDropDowns: info.active_components.settings_dropdowns,
@@ -159,7 +163,6 @@ const App: React.FC<IAppProps> = (props) => {
     setPluginDataStore(pluginDataStore);
     setAllTables(responseTables);
     setPluginPresets(pluginPresets);
-    const localActivePresetId = localStorage.getItem(ACTIVE_PRESET_ID);
     setIsShowState((prevState) => ({ ...prevState, isLoading: false }));
 
     if (localActivePresetId) {
