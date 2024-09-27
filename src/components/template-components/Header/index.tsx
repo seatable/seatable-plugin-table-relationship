@@ -23,42 +23,6 @@ const Header: React.FC<IHeaderProps> = (props) => {
     }
   }, []);
 
-  const downloadPdfDocument = () => {
-    const input = document.getElementById(PLUGIN_NAME);
-
-    // Step 1: Capture component as an image
-    htmlToImage
-      .toPng(input as HTMLElement)
-      .then(function (dataUrl) {
-        // Step 2: Convert image to PDF
-        const img = new Image();
-        img.src = dataUrl;
-        img.onload = function () {
-          const pdf = new jsPDF('l', 'mm', [420, 297]);
-
-          // Step 3: Add background color to the entire PDF
-          pdf.setFillColor('#f5f5f5');
-          pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight(), 'F');
-
-          // Step 4: Add image to PDF
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = pdf.internal.pageSize.getHeight();
-
-          const imgWidth = pdfWidth;
-          const imgHeight = (img.height * imgWidth) / img.width;
-          const yPos = (pdfHeight - imgHeight) / 2;
-
-          pdf.addImage(dataUrl, 'PNG', 0, yPos, imgWidth, imgHeight);
-
-          // Step 5: Download PDF
-          pdf.save(`${presetName}.pdf`);
-        };
-      })
-      .catch(function (error) {
-        console.error('Oops, something went wrong!', error);
-      });
-  };
-
   function onToggleView() {
     reactFlowInstance.fitView();
   }

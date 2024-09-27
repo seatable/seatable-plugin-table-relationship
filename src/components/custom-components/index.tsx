@@ -1,5 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useCallback, useState, useRef } from 'react';
-
 import ReactFlow, {
   useNodesState,
   useEdgesState,
@@ -101,6 +101,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     setLinks(filteredLinks);
     setNodes(validNodes);
     setEdges(_edges);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeRelationships, relationship]);
 
   useEffect(() => {
@@ -112,6 +113,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       reactFlow.setViewport(pluginVPDataStore);
     }
     setPluginVPDataStore(pluginVPDataStore);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appActiveState.activePresetId]);
 
   useEffect(() => {
@@ -121,7 +123,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       allTables,
       appActiveState.activePresetId
     );
-
     activeCustomSettings = customSettings;
     if (isPDSCS === false) {
       // if custom settings are not found, we set nodes, links, edges and relationship
