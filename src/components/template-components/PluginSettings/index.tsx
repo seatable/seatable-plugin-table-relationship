@@ -64,10 +64,6 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appActiveState]);
 
-  const handleShownFieldNames = (isShown: boolean) => {
-    console.log('isShown', isShown);
-  };
-
   return (
     <div
       className={`bg-white ${
