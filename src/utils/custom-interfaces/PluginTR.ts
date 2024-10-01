@@ -24,9 +24,16 @@ interface Link {
 }
 
 interface RelationshipState {
+  // Link to other records relationship
   recRel: boolean;
+  // Link formula relationship
   lkRel: boolean;
   lk2Rel: boolean;
+  countLinks: boolean;
+  rollup: boolean;
+  findmax: boolean;
+  findmin: boolean;
+  // Tables
   tblNoLnk: boolean;
 }
 
@@ -70,6 +77,7 @@ interface ILinksColumnData {
   table_name: string;
   column_key: string;
   column_name: string;
+  formulaType?: string;
   srcT?: string;
   tgtT?: string;
   link_id?: string;
@@ -80,6 +88,7 @@ interface ILinksData {
   type: string;
   sourceData: ILinksColumnData;
   targetData1st: ILinksColumnData;
+  formulaType?: string;
   targetData2nd?: ILinksColumnData;
 }
 

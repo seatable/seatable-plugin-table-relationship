@@ -72,7 +72,6 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   useEffect(() => {
     let _edges = edges;
     let _links = generateLinks(allTables);
-
     const pluginPresetData =
       pluginDataStore.presets[
         pluginDataStore.presets.findIndex(

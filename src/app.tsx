@@ -78,12 +78,15 @@ const App: React.FC<IAppProps> = (props) => {
     recRel: true,
     lkRel: true,
     lk2Rel: true,
+    countLinks: true,
+    rollup: true,
+    findmax: true,
+    findmin: true,
     tblNoLnk: true,
   });
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx } = appActiveState;
   const { collaborators } = window.app.state;
-  const [loading, setLoading] = useState(true); // Add a loading state
   let __allTables: any;
 
   useEffect(() => {
@@ -104,7 +107,6 @@ const App: React.FC<IAppProps> = (props) => {
     const metadata = await fetchMetaData(isDevelopment);
     __allTables = metadata.tables;
     setAllTables(metadata.tables);
-    setLoading(false);
 
     // Execute the second part of your code when the data is ready
     if (isDevelopment) {
@@ -124,6 +126,9 @@ const App: React.FC<IAppProps> = (props) => {
     unsubscribeRemoteDtableChanged = window.dtableSDK.subscribe(
       'remote-dtable-changed',
       async () => {
+        const metadata = await fetchMetaData(isDevelopment);
+        __allTables = metadata.tables;
+        setAllTables(metadata.tables);
         onDTableChanged(__allTables);
       }
     );
