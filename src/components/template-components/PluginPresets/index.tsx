@@ -160,6 +160,7 @@ const PluginPresets: React.FC<IPresetsProps> = ({
     setPluginPresets(_pluginPresets || []);
     let _activePresetIdx = _pluginPresets?.length;
     let _id: string = generatorPresetId(pluginPresets) || '';
+    localStorage.setItem(ACTIVE_PRESET_ID, _id);
     let newPreset = new Preset({ _id, name: presetName });
     let newPresetsArray = deepCopy(_pluginPresets);
     newPresetsArray.push(newPreset);
@@ -216,6 +217,7 @@ const PluginPresets: React.FC<IPresetsProps> = ({
       activePresetIdx = newPluginPresets.length - 1;
     }
     pluginDataStore.presets = newPluginPresets;
+    localStorage.setItem(ACTIVE_PRESET_ID, newPluginPresets[0]._id);
     updatePresets(0, newPluginPresets, pluginDataStore, pluginDataStore.presets[0]._id);
   };
 
