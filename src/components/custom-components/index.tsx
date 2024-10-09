@@ -220,7 +220,9 @@ const PluginTR: React.FC<IPluginTRProps> = ({
           const targetNode = nodeDataArray.find((node) => node.n === e.target);
 
           if (sourceNode && targetNode) {
-            if (sourceNode.cts + 90 < targetNode.cts) {
+            if (e.source === e.target) {
+              return e;
+            } else if (sourceNode.cts + 90 < targetNode.cts) {
               return {
                 ...e,
                 sourceHandle: e.sourceHandle?.replace('_l-', '_r-'),
