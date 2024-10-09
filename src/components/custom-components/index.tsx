@@ -219,24 +219,23 @@ const PluginTR: React.FC<IPluginTRProps> = ({
           const sourceNode = nodeDataArray.find((node) => node.n === e.source);
           const targetNode = nodeDataArray.find((node) => node.n === e.target);
 
-          if (sourceNode && targetNode) {
-            if (e.source === e.target) {
-              return e;
-            } else if (sourceNode.cts + 90 < targetNode.cts) {
-              return {
-                ...e,
-                sourceHandle: e.sourceHandle?.replace('_l-', '_r-'),
-                targetHandle: e.targetHandle?.replace('_r-', '_l-'),
-              };
-            } else {
-              return {
-                ...e,
-                sourceHandle: e.sourceHandle?.replace('_r-', '_l-'),
-                targetHandle: e.targetHandle?.replace('_l-', '_r-'),
-              };
-            }
+          if (!sourceNode || !targetNode || e.source === e.target) {
+            return e;
           }
-          return e;
+
+          const isSourceEarlier = sourceNode.cts + 90 < targetNode.cts;
+
+          return {
+            ...e,
+            sourceHandle: e.sourceHandle?.replace(
+              isSourceEarlier ? '_l-' : '_r-',
+              isSourceEarlier ? '_r-' : '_l-'
+            ),
+            targetHandle: e.targetHandle?.replace(
+              isSourceEarlier ? '_r-' : '_l-',
+              isSourceEarlier ? '_l-' : '_r-'
+            ),
+          };
         });
         setEdges(updatedEdges);
       }
