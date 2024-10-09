@@ -180,6 +180,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     (event, node) => {
       // Store the current position of all nodes when dragging starts
       const positions: { [key: string]: { x: number; y: number } } = {};
+      console.log({ positions });
       nodes.forEach((n) => {
         positions[n.id] = { x: n.position.x, y: n.position.y };
       });
@@ -288,6 +289,13 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         defaultViewport={_pluginVPDataStore}
         fitView={false}
         proOptions={proOptions}
+        onMoveStart={() => {
+          console.log(viewPortState);
+        }}
+        onMove={() => {
+          console.log({ _pluginVPDataStore });
+          console.log(viewPortState);
+        }}
         onMoveEnd={() => {
           setViewportPluginDataStoreFn(
             pluginDataStore,
