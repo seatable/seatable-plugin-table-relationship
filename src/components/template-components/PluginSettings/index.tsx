@@ -64,10 +64,6 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appActiveState]);
 
-  const handleShownFieldNames = (isShown: boolean) => {
-    console.log('isShown', isShown);
-  };
-
   return (
     <div
       className={`bg-white ${
@@ -113,6 +109,9 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
             </div>
           )}
           <div className={'mt-2'}>
+            <p className="d-inline-block mb-2" style={{ color: '#808080' }}>
+              {intl.get('custom_plugin.title_link').d(`${d.custom_plugin.title_link}`)}
+            </p>
             <div className="mb-2 d-flex align-items-center justify-content-between">
               <p>{intl.get('custom_plugin.rel_links').d(`${d.custom_plugin.rel_links}`)}</p>
               <button
@@ -130,6 +129,9 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
             </div>
           </div>
           <div className={'mt-2'}>
+            <p className="d-inline-block mb-2" style={{ color: '#808080' }}>
+              {intl.get('custom_plugin.title_formula').d(`${d.custom_plugin.title_formula}`)}
+            </p>
             <div className="mb-2 d-flex align-items-center justify-content-between">
               <p>{intl.get('custom_plugin.rel_lookup').d(`${d.custom_plugin.rel_lookup}`)}</p>
               <button
@@ -148,22 +150,76 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
           </div>
           <div className={'mt-2'}>
             <div className="mb-2 d-flex align-items-center justify-content-between">
-              <p>{intl.get('custom_plugin.rel_lookup2nd').d(`${d.custom_plugin.rel_lookup2nd}`)}</p>
+              <p>{intl.get('custom_plugin.rel_count').d(`${d.custom_plugin.rel_count}`)}</p>
               <button
                 onClick={() => {
                   handleRelationships({
                     ...activeRelationships,
-                    lk2Rel: !activeRelationships.lk2Rel,
+                    countLinks: !activeRelationships.countLinks,
                   });
                 }}
                 className={`${
-                  activeRelationships.lk2Rel
+                  activeRelationships.countLinks
                     ? stylesPSettings.settings_fields_toggle_btns_active
                     : stylesPSettings.settings_fields_toggle_btns
                 } `}></button>
             </div>
           </div>
           <div className={'mt-2'}>
+            <div className="mb-2 d-flex align-items-center justify-content-between">
+              <p>{intl.get('custom_plugin.rel_rollup').d(`${d.custom_plugin.rel_rollup}`)}</p>
+              <button
+                onClick={() => {
+                  handleRelationships({
+                    ...activeRelationships,
+                    rollup: !activeRelationships.rollup,
+                  });
+                }}
+                className={`${
+                  activeRelationships.rollup
+                    ? stylesPSettings.settings_fields_toggle_btns_active
+                    : stylesPSettings.settings_fields_toggle_btns
+                } `}></button>
+            </div>
+          </div>
+          <div className={'mt-2'}>
+            <div className="mb-2 d-flex align-items-center justify-content-between">
+              <p>{intl.get('custom_plugin.rel_max').d(`${d.custom_plugin.rel_max}`)}</p>
+              <button
+                onClick={() => {
+                  handleRelationships({
+                    ...activeRelationships,
+                    findmax: !activeRelationships.findmax,
+                  });
+                }}
+                className={`${
+                  activeRelationships.findmax
+                    ? stylesPSettings.settings_fields_toggle_btns_active
+                    : stylesPSettings.settings_fields_toggle_btns
+                } `}></button>
+            </div>
+          </div>
+          <div className={'mt-2'}>
+            <div className="mb-2 d-flex align-items-center justify-content-between">
+              <p>{intl.get('custom_plugin.rel_min').d(`${d.custom_plugin.rel_min}`)}</p>
+              <button
+                onClick={() => {
+                  handleRelationships({
+                    ...activeRelationships,
+                    findmin: !activeRelationships.findmin,
+                  });
+                }}
+                className={`${
+                  activeRelationships.findmin
+                    ? stylesPSettings.settings_fields_toggle_btns_active
+                    : stylesPSettings.settings_fields_toggle_btns
+                } `}></button>
+            </div>
+          </div>
+          <div className={'mt-2'}>
+            <p className="d-inline-block mb-2" style={{ color: '#808080' }}>
+              {intl.get('custom_plugin.title_tables').d(`${d.custom_plugin.title_tables}`)}
+            </p>
             <div className="mb-2 d-flex align-items-center justify-content-between">
               <p>{intl.get('custom_plugin.tbl_noLinks').d(`${d.custom_plugin.tbl_noLinks}`)}</p>
               <button
