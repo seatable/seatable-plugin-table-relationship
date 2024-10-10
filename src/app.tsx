@@ -41,6 +41,7 @@ import {
 import './locale';
 import {
   createDefaultPluginDataStore,
+  fetchMetaData,
   findPresetName,
   getActiveStateSafeGuard,
   getActiveTableAndActiveView,
@@ -101,6 +102,8 @@ const App: React.FC<IAppProps> = (props) => {
   }, []);
 
   const initPluginDTableData = async () => {
+    const metadata = await fetchMetaData(isDevelopment ?? false);
+    console.log({ metadata });
     if (isDevelopment) {
       // local develop //
       window.dtableSDK.subscribe('dtable-connect', () => {
@@ -130,8 +133,11 @@ const App: React.FC<IAppProps> = (props) => {
     resetData();
   };
 
-  const resetData = () => {
+  const resetData = async () => {
+    // const metadata = await fetchMetaData(isDevelopment ?? false);
+    // console.log({ metadata });
     let allTables: TableArray = window.dtableSDK.getTables(); // All the Tables of the Base
+    console.log({ allTables });
     let activeTable: Table = window.dtableSDK.getActiveTable(); // How is the ActiveTable Set? allTables[0]?
     let activeTableViews: TableViewArray = activeTable.views; // All the Views of the specific Active Table
     let pluginDataStore: IPluginDataStore = getPluginDataStore(activeTable, PLUGIN_NAME);
