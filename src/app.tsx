@@ -77,6 +77,10 @@ const App: React.FC<IAppProps> = (props) => {
     recRel: true,
     lkRel: true,
     lk2Rel: true,
+    countLinks: true,
+    rollup: true,
+    findmax: true,
+    findmin: true,
     tblNoLnk: true,
   });
   // Destructure properties from the app's active state for easier access
@@ -250,7 +254,6 @@ const App: React.FC<IAppProps> = (props) => {
         activePresetId: presetId,
         activePresetIdx: _activePresetIdx,
       };
-
       updatePluginDataStore({
         ...pluginDataStore,
         activePresetId: presetId,
@@ -521,6 +524,8 @@ const App: React.FC<IAppProps> = (props) => {
             onTogglePresets={togglePresets}
             toggleSettings={toggleSettings}
             togglePlugin={onPluginToggle}
+            appActiveState={appActiveState}
+            pluginDataStore={pluginDataStore}
           />
           {/* main body  */}
           <div

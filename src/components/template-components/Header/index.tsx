@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../../../styles/template-styles/Plugin.module.scss';
 import stylesPPresets from '../../../styles/template-styles/PluginPresets.module.scss';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
-import * as htmlToImage from 'html-to-image';
-import download from 'downloadjs';
 import { IHeaderProps } from '../../../utils/template-interfaces/Header.interface';
-import { PLUGIN_ID, PLUGIN_NAME } from '../../../utils/template-constants';
+import { PLUGIN_ID } from '../../../utils/template-constants';
 import { HiOutlineChevronDoubleRight } from 'react-icons/hi2';
 
 import { useReactFlow } from 'reactflow';
+import { setViewportPluginDataStoreFn } from '../../../utils/custom-utils/utils';
 
 const Header: React.FC<IHeaderProps> = (props) => {
-  const { presetName, isShowPresets, onTogglePresets, togglePlugin } = props;
+  const {
+    presetName,
+    isShowPresets,
+    onTogglePresets,
+    togglePlugin,
+    pluginDataStore,
+    appActiveState,
+  } = props;
   const [customComponentContent, setCustomComponentContent] = useState<string | null>(null);
   const reactFlowInstance = useReactFlow();
 
@@ -25,6 +29,8 @@ const Header: React.FC<IHeaderProps> = (props) => {
 
   function onToggleView() {
     reactFlowInstance.fitView();
+    const fitView = reactFlowInstance.getViewport();
+    setViewportPluginDataStoreFn(pluginDataStore, appActiveState.activePresetId, fitView);
   }
 
   return (
