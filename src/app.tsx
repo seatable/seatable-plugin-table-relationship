@@ -76,6 +76,10 @@ const App: React.FC<IAppProps> = (props) => {
     recRel: true,
     lkRel: true,
     lk2Rel: true,
+    countLinks: true,
+    rollup: true,
+    findmax: true,
+    findmin: true,
     tblNoLnk: true,
   });
   // Destructure properties from the app's active state for easier access
