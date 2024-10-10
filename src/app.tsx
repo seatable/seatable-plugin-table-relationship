@@ -82,7 +82,7 @@ const App: React.FC<IAppProps> = (props) => {
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx } = appActiveState;
   const { collaborators } = window.app.state;
-  const [loading, setLoading] = useState(true); // Add a loading state
+
   let __allTables: any;
 
   useEffect(() => {
@@ -103,7 +103,6 @@ const App: React.FC<IAppProps> = (props) => {
     const metadata = await fetchMetaData(isDevelopment);
     __allTables = metadata.tables;
     setAllTables(metadata.tables);
-    setLoading(false);
 
     // Execute the second part of your code when the data is ready
     if (isDevelopment) {
