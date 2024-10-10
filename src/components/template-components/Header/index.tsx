@@ -6,9 +6,17 @@ import { PLUGIN_ID } from '../../../utils/template-constants';
 import { HiOutlineChevronDoubleRight } from 'react-icons/hi2';
 
 import { useReactFlow } from 'reactflow';
+import { setViewportPluginDataStoreFn } from '../../../utils/custom-utils/utils';
 
 const Header: React.FC<IHeaderProps> = (props) => {
-  const { presetName, isShowPresets, onTogglePresets, togglePlugin } = props;
+  const {
+    presetName,
+    isShowPresets,
+    onTogglePresets,
+    togglePlugin,
+    pluginDataStore,
+    appActiveState,
+  } = props;
   const [customComponentContent, setCustomComponentContent] = useState<string | null>(null);
   const reactFlowInstance = useReactFlow();
 
@@ -21,6 +29,8 @@ const Header: React.FC<IHeaderProps> = (props) => {
 
   function onToggleView() {
     reactFlowInstance.fitView();
+    const fitView = reactFlowInstance.getViewport();
+    setViewportPluginDataStoreFn(pluginDataStore, appActiveState.activePresetId, fitView);
   }
 
   return (

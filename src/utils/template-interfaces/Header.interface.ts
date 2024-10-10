@@ -1,3 +1,5 @@
+import { AppActiveState, IPluginDataStore } from './App.interface';
+
 export interface IHeaderProps {
   presetName: string | undefined;
   isShowSettings: boolean;
@@ -5,4 +7,6 @@ export interface IHeaderProps {
   toggleSettings: () => void;
   togglePlugin: () => void;
   onTogglePresets: () => void;
+  appActiveState: AppActiveState;
+  pluginDataStore: IPluginDataStore;
 }
