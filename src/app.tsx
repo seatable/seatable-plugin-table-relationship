@@ -40,6 +40,9 @@ import {
 } from './utils/template-constants';
 import './locale';
 import {
+  cleanActiveTable,
+  cleanActiveTableViews,
+  cleanAllTables,
   createDefaultPluginDataStore,
   fetchMetaData,
   findPresetName,
@@ -102,8 +105,6 @@ const App: React.FC<IAppProps> = (props) => {
   }, []);
 
   const initPluginDTableData = async () => {
-    const metadata = await fetchMetaData(isDevelopment ?? false);
-    console.log({ metadata });
     if (isDevelopment) {
       // local develop //
       window.dtableSDK.subscribe('dtable-connect', () => {
@@ -134,12 +135,9 @@ const App: React.FC<IAppProps> = (props) => {
   };
 
   const resetData = async () => {
-    // const metadata = await fetchMetaData(isDevelopment ?? false);
-    // console.log({ metadata });
-    let allTables: TableArray = window.dtableSDK.getTables(); // All the Tables of the Base
-    console.log({ allTables });
-    let activeTable: Table = window.dtableSDK.getActiveTable(); // How is the ActiveTable Set? allTables[0]?
-    let activeTableViews: TableViewArray = activeTable.views; // All the Views of the specific Active Table
+    let allTables: TableArray = cleanAllTables(); // All the Tables of the Base
+    let activeTable: Table = cleanActiveTable(); // How is the ActiveTable Set? allTables[0]?
+    let activeTableViews: TableViewArray = cleanActiveTableViews(activeTable); // All the Views of the specific Active Table
     let pluginDataStore: IPluginDataStore = getPluginDataStore(activeTable, PLUGIN_NAME);
     let pluginPresets: PresetsArray = pluginDataStore.presets; // An array with all the Presets
 

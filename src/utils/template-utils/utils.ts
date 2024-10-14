@@ -21,6 +21,7 @@ import {
 import info from '../../setting.local';
 
 export const fetchMetaData = async (isDevelopment: boolean) => {
+  console.log('fetchMetaData');
   const config = window.dtable;
   let { APIToken } = info;
   let BASE_UUID;
@@ -59,6 +60,49 @@ export const fetchMetaData = async (isDevelopment: boolean) => {
   } catch (err) {
     console.error('Error fetching metadata:', err);
   }
+};
+
+export const cleanAllTables = () => {
+  let allTables: TableArray = window.dtableSDK.getTables().map((t: Table) => {
+    let nextTable = {
+      ...t,
+      rows: [],
+      id_row_map: {},
+    };
+
+    nextTable.views = nextTable.views.map((v: TableView) => {
+      return {
+        ...v,
+        rows: [],
+        formula_rows: {},
+      };
+    });
+
+    return nextTable;
+  }); // All the Tables of the Base
+
+  return allTables;
+};
+
+export const cleanActiveTable = () => {
+  let activeTable: Table = window.dtableSDK.getActiveTable();
+  activeTable = {
+    ...activeTable,
+    rows: [],
+    id_row_map: {},
+  };
+  return activeTable;
+};
+
+export const cleanActiveTableViews = (activeTable: Table) => {
+  activeTable.views = activeTable.views.map((v: TableView) => {
+    return {
+      ...v,
+      rows: [],
+      formula_rows: {},
+    };
+  });
+  return activeTable.views;
 };
 
 export const generatorBase64Code = (keyLength = 4) => {
