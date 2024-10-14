@@ -13,6 +13,7 @@ import {
   TableView,
 } from '../template-interfaces/Table.interface';
 import {
+  ACTIVE_PRESET_ID,
   DEFAULT_PLUGIN_DATA,
   PLUGIN_NAME,
   POSSIBLE,
@@ -21,7 +22,6 @@ import {
 import info from '../../setting.local';
 
 export const fetchMetaData = async (isDevelopment: boolean) => {
-  console.log('fetchMetaData');
   const config = window.dtable;
   let { APIToken } = info;
   let BASE_UUID;
@@ -105,6 +105,11 @@ export const cleanActiveTableViews = (activeTable: Table) => {
   return activeTable.views;
 };
 
+    return response.metadata;
+  } catch (err) {
+    console.error('Error fetching metadata:', err);
+  }
+};
 export const generatorBase64Code = (keyLength = 4) => {
   let key = '';
   for (let i = 0; i < keyLength; i++) {
@@ -325,8 +330,12 @@ export const parsePluginDataToActiveState = (
   allTables: TableArray
 ) => {
   // Extract relevant data from the pluginDataStore and allTables arrays
-  let idx = pluginDataStore.activePresetIdx;
-  let id = pluginDataStore.activePresetId;
+  const id = localStorage.getItem(ACTIVE_PRESET_ID) || pluginPresets[0]._id;
+  const idx =
+    pluginPresets.findIndex((p) => p._id === id) === -1
+      ? 0
+      : pluginPresets.findIndex((p) => p._id === id);
+
   let table =
     allTables.find((t) => t._id === pluginPresets[idx].settings?.selectedTable?.value) ||
     allTables[0];

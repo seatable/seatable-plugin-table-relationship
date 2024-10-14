@@ -1,11 +1,12 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useCallback, useState, useRef } from 'react';
-
 import ReactFlow, {
   useNodesState,
   useEdgesState,
   isNode,
   useViewport,
   useReactFlow,
+  Viewport,
 } from 'reactflow';
 import {
   IPluginTRProps,
@@ -40,6 +41,7 @@ import {
   IPresetInfo,
   PresetCustomSettings,
 } from '../../utils/template-interfaces/PluginPresets/Presets.interface';
+import { IPluginDataStore } from '../../utils/template-interfaces/App.interface';
 
 const nodeTypes = {
   custom: CustomNode,
@@ -285,11 +287,11 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         onEdgesChange={onEdgesChange}
         onNodeDragStart={onNodeDragStart}
         onNodeDrag={onNodeDrag}
+        onNodeDragStop={onNodeDragStop}
         defaultViewport={_pluginVPDataStore}
         fitView={false}
-        onNodeDragStop={onNodeDragStop}
         proOptions={proOptions}
-        onMoveEnd={(e) => {
+        onMoveEnd={() => {
           setViewportPluginDataStoreFn(
             pluginDataStore,
             appActiveState.activePresetId,
