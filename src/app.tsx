@@ -271,10 +271,13 @@ const App: React.FC<IAppProps> = (props) => {
       activePresetId: activePresetId,
       activePresetIdx: _activePresetIdx,
     };
-    setAppActiveState((prevState) => ({
+    const updatedActiveState = (prevState: AppActiveState) => ({
       ...prevState,
       activePresetIdx: _activePresetIdx,
-    }));
+    });
+
+    setAppActiveState((prevState: AppActiveState) => updatedActiveState(prevState));
+    onSelectPreset(activePresetId, updatedActiveState(appActiveState));
     setPluginPresets(updatedPresets);
     setPluginDataStore(pluginDataStore);
     updatePluginDataStore(_pluginDataStore);
