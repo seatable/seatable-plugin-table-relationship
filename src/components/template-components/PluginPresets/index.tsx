@@ -12,6 +12,7 @@ import {
 } from '../../../utils/template-interfaces/PluginPresets/Presets.interface';
 import {
   appendPresetSuffix,
+  cleanAllTables,
   createDefaultPresetSettings,
   generatorPresetId,
   getActiveTableAndActiveView,
@@ -70,7 +71,7 @@ const PluginPresets: React.FC<IPresetsProps> = ({
 
   const initPresetSetting = (settings = {}) => {
     let initUpdated = {};
-    let tables = window.dtableSDK.getTables();
+    let tables = cleanAllTables();
     let selectedTable = getSelectedTable(tables, settings);
     let titleColumn = selectedTable.columns.find((column: TableColumn) => column.key === '0000');
     let imageColumn = selectedTable.columns.find((column: TableColumn) => column.type === 'image');
