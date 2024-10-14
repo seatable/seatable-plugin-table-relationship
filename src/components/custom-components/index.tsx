@@ -5,7 +5,6 @@ import ReactFlow, {
   useEdgesState,
   isNode,
   useViewport,
-  useOnViewportChange,
   useReactFlow,
 } from 'reactflow';
 import {
@@ -101,6 +100,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     setLinks(filteredLinks);
     setNodes(validNodes);
     setEdges(_edges);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeRelationships, relationship]);
 
   useEffect(() => {
@@ -112,6 +112,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       reactFlow.setViewport(pluginVPDataStore);
     }
     setPluginVPDataStore(pluginVPDataStore);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appActiveState.activePresetId]);
 
   useEffect(() => {
@@ -121,7 +122,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       allTables,
       appActiveState.activePresetId
     );
-
+    // eslint-disable-next-line
     activeCustomSettings = customSettings;
     if (isPDSCS === false) {
       // if custom settings are not found, we set nodes, links, edges and relationship
@@ -238,6 +239,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         setEdges(updatedEdges);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [nodes, setNodes, prevNodePositions]
   );
 
@@ -268,6 +270,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         edges
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [nodes]
   );
 
