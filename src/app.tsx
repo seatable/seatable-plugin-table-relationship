@@ -446,6 +446,8 @@ const App: React.FC<IAppProps> = (props) => {
             onTogglePresets={togglePresets}
             toggleSettings={toggleSettings}
             togglePlugin={onPluginToggle}
+            appActiveState={appActiveState}
+            pluginDataStore={pluginDataStore}
           />
           {/* main body  */}
           <div

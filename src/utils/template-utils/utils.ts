@@ -20,48 +20,6 @@ import {
 } from '../template-constants';
 import info from '../../setting.local';
 
-export const fetchMetaData = async (isDevelopment: boolean) => {
-  console.log('fetchMetaData');
-  const config = window.dtable;
-  let { APIToken } = info;
-  let BASE_UUID;
-  let BASE_TOKEN;
-  let server = isDevelopment ? info.server : config.server;
-
-  try {
-    // Fetch the base UUID and token
-    const optionsToken = {
-      method: 'GET',
-      headers: {
-        accept: 'application/json',
-        authorization: `Bearer ${APIToken}`,
-      },
-    };
-    const tokenResponse = await fetch(`${server}/api/v2.1/dtable/app-access-token/`, optionsToken);
-    let { dtable_uuid, access_token } = await tokenResponse.json();
-    BASE_UUID = isDevelopment ? dtable_uuid : config.dtableUuid;
-    BASE_TOKEN = isDevelopment ? access_token : config.accessToken;
-    // Fetch the metadata using the obtained token and UUID
-
-    const optionsData = {
-      method: 'GET',
-      headers: {
-        accept: 'application/json',
-        authorization: `Bearer ${BASE_TOKEN}`,
-      },
-    };
-    const dataResponse = await fetch(
-      `${server}/api-gateway/api/v2/dtables/${BASE_UUID}/metadata/`,
-      optionsData
-    );
-    const response = await dataResponse.json();
-
-    return response.metadata;
-  } catch (err) {
-    console.error('Error fetching metadata:', err);
-  }
-};
-
 export const cleanAllTables = () => {
   let allTables: TableArray = window.dtableSDK.getTables().map((t: Table) => {
     let nextTable = {
@@ -105,6 +63,46 @@ export const cleanActiveTableViews = (activeTable: Table) => {
   return activeTable.views;
 };
 
+export const fetchMetaData = async (isDevelopment: boolean) => {
+  const config = window.dtable;
+  let { APIToken } = info;
+  let BASE_UUID;
+  let BASE_TOKEN;
+  let server = isDevelopment ? info.server : config.server;
+
+  try {
+    // Fetch the base UUID and token
+    const optionsToken = {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        authorization: `Bearer ${APIToken}`,
+      },
+    };
+    const tokenResponse = await fetch(`${server}/api/v2.1/dtable/app-access-token/`, optionsToken);
+    let { dtable_uuid, access_token } = await tokenResponse.json();
+    BASE_UUID = isDevelopment ? dtable_uuid : config.dtableUuid;
+    BASE_TOKEN = isDevelopment ? access_token : config.accessToken;
+    // Fetch the metadata using the obtained token and UUID
+
+    const optionsData = {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        authorization: `Bearer ${BASE_TOKEN}`,
+      },
+    };
+    const dataResponse = await fetch(
+      `${server}/api-gateway/api/v2/dtables/${BASE_UUID}/metadata/`,
+      optionsData
+    );
+    const response = await dataResponse.json();
+
+    return response.metadata;
+  } catch (err) {
+    console.error('Error fetching metadata:', err);
+  }
+};
 export const generatorBase64Code = (keyLength = 4) => {
   let key = '';
   for (let i = 0; i < keyLength; i++) {
