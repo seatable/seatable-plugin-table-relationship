@@ -13,13 +13,55 @@ import {
   TableView,
 } from '../template-interfaces/Table.interface';
 import {
-  ACTIVE_PRESET_ID,
   DEFAULT_PLUGIN_DATA,
   PLUGIN_NAME,
   POSSIBLE,
   PresetHandleAction,
 } from '../template-constants';
 import info from '../../setting.local';
+
+export const cleanAllTables = () => {
+  let allTables: TableArray = window.dtableSDK.getTables().map((t: Table) => {
+    let nextTable = {
+      ...t,
+      rows: [],
+      id_row_map: {},
+    };
+
+    nextTable.views = nextTable.views.map((v: TableView) => {
+      return {
+        ...v,
+        rows: [],
+        formula_rows: {},
+      };
+    });
+
+    return nextTable;
+  }); // All the Tables of the Base
+
+  return allTables;
+};
+
+export const cleanActiveTable = () => {
+  let activeTable: Table = window.dtableSDK.getActiveTable();
+  activeTable = {
+    ...activeTable,
+    rows: [],
+    id_row_map: {},
+  };
+  return activeTable;
+};
+
+export const cleanActiveTableViews = (activeTable: Table) => {
+  activeTable.views = activeTable.views.map((v: TableView) => {
+    return {
+      ...v,
+      rows: [],
+      formula_rows: {},
+    };
+  });
+  return activeTable.views;
+};
 
 export const fetchMetaData = async (isDevelopment: boolean) => {
   const config = window.dtable;
@@ -281,12 +323,8 @@ export const parsePluginDataToActiveState = (
   allTables: TableArray
 ) => {
   // Extract relevant data from the pluginDataStore and allTables arrays
-  const id = localStorage.getItem(ACTIVE_PRESET_ID) || pluginPresets[0]._id;
-  const idx =
-    pluginPresets.findIndex((p) => p._id === id) === -1
-      ? 0
-      : pluginPresets.findIndex((p) => p._id === id);
-
+  let idx = pluginDataStore.activePresetIdx;
+  let id = pluginDataStore.activePresetId;
   let table =
     allTables.find((t) => t._id === pluginPresets[idx].settings?.selectedTable?.value) ||
     allTables[0];
