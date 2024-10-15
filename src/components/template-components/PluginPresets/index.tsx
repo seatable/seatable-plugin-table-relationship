@@ -217,7 +217,6 @@ const PluginPresets: React.FC<IPresetsProps> = ({
     }
     pluginDataStore.presets = newPluginPresets;
     updatePresets(0, newPluginPresets, pluginDataStore, pluginDataStore.presets[0]._id);
-    updateActiveData();
   };
 
   // drag and drop logic

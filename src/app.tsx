@@ -272,7 +272,6 @@ const App: React.FC<IAppProps> = (props) => {
     setPluginPresets(updatedPresets);
     setPluginDataStore(pluginDataStore);
     updatePluginDataStore(_pluginDataStore);
-    onSelectPreset(activePresetId, updatedActiveState(appActiveState));
   };
 
   // Update plugin data store (old plugin settings)
