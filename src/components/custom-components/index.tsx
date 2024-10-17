@@ -276,7 +276,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     [nodes]
   );
 
-  const proOptions = { hideAttribution: true };
+  // const proOptions = { hideAttribution: true };
   return (
     <>
       <ReactFlow
@@ -290,7 +290,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         onNodeDragStop={onNodeDragStop}
         defaultViewport={_pluginVPDataStore}
         fitView={false}
-        proOptions={proOptions}
+        // proOptions={proOptions}
         onMoveEnd={() => {
           setViewportPluginDataStoreFn(
             pluginDataStore,
