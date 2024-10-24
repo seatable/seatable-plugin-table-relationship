@@ -331,7 +331,6 @@ const App: React.FC<IAppProps> = (props) => {
    * Handles the change of the active table or view, updating the application state and presets accordingly.
    */
   const onTableOrViewChange = (type: SettingsOption, option: SelectOption) => {
-    console.log('onTableOrViewChange');
     let _activeViewRows: TableRow[];
     let updatedPluginPresets: PresetsArray;
 

@@ -17,14 +17,3 @@ In general, a Plugin needs to be installed by the system admin on the SeaTable s
 ## How to develop and contribute to this plugin
 
 Please refer to the [SeaTable Plugin Template](https://github.com/seatable/seatable-plugin-template-base/tree/TB-staging) documentation on GitHub. This guide explains how to set up your local testing environment, create a `setting.local.js` file to connect to a SeaTable base, and more.
-
-## Changelog
-
-### Version 1.0.0
-
-- Initial release with SeaTable v5.0.
-- Displays the following types of relationships:
-  - Linked record
-  - Lookups
-  - Second-level lookup
-- Allows tables without links to be shown or hidden.

@@ -19,6 +19,7 @@ import {
   isUniquePresetName,
 } from '../../../utils/template-utils/utils';
 import {
+  ACTIVE_PRESET_ID,
   DEFAULT_PLUGIN_DATA,
   PLUGIN_NAME,
   PresetHandleAction,
