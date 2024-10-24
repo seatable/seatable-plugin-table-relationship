@@ -33,6 +33,7 @@ import styles from './styles/template-styles/Plugin.module.scss';
 import './assets/css/plugin-layout.css';
 // Import of Constants
 import {
+  ACTIVE_PRESET_ID,
   INITIAL_IS_SHOW_STATE,
   INITIAL_CURRENT_STATE,
   PLUGIN_NAME,
@@ -141,6 +142,13 @@ const App: React.FC<IAppProps> = (props) => {
     let pluginDataStore: IPluginDataStore = getPluginDataStore(activeTable, PLUGIN_NAME);
     let pluginPresets: PresetsArray = pluginDataStore.presets; // An array with all the Presets
 
+    let localActivePresetId = localStorage.getItem(ACTIVE_PRESET_ID);
+    console.log('resetData:' + localActivePresetId);
+    if (!localActivePresetId) {
+      localActivePresetId = pluginPresets[0]._id;
+      localStorage.setItem(ACTIVE_PRESET_ID, localActivePresetId);
+    }
+
     setActiveComponents((prevState) => ({
       ...prevState,
       settingsDropDowns: info.active_components.settings_dropdowns,
@@ -151,16 +159,18 @@ const App: React.FC<IAppProps> = (props) => {
     setPluginPresets(pluginPresets);
     setIsShowState((prevState) => ({ ...prevState, isLoading: false }));
 
-    if (pluginDataStore.activePresetId) {
+    if (localActivePresetId) {
       const appActiveState = parsePluginDataToActiveState(
         pluginDataStore,
         pluginPresets,
         allTables
       );
 
-      onSelectPreset(pluginDataStore.activePresetId, appActiveState);
+      onSelectPreset(localActivePresetId, appActiveState);
+      console.log('xx:' + localActivePresetId);
+      console.log('xxx:' + activePresetId);
       const activePresetRelationship = pluginPresets.find((p) => {
-        return p._id === pluginDataStore.activePresetId;
+        return p._id === activePresetId;
       })?.customSettings?.relationship;
       if (activePresetRelationship) {
         setActiveRelationships(activePresetRelationship);
@@ -211,11 +221,15 @@ const App: React.FC<IAppProps> = (props) => {
     let updatedActiveTableViews: TableView[];
     const _activePresetIdx = pluginPresets.findIndex((preset) => preset._id === presetId);
 
+    console.log('abc:' + presetId);
+    localStorage.setItem(ACTIVE_PRESET_ID, presetId);
+
     if (newPresetActiveState !== undefined) {
       updatedActiveState = {
         ...newPresetActiveState,
       };
       updatedActiveTableViews = newPresetActiveState?.activeTable?.views!;
+      setAppActiveState(updatedActiveState);
     } else {
       const activePreset = pluginPresets.find((preset) => preset._id === presetId);
       const selectedTable = activePreset?.settings?.selectedTable;
@@ -242,6 +256,7 @@ const App: React.FC<IAppProps> = (props) => {
         activePresetId: presetId,
         activePresetIdx: _activePresetIdx,
       });
+      setAppActiveState(updatedActiveState);
     }
 
     setActiveTableViews(updatedActiveTableViews);

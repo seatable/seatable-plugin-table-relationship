@@ -14,7 +14,7 @@ const PLUGIN_NAME = info.name
 const PLUGIN_ID = `${info.name}-component`;
 const DTABLE_UUID = window.dtablePluginConfig?.dtableUuid ?? 'ABC4567';
 export const ACTIVE_PRESET_ID =
-  'localActivePresetId_' + DTABLE_UUID.slice(0, 7) + '_' + PLUGIN_NAME;
+  'localActivePresetId_' + DTABLE_UUID.slice(0, 7) + '_' + PLUGIN_NAME.replace(/\s+/g, '');
 
 // Table and Preset Defaults
 const TABLE_NAME = 'table_name';
