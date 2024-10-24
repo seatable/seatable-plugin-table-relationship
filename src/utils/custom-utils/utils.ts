@@ -43,6 +43,10 @@ export function generateDefaultCustomSettings(allTables: TableArray) {
       recRel: true,
       lkRel: true,
       lk2Rel: true,
+      countLinks: true,
+      rollup: true,
+      findmax: true,
+      findmin: true,
       tblNoLnk: true,
     },
     links: lnk,
@@ -266,10 +270,19 @@ export function filterRelationshipLinks(lnk: ILinksData[], relationship: Relatio
     lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.link);
   }
   if (!relationship.lkRel) {
-    lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula);
+    lnk = lnk.filter((obj) => obj.formulaType !== LINK_TYPE.lookup);
   }
-  if (!relationship.lk2Rel) {
-    lnk = lnk.filter((obj) => obj.type !== LINK_TYPE.formula2nd);
+  if (!relationship.countLinks) {
+    lnk = lnk.filter((obj) => obj.formulaType !== LINK_TYPE.countLinks);
+  }
+  if (!relationship.rollup) {
+    lnk = lnk.filter((obj) => obj.formulaType !== LINK_TYPE.rollup);
+  }
+  if (!relationship.findmax) {
+    lnk = lnk.filter((obj) => obj.formulaType !== LINK_TYPE.findmax);
+  }
+  if (!relationship.findmin) {
+    lnk = lnk.filter((obj) => obj.formulaType !== LINK_TYPE.findmin);
   }
   return lnk;
 }
@@ -327,6 +340,7 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
     }
     const sourceTbl = sourceData.table_id;
     const targetTbl = targetData1st.table_id;
+    const pointSameTable = sourceTbl === targetTbl;
     const sourceNode = ns.find((n) => n.id === sourceTbl);
     const targetNode = ns.find((n) => n.id === targetTbl);
 
@@ -390,7 +404,7 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
         target: targetTbl,
         sourceHandle: sourceHandle,
         targetHandle: targetHandle,
-        type: 'simplebezier',
+        type: !pointSameTable ? 'simplebezier' : 'smoothstep',
         style: {
           strokeWidth: 1,
           stroke: '#212529',
@@ -407,7 +421,13 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
 
 // Helper for generateLinks
 // Finding the data for the source and target of the link
-function findData(tableKey: string, columnKey: string, allTables: TableArray) {
+function findData(
+  formulaTye: string,
+  tableKey: string,
+  columnKey: string,
+  allTables: TableArray,
+  sourceTarget?: string
+) {
   let result: ILinksColumnData = {
     column_key: '',
     column_name: '',
@@ -531,9 +551,9 @@ function removeUndefinedOrNull(
       obj.targetData1st !== null
   );
 }
-
 function createFormulaCcData(data: TableColumn[], allTables: TableArray) {
   let fCcData: ILinksData[] = [];
+
   const fCcRowData = data.map((fc: TableColumn) => {
     let secondLinkedTableId: string | undefined;
     const { sourceTableId, firstLinkTableId } = findSourceAndFirstLinkedTableId(
@@ -541,7 +561,7 @@ function createFormulaCcData(data: TableColumn[], allTables: TableArray) {
       allTables
     );
 
-    if (firstLinkTableId && fc.data.level2_linked_table_column_key !== null) {
+    if (firstLinkTableId && fc.data.level2_linked_table_column_key) {
       secondLinkedTableId = findSecondLinkedTableId(
         firstLinkTableId,
         fc.data.level1_linked_table_column_key,
@@ -549,29 +569,50 @@ function createFormulaCcData(data: TableColumn[], allTables: TableArray) {
       );
     }
 
-    if (fc.data.level2_linked_table_column_key !== null) {
+    if (fc.data.level2_linked_table_column_key) {
+      const targetTableKey =
+        fc.data.formula === LINK_TYPE.findmax || fc.data.formula === LINK_TYPE.findmin
+          ? sourceTableId
+          : firstLinkTableId;
+      const targetFirstColumnKey =
+        fc.data.formula === LINK_TYPE.findmax || fc.data.formula === LINK_TYPE.findmin
+          ? fc.data.level2_linked_table_column_key
+          : fc.data.level1_linked_table_column_key;
       return {
         type: fc.type,
-        sourceData: findData(sourceTableId, fc.key, allTables),
+        formulaType: fc.data.formula,
+        sourceData: findData(fc.data.formula, sourceTableId, fc.key, allTables, 'source'),
         targetData1st: findData(
-          firstLinkTableId,
-          fc.data.level1_linked_table_column_key,
-          allTables
+          fc.data.formula,
+          targetTableKey,
+          targetFirstColumnKey,
+          allTables,
+          'target 1'
         ),
         targetData2nd: findData(
+          fc.data.formula,
           secondLinkedTableId!,
           fc.data.level2_linked_table_column_key,
-          allTables
+          allTables,
+          'target 2'
         ),
       };
     } else {
+      const targetTableKey =
+        fc.data.formula === LINK_TYPE.countLinks ? sourceTableId : firstLinkTableId;
       return {
         type: fc.type,
-        sourceData: findData(sourceTableId, fc.key, allTables),
+        formulaType: fc.data.formula,
+        sourceData: findData(fc.data.formula, sourceTableId, fc.key, allTables, 'source'),
         targetData1st: findData(
-          firstLinkTableId,
-          fc.data.level1_linked_table_column_key,
-          allTables
+          fc.data.formula,
+          targetTableKey,
+          fc.data.level1_linked_table_column_key ||
+            fc.data.column_key_in_linked_record ||
+            fc.data.link_column_key ||
+            fc.data.column_key_for_comparison,
+          allTables,
+          'target'
         ),
       };
     }
@@ -579,6 +620,7 @@ function createFormulaCcData(data: TableColumn[], allTables: TableArray) {
 
   fCcRowData.forEach((fc: ILinksData) => {
     fCcData.push({
+      formulaType: fc.formulaType,
       type: fc.targetData2nd ? LINK_TYPE.formula2nd : LINK_TYPE.formula,
       sourceData: fc.sourceData,
       targetData1st: fc.targetData1st,
@@ -586,13 +628,13 @@ function createFormulaCcData(data: TableColumn[], allTables: TableArray) {
 
     if (fc.targetData2nd) {
       fCcData.push({
+        formulaType: fc.formulaType,
         type: LINK_TYPE.formula2nd,
         sourceData: fc.targetData1st,
         targetData1st: fc.targetData2nd,
       });
     }
   });
-
   fCcData = fCcData.filter(
     (i: ILinksData) =>
       Object.prototype.hasOwnProperty.call(i, 'sourceData') && i.sourceData !== undefined

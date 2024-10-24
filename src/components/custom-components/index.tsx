@@ -124,6 +124,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       allTables,
       appActiveState.activePresetId
     );
+    // eslint-disable-next-line
     activeCustomSettings = customSettings;
     if (isPDSCS === false) {
       // if custom settings are not found, we set nodes, links, edges and relationship
@@ -220,26 +221,27 @@ const PluginTR: React.FC<IPluginTRProps> = ({
           const sourceNode = nodeDataArray.find((node) => node.n === e.source);
           const targetNode = nodeDataArray.find((node) => node.n === e.target);
 
-          if (sourceNode && targetNode) {
-            if (sourceNode.cts + 90 < targetNode.cts) {
-              return {
-                ...e,
-                sourceHandle: e.sourceHandle?.replace('_l-', '_r-'),
-                targetHandle: e.targetHandle?.replace('_r-', '_l-'),
-              };
-            } else {
-              return {
-                ...e,
-                sourceHandle: e.sourceHandle?.replace('_r-', '_l-'),
-                targetHandle: e.targetHandle?.replace('_l-', '_r-'),
-              };
-            }
+          if (!sourceNode || !targetNode || e.source === e.target) {
+            return e;
           }
-          return e;
+          const isSourceEarlier = sourceNode.cts + 90 < targetNode.cts;
+
+          return {
+            ...e,
+            sourceHandle: e.sourceHandle?.replace(
+              isSourceEarlier ? '_l-' : '_r-',
+              isSourceEarlier ? '_r-' : '_l-'
+            ),
+            targetHandle: e.targetHandle?.replace(
+              isSourceEarlier ? '_r-' : '_l-',
+              isSourceEarlier ? '_l-' : '_r-'
+            ),
+          };
         });
         setEdges(updatedEdges);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [nodes, setNodes, prevNodePositions]
   );
 
@@ -270,10 +272,11 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         edges
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [nodes]
   );
 
-  const proOptions = { hideAttribution: true };
+  // const proOptions = { hideAttribution: true };
   return (
     <>
       <ReactFlow
@@ -287,7 +290,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         onNodeDragStop={onNodeDragStop}
         defaultViewport={_pluginVPDataStore}
         fitView={false}
-        proOptions={proOptions}
+        // proOptions={proOptions}
         onMoveEnd={() => {
           setViewportPluginDataStoreFn(
             pluginDataStore,

@@ -12,13 +12,13 @@ import {
 } from '../../../utils/template-interfaces/PluginPresets/Presets.interface';
 import {
   appendPresetSuffix,
+  cleanAllTables,
   createDefaultPresetSettings,
   generatorPresetId,
   getActiveTableAndActiveView,
   isUniquePresetName,
 } from '../../../utils/template-utils/utils';
 import {
-  ACTIVE_PRESET_ID,
   DEFAULT_PLUGIN_DATA,
   PLUGIN_NAME,
   PresetHandleAction,
@@ -71,7 +71,7 @@ const PluginPresets: React.FC<IPresetsProps> = ({
 
   const initPresetSetting = (settings = {}) => {
     let initUpdated = {};
-    let tables = window.dtableSDK.getTables();
+    let tables = cleanAllTables();
     let selectedTable = getSelectedTable(tables, settings);
     let titleColumn = selectedTable.columns.find((column: TableColumn) => column.key === '0000');
     let imageColumn = selectedTable.columns.find((column: TableColumn) => column.type === 'image');
@@ -202,7 +202,6 @@ const PluginPresets: React.FC<IPresetsProps> = ({
     let oldPreset = pluginPresets[activePresetIdx];
     let _id: string = generatorPresetId(pluginPresets) || '';
     let updatedPreset = new Preset({ ...oldPreset, _id, name: presetName });
-    localStorage.setItem(ACTIVE_PRESET_ID, _id);
 
     newPluginPresets.splice(activePresetIdx, 1, updatedPreset);
     pluginDataStore.presets = newPluginPresets;
@@ -220,7 +219,6 @@ const PluginPresets: React.FC<IPresetsProps> = ({
     pluginDataStore.presets = newPluginPresets;
     localStorage.setItem(ACTIVE_PRESET_ID, newPluginPresets[0]._id);
     updatePresets(0, newPluginPresets, pluginDataStore, pluginDataStore.presets[0]._id);
-    updateActiveData();
   };
 
   // drag and drop logic
