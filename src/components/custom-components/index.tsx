@@ -262,6 +262,8 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         return n;
       }) as NodeResultItem[];
 
+      console.log('onNodeDragStop');
+
       setNodes(updatedNodes);
       setPluginDataStoreFn(
         pluginDataStore,
