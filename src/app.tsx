@@ -88,7 +88,6 @@ const App: React.FC<IAppProps> = (props) => {
   });
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx } = appActiveState;
-  const { collaborators } = window.app.state;
 
   useEffect(() => {
     initPluginDTableData();
