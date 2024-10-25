@@ -1,13 +1,13 @@
 // External imports
 import info from '../../plugin-config/info.json';
 // Interfaces
+import pluginContext from '../../plugin-context';
 import { PresetSettings } from '../template-interfaces/PluginPresets/Presets.interface';
 import { AppActiveState, AppIsShowState } from '../template-interfaces/App.interface';
 import { IActivePresetSettings } from '../template-interfaces/PluginSettings.interface';
 
 // Constants
 const POSSIBLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789';
-import pluginContext from '../../plugin-context';
 const DTABLE_UUID = pluginContext.getSetting('dtableUuid');
 
 const PLUGIN_NAME = info.name
