@@ -494,7 +494,6 @@ const App: React.FC<IAppProps> = (props) => {
               onToggleSettings={toggleSettings}
               activeRelationships={activeRelationships}
               handleRelationships={handleRelationships}
-              skipNextLocalReset={skipNextLocalReset}
             />
           </div>
         </div>
