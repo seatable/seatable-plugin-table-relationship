@@ -53,6 +53,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   pluginDataStore,
   activeRelationships,
 }) => {
+  console.log('PluginTR');
   const [_allTables, setAllTables] = useState<TableArray>([]);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);

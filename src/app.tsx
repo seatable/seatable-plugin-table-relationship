@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import info from '../src/plugin-config/info.json';
 
 // Import of Component
@@ -83,6 +83,11 @@ const App: React.FC<IAppProps> = (props) => {
   });
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx } = appActiveState;
+  const shouldSkipLocalReset = useRef(false);
+
+  const skipNextLocalReset = () => {
+    shouldSkipLocalReset.current = true;
+  };
 
   useEffect(() => {
     initPluginDTableData();
@@ -102,13 +107,21 @@ const App: React.FC<IAppProps> = (props) => {
     if (isDevelopment) {
       // local develop //
       window.dtableSDK.subscribe('dtable-connect', () => {
+        console.log('isDevelopment', isDevelopment);
         onDTableConnect();
       });
     }
     unsubscribeLocalDtableChanged = window.dtableSDK.subscribe('local-dtable-changed', () => {
-      onDTableChanged();
+      // Only call onDTableChanged if we should not skip resetData for local changes
+      if (!shouldSkipLocalReset.current) {
+        console.log('Local DtableChanged');
+        onDTableChanged();
+      }
+      // Reset the flag after checking
+      shouldSkipLocalReset.current = false;
     });
     unsubscribeRemoteDtableChanged = window.dtableSDK.subscribe('remote-dtable-changed', () => {
+      console.log('Remote DtableChanged');
       onDTableChanged();
     });
     resetData();
@@ -122,13 +135,16 @@ const App: React.FC<IAppProps> = (props) => {
   };
 
   const onDTableConnect = () => {
+    console.log('DTable Connect');
     resetData();
   };
   const onDTableChanged = () => {
+    console.log('DTable Changed');
     resetData();
   };
 
   const resetData = async () => {
+    console.log('resetData');
     let allTables: TableArray = cleanAllTables(); // All the Tables of the Base
     let activeTable: Table = cleanActiveTable(); // How is the ActiveTable Set? allTables[0]?
     let activeTableViews: TableViewArray = cleanActiveTableViews(activeTable); // All the Views of the specific Active Table
@@ -315,7 +331,7 @@ const App: React.FC<IAppProps> = (props) => {
       // Collapse presets if open
       togglePresets();
     }
-
+    skipNextLocalReset();
     setIsShowState((prevState) => ({ ...prevState, isShowSettings: !prevState.isShowSettings }));
   };
 
@@ -397,6 +413,7 @@ const App: React.FC<IAppProps> = (props) => {
   };
 
   function handleRelationships(r: any) {
+    skipNextLocalReset();
     setActiveRelationships(r);
     const updatedPresets = pluginDataStore.presets.map((preset) => {
       if (preset._id === appActiveState.activePresetId) {
@@ -457,14 +474,11 @@ const App: React.FC<IAppProps> = (props) => {
               id={PLUGIN_NAME}
               className={styles.body}
               style={{ padding: '10px', width: '100%' }}>
-              {/* Note: The CustomPlugin component serves as a placeholder and should be replaced with your custom plugin component. */}
               <PluginTR
                 appActiveState={appActiveState}
                 allTables={allTables}
                 pluginDataStore={pluginDataStore}
-                activeRelationships={
-                  pluginPresets[activePresetIdx].customSettings?.relationship || activeRelationships
-                }
+                activeRelationships={activeRelationships}
                 setPluginDataStore={setPluginDataStore}
               />
             </div>
@@ -480,6 +494,7 @@ const App: React.FC<IAppProps> = (props) => {
               onToggleSettings={toggleSettings}
               activeRelationships={activeRelationships}
               handleRelationships={handleRelationships}
+              skipNextLocalReset={skipNextLocalReset}
             />
           </div>
         </div>

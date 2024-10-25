@@ -15,6 +15,7 @@ interface IPluginSettingsProps {
   activeRelationships: RelationshipState;
   handleRelationships: (t: any) => void;
   activeComponents: IActiveComponents;
+  skipNextLocalReset: () => void;
 }
 
 interface SelectOption {
