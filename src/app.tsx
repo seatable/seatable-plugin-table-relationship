@@ -54,7 +54,6 @@ import {
 import { SettingsOption } from './utils/types';
 import { ReactFlowProvider } from 'reactflow';
 import { RelationshipState } from './utils/custom-interfaces/PluginTR';
-import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from './locale';
 
 const App: React.FC<IAppProps> = (props) => {
   const { isDevelopment, lang } = props;
@@ -223,7 +222,10 @@ const App: React.FC<IAppProps> = (props) => {
    */
   const onSelectPreset = (presetId: string, newPresetActiveState?: AppActiveState) => {
     localStorage.setItem(ACTIVE_PRESET_ID, presetId);
-
+    console.log({ presetId, activePresetId });
+    if (presetId === activePresetId) {
+      return;
+    }
     let updatedActiveState: AppActiveState;
     let updatedActiveTableViews: TableView[];
     const _activePresetIdx = pluginPresets.findIndex((preset) => preset._id === presetId);
@@ -235,6 +237,8 @@ const App: React.FC<IAppProps> = (props) => {
       updatedActiveTableViews = newPresetActiveState?.activeTable?.views!;
     } else {
       const activePreset = pluginPresets.find((preset) => preset._id === presetId);
+      console.log(0, activePreset?.customSettings?.relationship);
+      console.log(shouldSkipLocalReset);
       const selectedTable = activePreset?.settings?.selectedTable;
       const selectedView = activePreset?.settings?.selectedView;
 
