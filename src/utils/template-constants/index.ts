@@ -7,11 +7,16 @@ import { IActivePresetSettings } from '../template-interfaces/PluginSettings.int
 
 // Constants
 const POSSIBLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789';
+import pluginContext from '../../plugin-context';
+const DTABLE_UUID = pluginContext.getSetting('dtableUuid');
 
 const PLUGIN_NAME = info.name
   .replace(/-([a-z])/g, (_, match) => ' ' + match.toUpperCase())
   .replace(/^./, (str) => str.toUpperCase());
 const PLUGIN_ID = `${info.name}-component`;
+
+export const ACTIVE_PRESET_ID =
+  'localActivePresetId_' + DTABLE_UUID.slice(0, 7) + '_' + PLUGIN_NAME;
 
 // Table and Preset Defaults
 const TABLE_NAME = 'table_name';

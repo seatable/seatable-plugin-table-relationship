@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
-import { FaPlus } from 'react-icons/fa6';
 import info from '../src/plugin-config/info.json';
 
 // Import of Component
@@ -24,7 +23,6 @@ import {
   TableView,
   TableRow,
   IActiveTableAndView,
-  TableColumn,
 } from './utils/template-interfaces/Table.interface';
 import { PresetsArray } from './utils/template-interfaces/PluginPresets/Presets.interface';
 import { SelectOption } from './utils/template-interfaces/PluginSettings.interface';
@@ -37,6 +35,7 @@ import {
   INITIAL_CURRENT_STATE,
   PLUGIN_NAME,
   DEFAULT_PLUGIN_DATA,
+  ACTIVE_PRESET_ID,
 } from './utils/template-constants';
 import './locale';
 import {
@@ -44,7 +43,6 @@ import {
   cleanActiveTableViews,
   cleanAllTables,
   createDefaultPluginDataStore,
-  fetchMetaData,
   findPresetName,
   getActiveStateSafeGuard,
   getActiveTableAndActiveView,
@@ -54,15 +52,12 @@ import {
   parsePluginDataToActiveState,
 } from './utils/template-utils/utils';
 import { SettingsOption } from './utils/types';
-import pluginContext from './plugin-context';
 import { ReactFlowProvider } from 'reactflow';
 import { RelationshipState } from './utils/custom-interfaces/PluginTR';
-import intl from 'react-intl-universal';
 import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from './locale';
 
 const App: React.FC<IAppProps> = (props) => {
   const { isDevelopment, lang } = props;
-  const { [DEFAULT_LOCALE]: d } = AVAILABLE_LOCALES;
 
   // Boolean state to show/hide the plugin's components
   const [isShowState, setIsShowState] = useState<AppIsShowState>(INITIAL_IS_SHOW_STATE);
@@ -140,6 +135,11 @@ const App: React.FC<IAppProps> = (props) => {
     let pluginDataStore: IPluginDataStore = getPluginDataStore(activeTable, PLUGIN_NAME);
     let pluginPresets: PresetsArray = pluginDataStore.presets; // An array with all the Presets
 
+    let localActivePresetId = localStorage.getItem(ACTIVE_PRESET_ID);
+    if (!localActivePresetId) {
+      localActivePresetId = pluginPresets[0]._id;
+      localStorage.setItem(ACTIVE_PRESET_ID, localActivePresetId);
+    }
     setActiveComponents((prevState) => ({
       ...prevState,
       settingsDropDowns: info.active_components.settings_dropdowns,
@@ -150,16 +150,16 @@ const App: React.FC<IAppProps> = (props) => {
     setPluginPresets(pluginPresets);
     setIsShowState((prevState) => ({ ...prevState, isLoading: false }));
 
-    if (pluginDataStore.activePresetId) {
+    if (localActivePresetId) {
       const appActiveState = parsePluginDataToActiveState(
         pluginDataStore,
         pluginPresets,
         allTables
       );
 
-      onSelectPreset(pluginDataStore.activePresetId, appActiveState);
+      onSelectPreset(localActivePresetId, appActiveState);
       const activePresetRelationship = pluginPresets.find((p) => {
-        return p._id === pluginDataStore.activePresetId;
+        return p._id === localActivePresetId;
       })?.customSettings?.relationship;
       if (activePresetRelationship) {
         setActiveRelationships(activePresetRelationship);
@@ -206,6 +206,8 @@ const App: React.FC<IAppProps> = (props) => {
    * Handles the selection of a preset, updating the active state and associated data accordingly.
    */
   const onSelectPreset = (presetId: string, newPresetActiveState?: AppActiveState) => {
+    localStorage.setItem(ACTIVE_PRESET_ID, presetId);
+
     let updatedActiveState: AppActiveState;
     let updatedActiveTableViews: TableView[];
     const _activePresetIdx = pluginPresets.findIndex((preset) => preset._id === presetId);
