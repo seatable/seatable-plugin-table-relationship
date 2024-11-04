@@ -8,6 +8,8 @@ import { IActivePresetSettings } from '../template-interfaces/PluginSettings.int
 // Constants
 const POSSIBLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789';
 
+const ACTIVE_PRESET_ID = '0000';
+
 const PLUGIN_NAME = info.name
   .replace(/-([a-z])/g, (_, match) => ' ' + match.toUpperCase())
   .replace(/^./, (str) => str.toUpperCase());
@@ -98,4 +100,5 @@ export {
   INITIAL_CURRENT_STATE,
   DEFAULT_SELECTED_PRESET,
   DEFAULT_SELECT_OPTION,
+  ACTIVE_PRESET_ID,
 };

@@ -21,6 +21,7 @@ import {
 import info from '../../setting.local';
 
 export const cleanAllTables = () => {
+  console.log('GET DATA!!!');
   let allTables: TableArray = window.dtableSDK.getTables().map((t: Table) => {
     let nextTable = {
       ...t,
