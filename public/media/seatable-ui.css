@@ -13684,3 +13684,8 @@ a.tag-addon:hover {
   border-color: #ff8000;
   box-shadow: 0 0 0 2px rgba(255, 128, 0, 0.25);
 }
+
+/* mouse pointer */
+.react-flow__pane {
+  cursor: move !important;
+}

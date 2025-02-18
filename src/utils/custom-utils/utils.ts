@@ -371,6 +371,7 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
 
         break;
     }
+
     if (sourceNode && targetNode) {
       let src = {
         tId: sourceNode.id,
@@ -384,6 +385,15 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
         edgSide: sourceNode.position.x < targetNode.position.x ? 'l' : 'r',
         suffix: '-tgt',
       };
+
+      console.log('src', src);
+      console.log('tgt', tgt);
+
+      // show self-linkage other side:
+      if (tgt.cId === tgt.tId) {
+        tgt.edgSide = 'l';
+        src.edgSide = 'l';
+      }
 
       sourceHandle = `${src.tId}_${src.cId}_${src.edgSide}${src.suffix}`;
       targetHandle = `${tgt.tId}_${tgt.cId}_${tgt.edgSide}${tgt.suffix}`;
@@ -495,11 +505,19 @@ function reduceLinkCcData(linkCc: ILinksColumnData[]) {
     [key: string]: { sourceData: ILinksColumnData | null; targetData: ILinksColumnData | null };
   } = {};
   linkCc.forEach((item) => {
+    // create groupedItem element with sourceData and targetData: null
     if (item.link_id && !groupedItems[item.link_id]) {
       groupedItems[item.link_id] = { sourceData: null, targetData: null };
     }
 
-    if (item.link_id && item.table_id === item.srcT) {
+    // to support self-linkage with v5.2
+    if (
+      item.link_id &&
+      item.table_id === item.srcT &&
+      groupedItems[item.link_id].sourceData !== null
+    ) {
+      groupedItems[item.link_id].targetData = item;
+    } else if (item.link_id && item.table_id === item.srcT) {
       groupedItems[item.link_id].sourceData = item;
     } else if (item.link_id && item.table_id === item.tgtT) {
       groupedItems[item.link_id].targetData = item;
