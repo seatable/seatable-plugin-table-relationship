@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.2.2 (21.03.2025)
+
+- remove conflicting css styles
+
 ## Version 1.2.1 (18.02.2025)
 
 - Support self-link columns with SeaTable v5.2

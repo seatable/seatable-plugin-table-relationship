@@ -386,8 +386,8 @@ export function generateEdges(links: ILinksData[], ns: NodeResultItem[]): Edge[]
         suffix: '-tgt',
       };
 
-      console.log('src', src);
-      console.log('tgt', tgt);
+      //console.log('src', src);
+      //console.log('tgt', tgt);
 
       // show self-linkage other side:
       if (tgt.cId === tgt.tId) {
