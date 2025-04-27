@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.2.3 (27.04.2025)
+
+- remove btn-close css class
+
 ## Version 1.2.2 (21.03.2025)
 
 - remove conflicting css styles
