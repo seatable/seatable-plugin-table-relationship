@@ -43,3 +43,46 @@
 .react-flow__node.annotation .react-flow__handle {
   display: none;
 }
+
+.react-flow__node-textnode {
+  overflow: visible;
+}
+
+/* Snap-to-element gradient indicators (injected child divs) */
+.snap-glow {
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.snap-glow-left {
+  right: 100%;
+  top: 0;
+  bottom: 0;
+  width: 14px;
+  background: linear-gradient(to left, var(--snap-color, rgba(74, 158, 255, 0.35)), transparent);
+}
+
+.snap-glow-right {
+  left: 100%;
+  top: 0;
+  bottom: 0;
+  width: 14px;
+  background: linear-gradient(to right, var(--snap-color, rgba(74, 158, 255, 0.35)), transparent);
+}
+
+.snap-glow-top {
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: linear-gradient(to top, var(--snap-color, rgba(74, 158, 255, 0.35)), transparent);
+}
+
+.snap-glow-bottom {
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: linear-gradient(to bottom, var(--snap-color, rgba(74, 158, 255, 0.35)), transparent);
+}

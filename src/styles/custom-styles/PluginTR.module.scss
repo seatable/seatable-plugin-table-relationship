@@ -27,9 +27,16 @@
     padding: 8px 10px;
     border-bottom: 1px solid #e2e8f0;
     color: #fff;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     overflow: hidden;
+
+    strong {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
   }
 
   &_header_sel {
@@ -60,7 +67,7 @@
 
     &_content {
       display: flex;
-      justify-content: start; /* Adjusted to space between */
+      justify-content: flex-start; /* Adjusted to space between */
       align-items: center;
       width: 100%;
 

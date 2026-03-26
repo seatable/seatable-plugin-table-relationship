@@ -21,14 +21,14 @@ const PresetDropdown: React.FC<IPresetDropdownProps> = ({
         id={PresetHandleAction.rename}
         className="d-flex align-items-center">
         <i className="item-icon dtable-font dtable-icon-rename"></i>
-        <p className="ml-2">{intl.get('preset_rename').d(`${d.preset_rename}`)}</p>
+        <p className="ml-2 mb-0">{intl.get('preset_rename').d(`${d.preset_rename}`)}</p>
       </li>
       <li
         onClick={togglePresetsUpdatePopUp}
         id={PresetHandleAction.duplicate}
         className="d-flex align-items-center">
         <i className="item-icon dtable-font dtable-icon-copy"></i>
-        <p className="ml-2">{intl.get('preset_duplicate').d(`${d.preset_duplicate}`)}</p>
+        <p className="ml-2 mb-0">{intl.get('preset_duplicate').d(`${d.preset_duplicate}`)}</p>
       </li>
       <li
         onClick={isPresets ? togglePresetsUpdatePopUp : undefined}
@@ -39,9 +39,23 @@ const PresetDropdown: React.FC<IPresetDropdownProps> = ({
           className={`item-icon dtable-font dtable-icon-delete ${
             !isPresets ? stylesPPresets.isPresetsCondition : ''
           }`}></i>
-        <p className={`ml-2 ${!isPresets ? stylesPPresets.isPresetsCondition : ''}`}>
+        <p className={`ml-2  mb-0 ${!isPresets ? stylesPPresets.isPresetsCondition : ''}`}>
           {intl.get('preset_delete').d(`${d.preset_delete}`)}
         </p>
+      </li>
+      <li
+        onClick={togglePresetsUpdatePopUp}
+        id={PresetHandleAction.reset}
+        className="d-flex align-items-center">
+        <i className="item-icon dtable-font dtable-icon-refresh"></i>
+        <p className="ml-2 mb-0">{intl.get('preset_reset').d(`${d.preset_reset}`)}</p>
+      </li>
+      <li
+        onClick={togglePresetsUpdatePopUp}
+        id={PresetHandleAction.export}
+        className="d-flex align-items-center">
+        <i className="item-icon dtable-font dtable-icon-download"></i>
+        <p className="ml-2 mb-0">{intl.get('preset_export').d(`${d.preset_export}`)}</p>
       </li>
     </ul>
   );

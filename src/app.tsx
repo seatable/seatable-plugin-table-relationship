@@ -53,15 +53,70 @@ import {
 } from './utils/template-utils/utils';
 import { SettingsOption } from './utils/types';
 import { ReactFlowProvider } from 'reactflow';
-import { RelationshipState } from './utils/custom-interfaces/PluginTR';
+import {
+  RelationshipState,
+  TableDisplayState,
+  PreviewHeaderColorState,
+} from './utils/custom-interfaces/PluginTR';
 import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from './locale';
+import { generateDefaultCustomSettings } from './utils/custom-utils/utils';
+import { visitParameterList } from 'typescript';
+
+// Normalize strokeDasharray values that were corrupted by old generateEdges mutation.
+// Maps computed values like '3 3' back to canonical '5 5' (dashed), '1 3' to '1 5' (dotted).
+function normalizeEdgeStrokes(tableDisplay: TableDisplayState): TableDisplayState {
+  if (!tableDisplay.edgeStrokes) return tableDisplay;
+  const normalize = (val: string): string => {
+    if (!val || val === '0') return '0';
+    const parts = val.split(' ');
+    if (parts.length === 2 && parts[0] === parts[1]) return '5 5';
+    if (parts.length === 2 && parts[0] !== parts[1]) return '1 5';
+    return '0';
+  };
+  return {
+    ...tableDisplay,
+    edgeStrokes: {
+      link: {
+        ...tableDisplay.edgeStrokes.link,
+        strokeDasharray: normalize(tableDisplay.edgeStrokes.link.strokeDasharray),
+      },
+      formula: {
+        ...tableDisplay.edgeStrokes.formula,
+        strokeDasharray: normalize(tableDisplay.edgeStrokes.formula.strokeDasharray),
+      },
+      formula2nd: {
+        ...tableDisplay.edgeStrokes.formula2nd,
+        strokeDasharray: normalize(tableDisplay.edgeStrokes.formula2nd.strokeDasharray),
+      },
+    },
+  };
+}
+
+// Fill in missing tableDisplay fields with defaults for presets created before these fields existed.
+function normalizeTableDisplay(td: TableDisplayState): TableDisplayState {
+  return {
+    ...td,
+    tblAllCols: td.tblAllCols ?? true,
+    tblNoLnk: td.tblNoLnk ?? true,
+    isAllShown: td.isAllShown ?? true,
+    isBackground: td.isBackground ?? false,
+    headerColor: td.headerColor ?? '#ED7109',
+    fontSize: td.fontSize ?? 14,
+    backgroundColor: td.backgroundColor ?? '#F5F5F5',
+    edgeStrokes: td.edgeStrokes ?? {
+      link: { stroke: '#212529', strokeWidth: 1, strokeDasharray: '0' },
+      formula: { stroke: '#212529', strokeWidth: 1, strokeDasharray: '5 5' },
+      formula2nd: { stroke: '#212529', strokeWidth: 1, strokeDasharray: '1 5' },
+    },
+  };
+}
 
 const App: React.FC<IAppProps> = (props) => {
   const { isDevelopment, lang } = props;
 
   // Boolean state to show/hide the plugin's components
   const [isShowState, setIsShowState] = useState<AppIsShowState>(INITIAL_IS_SHOW_STATE);
-  const { isShowPlugin, isShowSettings, isLoading, isShowPresets } = isShowState;
+  const { isShowPlugin, isShowSettings, isLoading, isShowWaiting, isShowPresets } = isShowState;
   // Tables, Presets, Views as dataStates. The main data of the plugin
   const [allTables, setAllTables] = useState<TableArray>([]);
   const [activeTableViews, setActiveTableViews] = useState<TableViewArray>([]);
@@ -73,14 +128,52 @@ const App: React.FC<IAppProps> = (props) => {
   const [activeComponents, setActiveComponents] = useState<IActiveComponents>({});
   const [activeRelationships, setActiveRelationships] = useState<RelationshipState>({
     recRel: true,
+    recSelfRel: true,
     lkRel: true,
     lk2Rel: true,
     countLinks: true,
     rollup: true,
     findmax: true,
     findmin: true,
-    tblNoLnk: true,
+    /*tblNoLnk: true,
+    tblAllCols: true,
+    isAllShown: true,*/
   });
+  const [activeTableDisplay, setActiveTableDisplay] = useState<TableDisplayState>({
+    displayedTables: allTables.map((t) => {
+      return t._id;
+    }),
+    selectedViews: Object.assign(
+      {},
+      ...allTables.map((t) => ({ [t._id]: t.views.filter((v) => v.type === 'table')[0]._id }))
+    ),
+    isAllShown: true,
+    isBackground: false,
+    headerColor: '#ED7109',
+    fontSize: 14,
+    backgroundColor: '#F5F5F5',
+    tblNoLnk: true,
+    tblAllCols: true,
+    edgeStrokes: {
+      link: {
+        stroke: '#212529',
+        strokeWidth: 1,
+        strokeDasharray: '0',
+      },
+      formula: {
+        stroke: '#212529',
+        strokeWidth: 1,
+        strokeDasharray: '5 5',
+      },
+      formula2nd: {
+        stroke: '#212529',
+        strokeWidth: 1,
+        strokeDasharray: '1 5',
+      },
+    },
+  });
+  const [previewHeaderColor, setPreviewHeaderColor] = useState<string | null>(null);
+  // const [previewHeaderColor, setPreviewHeaderColor] = useState<PreviewHeaderColorState>({previewHeaderColor: '#ED7109'});
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx } = appActiveState;
 
@@ -157,12 +250,60 @@ const App: React.FC<IAppProps> = (props) => {
         allTables
       );
 
+      // Reconcile tables in ALL presets: add new tables / remove deleted tables.
+      // Must use local allTables (not React state which is stale).
+      const allTableIds = allTables.map((t) => t._id);
+      let anyPresetChanged = false;
+      for (const preset of pluginPresets) {
+        if (!preset?.customSettings?.tableDisplay?.selectedViews) continue;
+        // Normalize missing fields to defaults for old presets
+        preset.customSettings.tableDisplay = normalizeTableDisplay(
+          preset.customSettings.tableDisplay
+        );
+        const td = preset.customSettings.tableDisplay;
+        let changed = false;
+        for (const t of allTables) {
+          if (!(t._id in td.selectedViews)) {
+            td.selectedViews[t._id] =
+              t.views.filter((v: any) => v.type === 'table')[0]?._id || t.views[0]._id;
+            if (!td.displayedTables.includes(t._id)) {
+              td.displayedTables.push(t._id);
+            }
+            changed = true;
+          }
+        }
+        const extraIds = Object.keys(td.selectedViews).filter((k) => !allTableIds.includes(k));
+        if (extraIds.length > 0) {
+          for (const eid of extraIds) {
+            delete td.selectedViews[eid];
+          }
+          td.displayedTables = td.displayedTables.filter((id: string) => allTableIds.includes(id));
+          changed = true;
+        }
+        td.displayedTables = Array.from(new Set(td.displayedTables));
+        if (changed) anyPresetChanged = true;
+      }
+      if (anyPresetChanged) {
+        window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
+          ...pluginDataStore,
+          presets: pluginPresets,
+        });
+      }
+
       onSelectPreset(localActivePresetId, appActiveState);
       const activePresetRelationship = pluginPresets.find((p) => {
         return p._id === localActivePresetId;
       })?.customSettings?.relationship;
       if (activePresetRelationship) {
         setActiveRelationships(activePresetRelationship);
+      }
+      const activePresetTableDisplay = pluginPresets.find((p) => {
+        return p._id === localActivePresetId;
+      })?.customSettings?.tableDisplay;
+      if (activePresetTableDisplay) {
+        setActiveTableDisplay(
+          normalizeTableDisplay(normalizeEdgeStrokes(activePresetTableDisplay))
+        );
       }
       return;
     } else {
@@ -247,6 +388,28 @@ const App: React.FC<IAppProps> = (props) => {
 
     setActiveTableViews(updatedActiveTableViews);
     setAppActiveState(updatedActiveState);
+
+    // Also update relationships and tableDisplay in the same batch
+    // to avoid flickering from stale props during preset switch.
+    // Read from SDK (source of truth) instead of pluginPresets React state,
+    // which may be stale when called from resetData.
+    const freshPDS = window.dtableSDK.getPluginSettings(PLUGIN_NAME);
+    const freshPreset =
+      freshPDS?.presets?.find((p: any) => p._id === presetId) || pluginPresets[_activePresetIdx];
+    if (freshPreset?.customSettings?.relationship) {
+      setActiveRelationships(freshPreset.customSettings.relationship);
+    } else {
+      const defaults = generateDefaultCustomSettings(allTables);
+      setActiveRelationships(defaults.relationship);
+    }
+    if (freshPreset?.customSettings?.tableDisplay) {
+      setActiveTableDisplay(
+        normalizeTableDisplay(normalizeEdgeStrokes(freshPreset.customSettings.tableDisplay))
+      );
+    } else {
+      const defaults = generateDefaultCustomSettings(allTables);
+      setActiveTableDisplay(defaults.tableDisplay);
+    }
   };
 
   /**
@@ -266,12 +429,13 @@ const App: React.FC<IAppProps> = (props) => {
     };
     const updatedActiveState = (prevState: AppActiveState) => ({
       ...prevState,
+      activePresetId: activePresetId,
       activePresetIdx: _activePresetIdx,
     });
 
     setAppActiveState((prevState: AppActiveState) => updatedActiveState(prevState));
     setPluginPresets(updatedPresets);
-    setPluginDataStore(pluginDataStore);
+    setPluginDataStore(_pluginDataStore);
     updatePluginDataStore(_pluginDataStore);
   };
 
@@ -332,7 +496,6 @@ const App: React.FC<IAppProps> = (props) => {
    * Handles the change of the active table or view, updating the application state and presets accordingly.
    */
   const onTableOrViewChange = (type: SettingsOption, option: SelectOption) => {
-    //console.log('onTableOrViewChange');
     let _activeViewRows: TableRow[];
     let updatedPluginPresets: PresetsArray;
 
@@ -398,7 +561,8 @@ const App: React.FC<IAppProps> = (props) => {
 
   function handleRelationships(r: any) {
     setActiveRelationships(r);
-    const updatedPresets = pluginDataStore.presets.map((preset) => {
+    const currentData = window.dtableSDK.getPluginSettings(PLUGIN_NAME) || pluginDataStore;
+    const updatedPresets = currentData.presets.map((preset: any) => {
       if (preset._id === appActiveState.activePresetId) {
         return {
           ...preset,
@@ -412,7 +576,29 @@ const App: React.FC<IAppProps> = (props) => {
     });
 
     window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
-      ...pluginDataStore,
+      ...currentData,
+      presets: updatedPresets,
+    });
+  }
+
+  function handleTableDisplays(t: any) {
+    setActiveTableDisplay(t);
+    const currentData = window.dtableSDK.getPluginSettings(PLUGIN_NAME) || pluginDataStore;
+    const updatedPresets = currentData.presets.map((preset: any) => {
+      if (preset._id === appActiveState.activePresetId) {
+        return {
+          ...preset,
+          customSettings: {
+            ...preset.customSettings,
+            tableDisplay: t,
+          },
+        };
+      }
+      return preset;
+    });
+
+    window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
+      ...currentData,
       presets: updatedPresets,
     });
   }
@@ -420,13 +606,23 @@ const App: React.FC<IAppProps> = (props) => {
   if (!isShowPlugin) {
     return null;
   }
+
   return isLoading ? (
     <div></div>
   ) : (
     <ReactFlowProvider>
+      <div
+        style={{ display: isShowWaiting ? 'flex' : 'none' }}
+        className="wait-fs-modal"
+        onClick={(e) => {
+          setIsShowState({ ...isShowState, isShowWaiting: false });
+        }}>
+        <div className="ldr simple-circle"></div>
+      </div>
       <ResizableWrapper>
         {/* presets  */}
         <PluginPresets
+          appActiveState={appActiveState}
           allTables={allTables}
           pluginPresets={pluginPresets}
           activePresetIdx={activePresetIdx}
@@ -437,6 +633,8 @@ const App: React.FC<IAppProps> = (props) => {
           onSelectPreset={onSelectPreset}
           updatePresets={updatePresets}
           updateActiveData={updateActiveData}
+          isShowState={isShowState}
+          setIsShowState={setIsShowState}
         />
         <div className={styles.plugin}>
           <Header
@@ -452,20 +650,18 @@ const App: React.FC<IAppProps> = (props) => {
           {/* main body  */}
           <div
             className="d-flex position-relative"
-            style={{ height: '94%', width: '100%', backgroundColor: '#f5f5f5' }}>
-            <div
-              id={PLUGIN_NAME}
-              className={styles.body}
-              style={{ padding: '10px', width: '100%' }}>
+            style={{ height: 'calc(100% - 50px)', width: '100%', backgroundColor: '#f5f5f5' }}>
+            <div id={PLUGIN_NAME} className={styles.body} style={{ padding: '10px', flex: '1' }}>
               {/* Note: The CustomPlugin component serves as a placeholder and should be replaced with your custom plugin component. */}
               <PluginTR
                 appActiveState={appActiveState}
                 allTables={allTables}
                 pluginDataStore={pluginDataStore}
-                activeRelationships={
-                  pluginPresets[activePresetIdx].customSettings?.relationship || activeRelationships
-                }
+                activeRelationships={activeRelationships}
+                activeTableDisplay={activeTableDisplay}
                 setPluginDataStore={setPluginDataStore}
+                // onPreviewHeaderColor={setPreviewHeaderColor}
+                previewHeaderColor={previewHeaderColor}
               />
             </div>
 
@@ -480,6 +676,10 @@ const App: React.FC<IAppProps> = (props) => {
               onToggleSettings={toggleSettings}
               activeRelationships={activeRelationships}
               handleRelationships={handleRelationships}
+              activeTableDisplay={activeTableDisplay}
+              handleTableDisplays={handleTableDisplays}
+              onPreviewHeaderColor={setPreviewHeaderColor}
+              previewHeaderColor={previewHeaderColor}
             />
           </div>
         </div>

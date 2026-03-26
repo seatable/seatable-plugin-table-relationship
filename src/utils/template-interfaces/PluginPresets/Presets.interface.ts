@@ -1,9 +1,10 @@
-import { RelationshipState } from '../../custom-interfaces/PluginTR';
-import { AppActiveState, IPluginDataStore } from '../App.interface';
+import { RelationshipState, TableDisplayState } from '../../custom-interfaces/PluginTR';
+import { AppActiveState, AppIsShowState, IPluginDataStore } from '../App.interface';
 import { SelectOption } from '../PluginSettings.interface';
 import { TableArray } from '../Table.interface';
 
 export interface IPresetsProps {
+  appActiveState: AppActiveState;
   pluginPresets: PresetsArray;
   activePresetIdx: number;
   onSelectPreset: (presetId: string, newPresetActiveState?: AppActiveState) => void;
@@ -19,6 +20,8 @@ export interface IPresetsProps {
   onTogglePresets: () => void;
   onToggleSettings: () => void;
   updateActiveData: () => void;
+  isShowState: AppIsShowState;
+  setIsShowState: (value: React.SetStateAction<AppIsShowState>) => void;
 }
 
 export interface IPresetsState {
@@ -43,6 +46,7 @@ export interface PresetSettings {
 }
 export interface PresetCustomSettings {
   relationship: RelationshipState;
+  tableDisplay: TableDisplayState;
   [key: string]: any;
 }
 

@@ -38,6 +38,8 @@ const ResizableWrapper: React.FC<IResizableWrapper> = ({ children }) => {
     };
     const onMouseUpTopResize = (event: MouseEvent) => {
       document.removeEventListener('mousemove', onMouseMoveTopResize);
+      document.removeEventListener('mouseup', onMouseUpTopResize);
+      setAllowTextSelection(true);
     };
     const onMouseDownTopResize = (event: MouseEvent) => {
       setAllowTextSelection(false);
@@ -55,6 +57,8 @@ const ResizableWrapper: React.FC<IResizableWrapper> = ({ children }) => {
     return () => {
       setAllowTextSelection(true);
       topResizer?.removeEventListener('mousedown', onMouseDownTopResize);
+      document.removeEventListener('mousemove', onMouseMoveTopResize);
+      document.removeEventListener('mouseup', onMouseUpTopResize);
     };
   }, [modalRef]);
 

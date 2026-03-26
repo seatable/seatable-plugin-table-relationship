@@ -1,23 +1,23 @@
 {
   "name": "table-relationship",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "display_type": "overlay",
   "display_name": {
     "de": "Tabellenbeziehungen",
-    "en": "Table relationship",
-    "fr": "Relations de table",
-    "es": "Tabla de relaciones",
-    "pt": "Relações de tabela",
-    "ru": "Отношения в таблице",
-    "zh-cn": "表格关系"
+    "en": "Table relationships",
+    "fr": "Relations entre tables",
+    "es": "Relaciones entre tablas",
+    "pt": "Relacionamentos entre tabelas",
+    "ru": "Связи между таблицами",
+    "zh-cn": "表关系"
   },
   "description": {
     "de": "Zeigt die Beziehungen zwischen den Tabellen in einer Base.",
     "en": "Display the relations between the tables in a base.",
     "fr": "Afficher les relations entre les tables d'une base.",
     "es": "Visualizar las relaciones entre las tablas de una base.",
-    "pt": "Visualizar as relações entre as tabelas de uma base.",
-    "ru": "Отображение отношений между таблицами в базе.",
+    "pt": "Visualizar os relacionamentos entre as tabelas de uma base.",
+    "ru": "Отображение связей между таблицами в базе.",
     "zh-cn": "显示数据库中表格之间的关系。"
   },
   "active_components": {

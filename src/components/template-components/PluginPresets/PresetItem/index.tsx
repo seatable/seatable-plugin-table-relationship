@@ -26,10 +26,14 @@ const PresetItem: React.FC<IPresetItemProps> = ({
   presetNameAlreadyExists,
   onChangePresetName,
   deletePreset,
+  exportPreset,
+  resetPreset,
   onSelectPreset,
   duplicatePreset,
   togglePresetsUpdate,
   onToggleSettings,
+  isShowState,
+  setIsShowState,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [showPresetDropdown, setShowPresetDropdown] = useState(false);
@@ -80,6 +84,14 @@ const PresetItem: React.FC<IPresetItemProps> = ({
       case PresetHandleAction.duplicate:
         duplicatePreset(p);
         setShowPresetDropdown(false);
+        break;
+      case PresetHandleAction.reset:
+        resetPreset();
+        break;
+      case PresetHandleAction.export:
+        setIsShowState({ ...isShowState, isShowWaiting: true });
+        togglePresetDropdown();
+        exportPreset();
         break;
       default:
     }
