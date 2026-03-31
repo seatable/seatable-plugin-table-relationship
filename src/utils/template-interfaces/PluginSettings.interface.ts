@@ -1,5 +1,9 @@
 import { SettingsOption } from '../types';
-import { RelationshipState } from '../custom-interfaces/PluginTR';
+import {
+  RelationshipState,
+  TableDisplayState,
+  PreviewHeaderColorState,
+} from '../custom-interfaces/PluginTR';
 import { AppActiveState, IActiveComponents } from './App.interface';
 import { PresetSettings, PresetsArray } from './PluginPresets/Presets.interface';
 import { TableArray, TableViewArray } from './Table.interface';
@@ -14,7 +18,11 @@ interface IPluginSettingsProps {
   isShowSettings: boolean;
   activeRelationships: RelationshipState;
   handleRelationships: (t: any) => void;
+  activeTableDisplay: TableDisplayState;
+  handleTableDisplays: (t: any) => void;
   activeComponents: IActiveComponents;
+  previewHeaderColor?: string | null;
+  onPreviewHeaderColor: (t: any) => void;
 }
 
 interface SelectOption {

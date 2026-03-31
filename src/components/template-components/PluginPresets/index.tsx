@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import ReactFlow, { Panel, useReactFlow, getNodesBounds, getViewportForBounds } from 'reactflow';
+import { toPng } from 'html-to-image';
 import { getTableByName } from 'dtable-utils';
 import PresetItem from './PresetItem/index';
 import stylesPresets from '../../../styles/template-styles/PluginPresets.module.scss';
@@ -18,6 +20,7 @@ import {
   getActiveTableAndActiveView,
   isUniquePresetName,
 } from '../../../utils/template-utils/utils';
+import { generateDefaultCustomSettings } from '../../../utils/custom-utils/utils';
 import {
   ACTIVE_PRESET_ID,
   DEFAULT_PLUGIN_DATA,
@@ -39,6 +42,7 @@ import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from '../../../locale';
 const { [DEFAULT_LOCALE]: d } = AVAILABLE_LOCALES;
 
 const PluginPresets: React.FC<IPresetsProps> = ({
+  appActiveState,
   allTables,
   pluginPresets,
   activePresetIdx,
@@ -49,6 +53,8 @@ const PluginPresets: React.FC<IPresetsProps> = ({
   onSelectPreset,
   updatePresets,
   updateActiveData,
+  isShowState,
+  setIsShowState,
 }) => {
   const [dragItemIndex, setDragItemIndex] = useState<number | null>(null);
   const [dragOverItemIndex, setDragOverItemIndex] = useState<number | null>(null);
@@ -57,6 +63,7 @@ const PluginPresets: React.FC<IPresetsProps> = ({
   const [_pluginPresets, setPluginPresets] = useState<PresetsArray>([]);
   const [showNewPresetPopUp, setShowNewPresetPopUp] = useState<boolean>(false);
   const [showEditPresetPopUp, setShowEditPresetPopUp] = useState<boolean>(false);
+  const { getNodes } = useReactFlow();
 
   useEffect(() => {
     setPluginPresets(pluginPresets);
@@ -129,7 +136,7 @@ const PluginPresets: React.FC<IPresetsProps> = ({
       setShowNewPresetPopUp(false);
     }
 
-    setPresetName('');
+    setPresetName(intl.get('preset_new'));
     setShowEditPresetPopUp(type === PresetHandleAction.edit ? false : true);
   };
 
@@ -140,7 +147,7 @@ const PluginPresets: React.FC<IPresetsProps> = ({
       setPresetName(presetName);
       setShowEditPresetPopUp((prev) => !prev);
     } else {
-      setPresetName('');
+      setPresetName(intl.get('preset_new'));
       setShowNewPresetPopUp((prev) => !prev);
     }
   };
@@ -167,8 +174,8 @@ const PluginPresets: React.FC<IPresetsProps> = ({
     newPresetsArray.push(newPreset);
     let initUpdated = initPresetSetting();
     newPresetsArray[_activePresetIdx].settings = Object.assign(_presetSettings, initUpdated);
-    pluginDataStore.presets = newPresetsArray;
-    updatePresets(_activePresetIdx, newPresetsArray, pluginDataStore, _id);
+    const updatedPluginDataStore = { ...pluginDataStore, presets: newPresetsArray };
+    updatePresets(_activePresetIdx, newPresetsArray, updatedPluginDataStore, _id);
     const _activeTableAndView: IActiveTableAndView = getActiveTableAndActiveView(
       newPresetsArray,
       allTables,
@@ -206,9 +213,9 @@ const PluginPresets: React.FC<IPresetsProps> = ({
     localStorage.setItem(ACTIVE_PRESET_ID, _id);
 
     newPluginPresets.splice(activePresetIdx, 1, updatedPreset);
-    pluginDataStore.presets = newPluginPresets;
+    const updatedPluginDataStore = { ...pluginDataStore, presets: newPluginPresets };
 
-    updatePresets(activePresetIdx, newPluginPresets, pluginDataStore, _id);
+    updatePresets(activePresetIdx, newPluginPresets, updatedPluginDataStore, _id);
   };
 
   // Delete the selected Preset
@@ -218,9 +225,69 @@ const PluginPresets: React.FC<IPresetsProps> = ({
     if (activePresetIdx >= newPluginPresets.length) {
       activePresetIdx = newPluginPresets.length - 1;
     }
-    pluginDataStore.presets = newPluginPresets;
+    const updatedPluginDataStore = { ...pluginDataStore, presets: newPluginPresets };
     localStorage.setItem(ACTIVE_PRESET_ID, newPluginPresets[0]._id);
-    updatePresets(0, newPluginPresets, pluginDataStore, pluginDataStore.presets[0]._id);
+    updatePresets(0, newPluginPresets, updatedPluginDataStore, newPluginPresets[0]._id);
+  };
+
+  const downloadImage = (dataUrl: string, fileName: string) => {
+    const a = document.createElement('a');
+
+    a.setAttribute('download', fileName + '.png');
+    a.setAttribute('href', dataUrl);
+    a.click();
+    setIsShowState({ ...isShowState, isShowWaiting: false });
+    // TODO: add FileSaver ?
+  };
+
+  // Reset the selected Preset
+  const resetPreset = () => {
+    let newPluginPresets = deepCopy(pluginPresets);
+    let oldPreset = pluginPresets[activePresetIdx];
+    let _id: string = generatorPresetId(pluginPresets) || '';
+    let updatedPreset = new Preset({
+      ...oldPreset,
+      _id,
+      customSettings: generateDefaultCustomSettings(allTables),
+    });
+    localStorage.setItem(ACTIVE_PRESET_ID, _id);
+
+    newPluginPresets.splice(activePresetIdx, 1, updatedPreset);
+    const updatedPluginDataStore = { ...pluginDataStore, presets: newPluginPresets };
+
+    updatePresets(activePresetIdx, newPluginPresets, updatedPluginDataStore, _id);
+  };
+
+  // Export the selected Preset
+  const exportPreset = () => {
+    const currentPresetName = pluginPresets[activePresetIdx].name;
+    const currentTableDisplay = pluginPresets[activePresetIdx].customSettings?.tableDisplay;
+    const nodesBounds = getNodesBounds(getNodes());
+    //const imageWidth = nodesBounds.height>nodesBounds.width?768:1024;
+    //const imageHeight = nodesBounds.height>nodesBounds.width?1024:768;
+    const viewport = getViewportForBounds(
+      nodesBounds,
+      nodesBounds.width,
+      nodesBounds.height,
+      0.5,
+      1.5
+    );
+    const viewportElement = document.querySelector('.react-flow__viewport') as HTMLElement;
+
+    toPng(viewportElement, {
+      width: nodesBounds.width,
+      height: nodesBounds.height,
+      style: {
+        width: nodesBounds.width.toString(),
+        height: nodesBounds.height.toString(),
+        transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
+      },
+      backgroundColor: currentTableDisplay?.isBackground
+        ? currentTableDisplay?.backgroundColor
+        : '',
+    }).then((url) => {
+      downloadImage(url, currentPresetName);
+    });
   };
 
   // drag and drop logic
@@ -294,10 +361,14 @@ const PluginPresets: React.FC<IPresetsProps> = ({
               }
               onSelectPreset={onSelectPreset}
               deletePreset={deletePreset}
+              exportPreset={exportPreset}
+              resetPreset={resetPreset}
               duplicatePreset={duplicatePreset}
               togglePresetsUpdate={togglePresetsUpdate}
               showEditPresetPopUp={showEditPresetPopUp}
               onToggleSettings={onToggleSettings}
+              isShowState={isShowState}
+              setIsShowState={setIsShowState}
             />
           </div>
         ))}
