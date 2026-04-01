@@ -84,6 +84,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   const viewportRestoredRef = useRef(false);
   const lastViewportRef = useRef<{ x: number; y: number; zoom: number } | null>(null);
   const needsViewportRestoreRef = useRef(true);
+  const dragSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Hide ReactFlow immediately when preset changes
   if (prevPresetIdRef.current !== appActiveState.activePresetId) {
@@ -766,7 +767,9 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       );
 
       // Persist after a delay to avoid triggering resetData cascade immediately
-      setTimeout(() => {
+      if (dragSaveTimerRef.current) clearTimeout(dragSaveTimerRef.current);
+      dragSaveTimerRef.current = setTimeout(() => {
+        dragSaveTimerRef.current = null;
         const currentNodes = reactFlow.getNodes();
         setPluginDataStoreFn(
           pluginDataStore,
@@ -953,7 +956,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   const activePresetIdRef = useRef(appActiveState.activePresetId);
   activePresetIdRef.current = appActiveState.activePresetId;
 
-  // Save viewport on unmount (plugin close) — empty deps so it only fires once.
+  // Save viewport on unmount (plugin close) and clear all active timers.
   // Uses lastViewportRef because reactFlow.getViewport() returns defaults during teardown.
   useEffect(() => {
     return () => {
@@ -964,6 +967,14 @@ const PluginTR: React.FC<IPluginTRProps> = ({
           lastViewportRef.current
         );
       }
+      // Clear all timers to prevent callbacks firing on unmounted component
+      if (fontSizeSaveTimer.current) clearTimeout(fontSizeSaveTimer.current);
+      if (setStatesSaveTimer.current) clearTimeout(setStatesSaveTimer.current);
+      if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
+      if (revealFallbackRef.current) clearTimeout(revealFallbackRef.current);
+      if (presetSwitchCooldownRef.current) clearTimeout(presetSwitchCooldownRef.current);
+      if (dragSaveTimerRef.current) clearTimeout(dragSaveTimerRef.current);
+      if (dragEdgeRafRef.current) cancelAnimationFrame(dragEdgeRafRef.current);
     };
   }, []);
 
