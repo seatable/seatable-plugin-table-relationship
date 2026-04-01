@@ -114,6 +114,12 @@ function normalizeTableDisplay(td: TableDisplayState): TableDisplayState {
 const App: React.FC<IAppProps> = (props) => {
   const { isDevelopment, lang } = props;
 
+  // Debounce timer for resetData triggered by SDK change events.
+  // Prevents the save→subscribe→resetData infinite cascade: every SDK write
+  // (from App or PluginTR) fires local-dtable-changed, which would call resetData,
+  // which saves again, etc.  Debouncing collapses rapid cascades into a single call.
+  const resetDataTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Boolean state to show/hide the plugin's components
   const [isShowState, setIsShowState] = useState<AppIsShowState>(INITIAL_IS_SHOW_STATE);
   const { isShowPlugin, isShowSettings, isLoading, isShowWaiting, isShowPresets } = isShowState;
@@ -182,6 +188,7 @@ const App: React.FC<IAppProps> = (props) => {
     return () => {
       unsubscribeLocalDtableChanged();
       unsubscribeRemoteDtableChanged();
+      if (resetDataTimerRef.current) clearTimeout(resetDataTimerRef.current);
     };
   }, []);
 
@@ -218,121 +225,143 @@ const App: React.FC<IAppProps> = (props) => {
     resetData();
   };
   const onDTableChanged = () => {
-    resetData();
+    // Debounce to collapse rapid save→event→resetData cascades into one call.
+    if (resetDataTimerRef.current) clearTimeout(resetDataTimerRef.current);
+    resetDataTimerRef.current = setTimeout(() => {
+      resetData();
+    }, 200);
   };
 
   const resetData = async () => {
-    let allTables: TableArray = cleanAllTables(); // All the Tables of the Base
-    let activeTable: Table = cleanActiveTable(); // How is the ActiveTable Set? allTables[0]?
-    let activeTableViews: TableViewArray = cleanActiveTableViews(activeTable); // All the Views of the specific Active Table
-    let pluginDataStore: IPluginDataStore = getPluginDataStore(activeTable, PLUGIN_NAME);
-    let pluginPresets: PresetsArray = pluginDataStore.presets; // An array with all the Presets
+    try {
+      let allTables: TableArray = cleanAllTables(); // All the Tables of the Base
+      let activeTable: Table = cleanActiveTable(); // How is the ActiveTable Set? allTables[0]?
+      let activeTableViews: TableViewArray = cleanActiveTableViews(activeTable); // All the Views of the specific Active Table
+      let pluginDataStore: IPluginDataStore = getPluginDataStore(activeTable, PLUGIN_NAME);
+      let pluginPresets: PresetsArray = pluginDataStore.presets; // An array with all the Presets
 
-    let localActivePresetId = localStorage.getItem(ACTIVE_PRESET_ID);
-    if (!localActivePresetId) {
-      localActivePresetId = pluginPresets[0]._id;
-      localStorage.setItem(ACTIVE_PRESET_ID, localActivePresetId);
-    }
-    setActiveComponents((prevState) => ({
-      ...prevState,
-      settingsDropDowns: info.active_components.settings_dropdowns,
-      add_row_button: info.active_components.add_row_button,
-    }));
-    setPluginDataStore(pluginDataStore);
-    setAllTables(allTables);
-    setPluginPresets(pluginPresets);
-    setIsShowState((prevState) => ({ ...prevState, isLoading: false }));
+      let localActivePresetId = localStorage.getItem(ACTIVE_PRESET_ID);
+      if (!localActivePresetId) {
+        if (!pluginPresets || pluginPresets.length === 0) {
+          // No presets exist yet — create defaults before accessing [0]
+          const defaultPluginDataStore: IPluginDataStore = createDefaultPluginDataStore(
+            activeTable,
+            PLUGIN_NAME
+          );
+          window.dtableSDK.updatePluginSettings(PLUGIN_NAME, defaultPluginDataStore);
+          pluginDataStore = defaultPluginDataStore;
+          pluginPresets = defaultPluginDataStore.presets;
+        }
+        localActivePresetId = pluginPresets[0]._id;
+        localStorage.setItem(ACTIVE_PRESET_ID, localActivePresetId);
+      }
+      setActiveComponents((prevState) => ({
+        ...prevState,
+        settingsDropDowns: info.active_components.settings_dropdowns,
+        add_row_button: info.active_components.add_row_button,
+      }));
+      setPluginDataStore(pluginDataStore);
+      setAllTables(allTables);
+      setPluginPresets(pluginPresets);
+      setIsShowState((prevState) => ({ ...prevState, isLoading: false }));
 
-    if (localActivePresetId) {
-      const appActiveState = parsePluginDataToActiveState(
-        pluginDataStore,
-        pluginPresets,
-        allTables
-      );
-
-      // Reconcile tables in ALL presets: add new tables / remove deleted tables.
-      // Must use local allTables (not React state which is stale).
-      const allTableIds = allTables.map((t) => t._id);
-      let anyPresetChanged = false;
-      for (const preset of pluginPresets) {
-        if (!preset?.customSettings?.tableDisplay?.selectedViews) continue;
-        // Normalize missing fields to defaults for old presets
-        preset.customSettings.tableDisplay = normalizeTableDisplay(
-          preset.customSettings.tableDisplay
+      if (localActivePresetId) {
+        const appActiveState = parsePluginDataToActiveState(
+          pluginDataStore,
+          pluginPresets,
+          allTables
         );
-        const td = preset.customSettings.tableDisplay;
-        let changed = false;
-        for (const t of allTables) {
-          if (!(t._id in td.selectedViews)) {
-            td.selectedViews[t._id] =
-              t.views.filter((v: any) => v.type === 'table')[0]?._id || t.views[0]._id;
-            if (!td.displayedTables.includes(t._id)) {
-              td.displayedTables.push(t._id);
+
+        // Reconcile tables in ALL presets: add new tables / remove deleted tables.
+        // Must use local allTables (not React state which is stale).
+        const allTableIds = allTables.map((t) => t._id);
+        let anyPresetChanged = false;
+        for (const preset of pluginPresets) {
+          if (!preset?.customSettings?.tableDisplay?.selectedViews) continue;
+          // Normalize missing fields to defaults for old presets
+          preset.customSettings.tableDisplay = normalizeTableDisplay(
+            preset.customSettings.tableDisplay
+          );
+          const td = preset.customSettings.tableDisplay;
+          let changed = false;
+          for (const t of allTables) {
+            if (!(t._id in td.selectedViews)) {
+              td.selectedViews[t._id] =
+                t.views.filter((v: any) => v.type === 'table')[0]?._id || t.views[0]._id;
+              if (!td.displayedTables.includes(t._id)) {
+                td.displayedTables.push(t._id);
+              }
+              changed = true;
             }
+          }
+          const extraIds = Object.keys(td.selectedViews).filter((k) => !allTableIds.includes(k));
+          if (extraIds.length > 0) {
+            for (const eid of extraIds) {
+              delete td.selectedViews[eid];
+            }
+            td.displayedTables = td.displayedTables.filter((id: string) =>
+              allTableIds.includes(id)
+            );
             changed = true;
           }
+          td.displayedTables = Array.from(new Set(td.displayedTables));
+          if (changed) anyPresetChanged = true;
         }
-        const extraIds = Object.keys(td.selectedViews).filter((k) => !allTableIds.includes(k));
-        if (extraIds.length > 0) {
-          for (const eid of extraIds) {
-            delete td.selectedViews[eid];
-          }
-          td.displayedTables = td.displayedTables.filter((id: string) => allTableIds.includes(id));
-          changed = true;
+        if (anyPresetChanged) {
+          window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
+            ...pluginDataStore,
+            presets: pluginPresets,
+          });
         }
-        td.displayedTables = Array.from(new Set(td.displayedTables));
-        if (changed) anyPresetChanged = true;
-      }
-      if (anyPresetChanged) {
-        window.dtableSDK.updatePluginSettings(PLUGIN_NAME, {
-          ...pluginDataStore,
-          presets: pluginPresets,
-        });
-      }
 
-      onSelectPreset(localActivePresetId, appActiveState);
-      const activePresetRelationship = pluginPresets.find((p) => {
-        return p._id === localActivePresetId;
-      })?.customSettings?.relationship;
-      if (activePresetRelationship) {
-        setActiveRelationships(activePresetRelationship);
-      }
-      const activePresetTableDisplay = pluginPresets.find((p) => {
-        return p._id === localActivePresetId;
-      })?.customSettings?.tableDisplay;
-      if (activePresetTableDisplay) {
-        setActiveTableDisplay(
-          normalizeTableDisplay(normalizeEdgeStrokes(activePresetTableDisplay))
+        onSelectPreset(localActivePresetId, appActiveState);
+        const activePresetRelationship = pluginPresets.find((p) => {
+          return p._id === localActivePresetId;
+        })?.customSettings?.relationship;
+        if (activePresetRelationship) {
+          setActiveRelationships(activePresetRelationship);
+        }
+        const activePresetTableDisplay = pluginPresets.find((p) => {
+          return p._id === localActivePresetId;
+        })?.customSettings?.tableDisplay;
+        if (activePresetTableDisplay) {
+          setActiveTableDisplay(
+            normalizeTableDisplay(normalizeEdgeStrokes(activePresetTableDisplay))
+          );
+        }
+        return;
+      } else {
+        // If there are no presets, the default one is created
+        if (pluginPresets.length === 0) {
+          const defaultPluginDataStore: IPluginDataStore = createDefaultPluginDataStore(
+            activeTable,
+            PLUGIN_NAME
+          );
+          window.dtableSDK.updatePluginSettings(PLUGIN_NAME, defaultPluginDataStore);
+        }
+        // Retrieve both objects of activeTable and activeView from the pluginPresets NOT from the window.dtableSDK
+        const activeTableAndView: IActiveTableAndView = getActiveTableAndActiveView(
+          pluginPresets,
+          allTables
         );
-      }
-      return;
-    } else {
-      // If there are no presets, the default one is created
-      if (pluginPresets.length === 0) {
-        const defaultPluginDataStore: IPluginDataStore = createDefaultPluginDataStore(
+        // Get the activeViewRows from the window.dtableSDK
+        const activeViewRows: TableRow[] = [];
+
+        const activeStateSafeGuard = getActiveStateSafeGuard(
+          pluginPresets,
           activeTable,
-          PLUGIN_NAME
+          activeTableAndView,
+          activeViewRows
         );
-        window.dtableSDK.updatePluginSettings(PLUGIN_NAME, defaultPluginDataStore);
+
+        // At first we set the first Preset as the active one
+        setActiveTableViews(activeTableAndView?.table?.views || activeTableViews);
+        setAppActiveState(activeStateSafeGuard);
       }
-      // Retrieve both objects of activeTable and activeView from the pluginPresets NOT from the window.dtableSDK
-      const activeTableAndView: IActiveTableAndView = getActiveTableAndActiveView(
-        pluginPresets,
-        allTables
-      );
-      // Get the activeViewRows from the window.dtableSDK
-      const activeViewRows: TableRow[] = [];
-
-      const activeStateSafeGuard = getActiveStateSafeGuard(
-        pluginPresets,
-        activeTable,
-        activeTableAndView,
-        activeViewRows
-      );
-
-      // At first we set the first Preset as the active one
-      setActiveTableViews(activeTableAndView?.table?.views || activeTableViews);
-      setAppActiveState(activeStateSafeGuard);
+    } catch (err) {
+      console.error('[Table Relationships] resetData failed:', err);
+      // Ensure plugin still renders even if data loading fails
+      setIsShowState((prevState) => ({ ...prevState, isLoading: false }));
     }
   };
 

@@ -6,6 +6,7 @@ import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from './locale';
 import intl from 'react-intl-universal';
 
 let pluginRoot: ReturnType<typeof createRoot> | null = null;
+let pluginContainer: Element | null = null;
 
 const SeaTablePlugin = {
   execute: () => {
@@ -15,8 +16,13 @@ const SeaTablePlugin = {
         : DEFAULT_LOCALE;
     intl.init({ currentLocale: lang, locales: AVAILABLE_LOCALES });
     const container = document.querySelector('#plugin-wrapper');
-    if (!pluginRoot) {
+    // Recreate root if the container was replaced by SeaTable between open/close cycles
+    if (!pluginRoot || container !== pluginContainer) {
+      if (pluginRoot) {
+        pluginRoot.unmount();
+      }
       pluginRoot = createRoot(container!);
+      pluginContainer = container;
     }
     pluginRoot.render(<App showDialog={true} key={Date.now()} />);
   },

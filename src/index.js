@@ -7,6 +7,7 @@ import intl from 'react-intl-universal';
 import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from './locale/index.ts';
 
 let pluginRoot = null;
+let pluginContainer = null;
 let langDropRoot = null;
 
 class SeaTablePlugin {
@@ -34,8 +35,13 @@ class SeaTablePlugin {
     await this.init();
     intl.init({ currentLocale: lang, locales: AVAILABLE_LOCALES });
     const rootElement = document.querySelector('#plugin-wrapper');
-    if (!pluginRoot) {
+    // Recreate root if the container was replaced between open/close cycles
+    if (!pluginRoot || rootElement !== pluginContainer) {
+      if (pluginRoot) {
+        pluginRoot.unmount();
+      }
       pluginRoot = createRoot(rootElement);
+      pluginContainer = rootElement;
     }
     pluginRoot.render(<App isDevelopment lang={lang} key={Date.now()} />);
   }
