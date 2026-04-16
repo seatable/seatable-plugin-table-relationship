@@ -498,28 +498,24 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
                       <ContainerContent>
                         <p className="d-inline mb-2 mt-0">{intl.get('view').d(`${d.view}`)}</p>
                         <DtableSelect
-                          value={
-                            activeTableDisplay.selectedViews &&
-                            t._id in activeTableDisplay.selectedViews
-                              ? {
-                                  value: t.views
-                                    .filter((v) => v.type === 'table')
-                                    .filter(
-                                      (v) => v._id === activeTableDisplay.selectedViews[t._id]
-                                    )[0]._id,
-                                  label: t.views
-                                    .filter((v) => v.type === 'table')
-                                    .filter(
-                                      (v) => v._id === activeTableDisplay.selectedViews[t._id]
-                                    )[0].name,
-                                }
-                              : t.views
-                                  .filter((v) => v.type === 'table')
-                                  .map((v) => {
-                                    let viewOption = { value: v._id, label: v.name };
-                                    return viewOption;
-                                  })[0]
-                          }
+                          value={(() => {
+                            const tableViews = t.views.filter((v) => v.type === 'table');
+                            if (
+                              activeTableDisplay.selectedViews &&
+                              t._id in activeTableDisplay.selectedViews
+                            ) {
+                              const matched = tableViews.find(
+                                (v) => v._id === activeTableDisplay.selectedViews[t._id]
+                              );
+                              const fallback = tableViews[0] || t.views[0];
+                              const view = matched || fallback;
+                              return view ? { value: view._id, label: view.name } : undefined;
+                            }
+                            const fallback = tableViews[0] || t.views[0];
+                            return fallback
+                              ? { value: fallback._id, label: fallback.name }
+                              : undefined;
+                          })()}
                           options={t.views
                             .filter((v) => v.type === 'table')
                             .map((v) => {

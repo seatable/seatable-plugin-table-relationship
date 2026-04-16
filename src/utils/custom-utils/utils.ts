@@ -309,43 +309,6 @@ function checkData(array1: NodeResultItem[], array2: NodeResultItem[]): NodeResu
   return mergedArray;
 }
 
-function checkColumnsPosition(
-  array1: NodeResultItem[],
-  array2: NodeResultItem[]
-): NodeResultItem[] {
-  // Create a new array to store the merged results
-  const mergedArray: NodeResultItem[] = [];
-
-  for (let i = 0; i < array1.length; i++) {
-    const item1 = array1[i];
-    const item2 = array2.find((item) => item.id === item1.id);
-
-    if (item2) {
-      // Compare and merge columns
-      const mergedColumns = item1.data.columns.map((col, index) => {
-        const col2 = item2.data.columns[index];
-        if (JSON.stringify(col) !== JSON.stringify(col2)) {
-          return col;
-        }
-        return col2;
-      });
-
-      // Create merged item
-      const mergedItem: NodeResultItem = {
-        ...item2,
-        data: {
-          ...item2.data,
-          columns: mergedColumns,
-        },
-      };
-
-      mergedArray.push(mergedItem);
-    }
-  }
-
-  return mergedArray;
-}
-
 // This function is used to update the customSettings in the PluginDataStore
 export function setPluginDataStoreFn(
   pluginDataStore: IPluginDataStore,
@@ -1077,9 +1040,8 @@ function findColumns(table: Table, selectedViews: SelectedViews, tblAllCols: boo
   } else {
     let selectedView = table.views.filter((v) => v._id === selectedViews[table._id]);
     if (selectedView && selectedView.length === 1) {
-      selectedColumns = table.columns.filter(
-        (c) => !selectedView[0].hidden_columns.includes(c.key)
-      );
+      const hiddenColumns = selectedView[0].hidden_columns || [];
+      selectedColumns = table.columns.filter((c) => !hiddenColumns.includes(c.key));
     }
   }
   return selectedColumns;

@@ -208,14 +208,12 @@ const PluginPresets: React.FC<IPresetsProps> = ({
   const editPreset = (presetName: string) => {
     let newPluginPresets = deepCopy(pluginPresets);
     let oldPreset = pluginPresets[activePresetIdx];
-    let _id: string = generatorPresetId(pluginPresets) || '';
-    let updatedPreset = new Preset({ ...oldPreset, _id, name: presetName });
-    localStorage.setItem(ACTIVE_PRESET_ID, _id);
+    let updatedPreset = new Preset({ ...oldPreset, name: presetName });
 
     newPluginPresets.splice(activePresetIdx, 1, updatedPreset);
     const updatedPluginDataStore = { ...pluginDataStore, presets: newPluginPresets };
 
-    updatePresets(activePresetIdx, newPluginPresets, updatedPluginDataStore, _id);
+    updatePresets(activePresetIdx, newPluginPresets, updatedPluginDataStore, oldPreset._id);
   };
 
   // Delete the selected Preset

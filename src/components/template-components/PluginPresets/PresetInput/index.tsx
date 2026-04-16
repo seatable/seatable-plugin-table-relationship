@@ -33,6 +33,7 @@ const PresetInput: React.FC<IPresetInput> = ({
     switch (e.key) {
       case KeyDownActions.enter:
         onChangePresetName(e);
+        setIsEditing(false);
         break;
       case KeyDownActions.escape: {
         setBlurCausedByKeyDown(true);
@@ -47,8 +48,9 @@ const PresetInput: React.FC<IPresetInput> = ({
   const handleFocusOut = (e: React.FormEvent<HTMLInputElement>) => {
     if (!blurCausedByKeyDown) {
       onChangePresetName(e);
-      setBlurCausedByKeyDown(false);
+      setIsEditing(false);
     }
+    setBlurCausedByKeyDown(false);
   };
 
   return (

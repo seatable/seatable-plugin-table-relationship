@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.2.5 (16.04.2026)
+
+- Bug fixes and translation improvements
+
 ## Version 1.2.4 (17.03.2026)
 
 - Allows individual tables to be displayed or not
