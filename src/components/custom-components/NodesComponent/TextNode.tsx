@@ -56,74 +56,78 @@ function TextNode({ id, data }: { id: string; data: any }) {
         position={Position.Top}
         align={'start'}
         style={{ flexDirection: 'row', display: 'flex' }}>
-        <button
-          className="react-flow__controls-button"
-          title={intl.get('custom_plugin.edit_text').d(`${d.custom_plugin.edit_text}`)}
-          onClick={() => {
-            setIsEditing(true);
-            const el = document.getElementById(id + '_label');
-            if (el) {
-              el.classList.add('nodrag');
-              const length = el.innerText.length;
-              el.style.cursor = 'text';
-              el.contentEditable = 'true';
-              el.focus();
+        {/* nopan nodrag: prevent ReactFlow from capturing mouse events on toolbar
+            buttons as panning/dragging, so clicks register even with slight movement */}
+        <div className="nopan nodrag" style={{ display: 'flex' }}>
+          <button
+            className="react-flow__controls-button"
+            title={intl.get('custom_plugin.edit_text').d(`${d.custom_plugin.edit_text}`)}
+            onClick={() => {
+              setIsEditing(true);
+              const el = document.getElementById(id + '_label');
+              if (el) {
+                el.classList.add('nodrag');
+                const length = el.innerText.length;
+                el.style.cursor = 'text';
+                el.contentEditable = 'true';
+                el.focus();
+              }
+            }}>
+            <i
+              className="item-icon dtable-font dtable-icon-rename"
+              aria-hidden="true"
+              style={{ color: '#8c8c8c' }}></i>
+          </button>
+          <button
+            className="react-flow__controls-button"
+            title={
+              data.hasBackground
+                ? intl.get('custom_plugin.hide_background').d(`${d.custom_plugin.hide_background}`)
+                : intl.get('custom_plugin.show_background').d(`${d.custom_plugin.show_background}`)
             }
-          }}>
-          <i
-            className="item-icon dtable-font dtable-icon-rename"
-            aria-hidden="true"
-            style={{ color: '#8c8c8c' }}></i>
-        </button>
-        <button
-          className="react-flow__controls-button"
-          title={
-            data.hasBackground
-              ? intl.get('custom_plugin.hide_background').d(`${d.custom_plugin.hide_background}`)
-              : intl.get('custom_plugin.show_background').d(`${d.custom_plugin.show_background}`)
-          }
-          onClick={() => {
-            data.onSave(id, { hasBackground: !data.hasBackground });
-          }}>
-          {data.hasBackground ? (
-            <FaDropletSlash style={{ color: '#8c8c8c' }} />
-          ) : (
-            <FaDroplet style={{ color: '#8c8c8c' }} />
-          )}
-        </button>
-        <button
-          className="react-flow__controls-button"
-          title={intl.get('custom_plugin.align_left').d(`${d.custom_plugin.align_left}`)}
-          onClick={() => {
-            data.onSave(id, { align: 'left' });
-          }}>
-          <FaAlignLeft style={{ color: '#8c8c8c' }} />
-        </button>
-        <button
-          className="react-flow__controls-button"
-          title={intl.get('custom_plugin.align_center').d(`${d.custom_plugin.align_center}`)}
-          onClick={() => {
-            data.onSave(id, { align: 'center' });
-          }}>
-          <FaAlignCenter style={{ color: '#8c8c8c' }} />
-        </button>
-        <button
-          className="react-flow__controls-button"
-          title={intl.get('custom_plugin.align_right').d(`${d.custom_plugin.align_right}`)}
-          onClick={() => {
-            data.onSave(id, { align: 'right' });
-          }}>
-          <FaAlignRight style={{ color: '#8c8c8c' }} />
-        </button>
-        <button
-          className="react-flow__controls-button"
-          title={intl.get('custom_plugin.delete_node').d(`${d.custom_plugin.delete_node}`)}
-          onClick={() => data.onDelete(id)}>
-          <i
-            className="item-icon dtable-font dtable-icon-delete"
-            aria-hidden="true"
-            style={{ color: '#8c8c8c' }}></i>
-        </button>
+            onClick={() => {
+              data.onSave(id, { hasBackground: !data.hasBackground });
+            }}>
+            {data.hasBackground ? (
+              <FaDropletSlash style={{ color: '#8c8c8c' }} />
+            ) : (
+              <FaDroplet style={{ color: '#8c8c8c' }} />
+            )}
+          </button>
+          <button
+            className="react-flow__controls-button"
+            title={intl.get('custom_plugin.align_left').d(`${d.custom_plugin.align_left}`)}
+            onClick={() => {
+              data.onSave(id, { align: 'left' });
+            }}>
+            <FaAlignLeft style={{ color: '#8c8c8c' }} />
+          </button>
+          <button
+            className="react-flow__controls-button"
+            title={intl.get('custom_plugin.align_center').d(`${d.custom_plugin.align_center}`)}
+            onClick={() => {
+              data.onSave(id, { align: 'center' });
+            }}>
+            <FaAlignCenter style={{ color: '#8c8c8c' }} />
+          </button>
+          <button
+            className="react-flow__controls-button"
+            title={intl.get('custom_plugin.align_right').d(`${d.custom_plugin.align_right}`)}
+            onClick={() => {
+              data.onSave(id, { align: 'right' });
+            }}>
+            <FaAlignRight style={{ color: '#8c8c8c' }} />
+          </button>
+          <button
+            className="react-flow__controls-button"
+            title={intl.get('custom_plugin.delete_node').d(`${d.custom_plugin.delete_node}`)}
+            onClick={() => data.onDelete(id)}>
+            <i
+              className="item-icon dtable-font dtable-icon-delete"
+              aria-hidden="true"
+              style={{ color: '#8c8c8c' }}></i>
+          </button>
+        </div>
       </NodeToolbar>
       <div
         id={id + '_label'}

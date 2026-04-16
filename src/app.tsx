@@ -60,7 +60,6 @@ import {
 } from './utils/custom-interfaces/PluginTR';
 import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from './locale';
 import { generateDefaultCustomSettings } from './utils/custom-utils/utils';
-import { visitParameterList } from 'typescript';
 
 // Normalize strokeDasharray values that were corrupted by old generateEdges mutation.
 // Maps computed values like '3 3' back to canonical '5 5' (dashed), '1 3' to '1 5' (dotted).
@@ -688,8 +687,6 @@ const App: React.FC<IAppProps> = (props) => {
                 pluginDataStore={pluginDataStore}
                 activeRelationships={activeRelationships}
                 activeTableDisplay={activeTableDisplay}
-                setPluginDataStore={setPluginDataStore}
-                // onPreviewHeaderColor={setPreviewHeaderColor}
                 previewHeaderColor={previewHeaderColor}
               />
             </div>
