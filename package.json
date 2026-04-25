@@ -13,7 +13,7 @@
     "react-dom": "18.3.1",
     "react-i18next": "^16.5.8",
     "react-icons": "^4.12.0",
-    "react-intl-universal": "^2.11.1",
+    "react-intl-universal": "^2.12.0",
     "react-select": "^5.8.0",
     "reactflow": "^11.11.4",
     "reactstrap": "9.2.3",
