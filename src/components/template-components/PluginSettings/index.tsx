@@ -22,6 +22,7 @@ import {
 } from '../../custom-components/ExpandableContainer/ExpandableContainer';
 import ColorPicker from '../../../components/color-picker';
 import PixelEditor from '../../../components/pixel-editor';
+import info from '../../../plugin-config/info.json';
 const { [DEFAULT_LOCALE]: d } = AVAILABLE_LOCALES;
 
 const line = (label = 'solid') => ({
@@ -102,6 +103,7 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
   handleTableDisplays,
   previewHeaderColor,
   onPreviewHeaderColor,
+  onResetPositions,
 }) => {
   // State variables for table and view options
   const [tableOptions, setTableOptions] = useState<SelectOption[]>();
@@ -181,8 +183,13 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
       className={`bg-white ${
         isShowSettings ? stylesPSettings.settings : stylesPSettings.settings_hide
       }`}
-      style={{ overflow: 'auto', position: 'relative', flexShrink: '0' }}>
-      <div className="pt-0 pb-5 pl-5 pr-5">
+      style={{
+        position: 'relative',
+        flexShrink: '0',
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+      <div className="pt-0 pb-5 pl-5 pr-5" style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
         <div
           className={`d-flex align-items-center justify-content-between ${stylesPSettings.settings_header} sticky-top bg-white pt-5`}>
           <div>
@@ -551,6 +558,45 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
             </div>
           </div>
           <div className="theme-content pb-9 tab-pane">
+            <ExpandableContainer>
+              <ContainerHeader>
+                <p className="ml-2 mb-0">
+                  {intl.get('custom_plugin.theme_layout').d(`${d.custom_plugin.theme_layout}`)}
+                </p>
+              </ContainerHeader>
+              <ContainerContent>
+                <p>
+                  {intl.get('custom_plugin.theme_numcols').d(`${d.custom_plugin.theme_numcols}`)}
+                  <span className="ml-2" style={{ color: '#808080' }}>
+                    {activeTableDisplay.numCols ?? 5}
+                  </span>
+                </p>
+                <input
+                  type="range"
+                  min="3"
+                  max="10"
+                  value={activeTableDisplay.numCols ?? 5}
+                  onChange={(e) => {
+                    handleTableDisplays({
+                      ...activeTableDisplay,
+                      numCols: parseInt(e.currentTarget.value),
+                    });
+                  }}
+                  className={'table-relationships-plugin-slider w-50 mb-3 mt-2'}
+                />
+                <button
+                  type="button"
+                  className="btn btn-primary mt-2"
+                  title={intl
+                    .get('custom_plugin.theme_reset_positions_tooltip')
+                    .d(`${d.custom_plugin.theme_reset_positions_tooltip}`)}
+                  onClick={() => onResetPositions && onResetPositions()}>
+                  {intl
+                    .get('custom_plugin.theme_reset_positions')
+                    .d(`${d.custom_plugin.theme_reset_positions}`)}
+                </button>
+              </ContainerContent>
+            </ExpandableContainer>
             <ExpandableContainer>
               <ContainerHeader>
                 <p className="ml-2 mb-0">
@@ -926,6 +972,16 @@ const PluginSettings: React.FC<IPluginSettingsProps> = ({
             </ExpandableContainer>
           </div>
         </div>
+      </div>
+      <div
+        style={{
+          textAlign: 'right',
+          fontSize: '11px',
+          color: '#aaa',
+          padding: '4px 14px 6px',
+          pointerEvents: 'none',
+        }}>
+        v{info.version}
       </div>
     </div>
   );

@@ -102,6 +102,7 @@ function normalizeTableDisplay(td: TableDisplayState): TableDisplayState {
     headerColor: td.headerColor ?? '#ED7109',
     fontSize: td.fontSize ?? 14,
     backgroundColor: td.backgroundColor ?? '#F5F5F5',
+    numCols: td.numCols ?? 5,
     edgeStrokes: td.edgeStrokes ?? {
       link: { stroke: '#212529', strokeWidth: 1, strokeDasharray: '0' },
       formula: { stroke: '#212529', strokeWidth: 1, strokeDasharray: '5 5' },
@@ -159,6 +160,7 @@ const App: React.FC<IAppProps> = (props) => {
     backgroundColor: '#F5F5F5',
     tblNoLnk: true,
     tblAllCols: true,
+    numCols: 5,
     edgeStrokes: {
       link: {
         stroke: '#212529',
@@ -178,6 +180,10 @@ const App: React.FC<IAppProps> = (props) => {
     },
   });
   const [previewHeaderColor, setPreviewHeaderColor] = useState<string | null>(null);
+  // Incrementing counter that signals PluginTR to clear `displaced` flags on table
+  // nodes and re-run the grid layout. Stored only in React state — not persisted —
+  // because it represents a one-shot user action, not a setting.
+  const [resetPositionsToken, setResetPositionsToken] = useState<number>(0);
   // const [previewHeaderColor, setPreviewHeaderColor] = useState<PreviewHeaderColorState>({previewHeaderColor: '#ED7109'});
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx } = appActiveState;
@@ -631,6 +637,10 @@ const App: React.FC<IAppProps> = (props) => {
     });
   }
 
+  function handleResetPositions() {
+    setResetPositionsToken((n) => n + 1);
+  }
+
   if (!isShowPlugin) {
     return null;
   }
@@ -688,6 +698,7 @@ const App: React.FC<IAppProps> = (props) => {
                 activeRelationships={activeRelationships}
                 activeTableDisplay={activeTableDisplay}
                 previewHeaderColor={previewHeaderColor}
+                resetPositionsToken={resetPositionsToken}
               />
             </div>
 
@@ -706,6 +717,7 @@ const App: React.FC<IAppProps> = (props) => {
               handleTableDisplays={handleTableDisplays}
               onPreviewHeaderColor={setPreviewHeaderColor}
               previewHeaderColor={previewHeaderColor}
+              onResetPositions={handleResetPositions}
             />
           </div>
         </div>

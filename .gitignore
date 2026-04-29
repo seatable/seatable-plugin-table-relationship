@@ -28,3 +28,7 @@ yarn-error.log*
 
 # local development settings
 /src/setting.local.js
+
+# Claude Code
+/.claude
+/CLAUDE.md

@@ -65,6 +65,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   activeRelationships,
   activeTableDisplay,
   previewHeaderColor,
+  resetPositionsToken,
 }) => {
   const [nodes, setNodes] = useNodesState([]); // onNodesChange
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -287,7 +288,12 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       style: nodeStyleForFontSize(activeTableDisplay.fontSize),
     }));
     // Re-arrange grid positions for non-displaced nodes based on new fontSize
-    _nodes = arrangeNodesOnGrid(_nodes, links, activeTableDisplay.fontSize);
+    _nodes = arrangeNodesOnGrid(
+      _nodes,
+      links,
+      activeTableDisplay.fontSize,
+      activeTableDisplay.numCols ?? 5
+    );
     const nodesWithCallbacks = injectNodeCallbacks(_nodes);
     setNodes(nodesWithCallbacks);
     setPendingEdgeRefresh(true);
@@ -304,6 +310,70 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       );
     }, 500);
   }, [activeTableDisplay.fontSize]);
+
+  // Re-run grid layout when the user changes the column count.
+  // Displaced (manually positioned) nodes keep their positions.
+  useEffect(() => {
+    if (presetSwitchCooldownRef.current) return;
+    const { customSettings } = isCustomSettingsFn(
+      pluginDataStore,
+      allTables,
+      appActiveState.activePresetId
+    );
+    const arranged = arrangeNodesOnGrid(
+      customSettings.nodes,
+      customSettings.links,
+      activeTableDisplay.fontSize,
+      activeTableDisplay.numCols ?? 5
+    );
+    const nodesWithCallbacks = injectNodeCallbacks(arranged);
+    setNodes(nodesWithCallbacks);
+    setPluginDataStoreFn(
+      pluginDataStore,
+      activeRelationships,
+      activeTableDisplay,
+      appActiveState.activePresetId,
+      nodesWithCallbacks,
+      customSettings.links
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTableDisplay.numCols]);
+
+  // Reset positions: clear `displaced` flag on table nodes, re-run the grid layout,
+  // leave text notes untouched. Triggered by an incrementing token from App so a
+  // repeated click always fires (and skip the initial 0 value on mount).
+  const prevResetTokenRef = useRef<number | undefined>(resetPositionsToken);
+  useEffect(() => {
+    if (resetPositionsToken === undefined || resetPositionsToken === 0) return;
+    if (resetPositionsToken === prevResetTokenRef.current) return;
+    prevResetTokenRef.current = resetPositionsToken;
+    const { customSettings } = isCustomSettingsFn(
+      pluginDataStore,
+      allTables,
+      appActiveState.activePresetId
+    );
+    const cleared = customSettings.nodes.map((n: any) => {
+      if (n.type === 'textnode') return n;
+      return { ...n, position: { ...n.position }, data: { ...n.data, displaced: false } };
+    });
+    const arranged = arrangeNodesOnGrid(
+      cleared,
+      customSettings.links,
+      activeTableDisplay.fontSize,
+      activeTableDisplay.numCols ?? 5
+    );
+    const nodesWithCallbacks = injectNodeCallbacks(arranged);
+    setNodes(nodesWithCallbacks);
+    setPluginDataStoreFn(
+      pluginDataStore,
+      activeRelationships,
+      activeTableDisplay,
+      appActiveState.activePresetId,
+      nodesWithCallbacks,
+      customSettings.links
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetPositionsToken]);
 
   useEffect(() => {
     if (!pendingEdgeRefresh) return;
@@ -398,7 +468,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     if (tableListChanged || !storedNodesVsTablesNodes) {
       // Re-arrange grid: displaced (user-positioned) nodes keep their positions,
       // new nodes get placed in free grid slots.
-      nodes = arrangeNodesOnGrid(nodes, links, tableDisplay.fontSize);
+      nodes = arrangeNodesOnGrid(nodes, links, tableDisplay.fontSize, tableDisplay.numCols ?? 5);
       tableListChanged = false;
     }
 
@@ -978,6 +1048,35 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     };
   }, []);
 
+  // Show a crosshair cursor over the chart while Shift is held, to surface the
+  // (otherwise hidden) shift-drag rubber-band selection feature. Clear on blur
+  // so the class doesn't get stuck if the user alt-tabs while holding Shift.
+  useEffect(() => {
+    const setShift = (pressed: boolean) => {
+      const el = flowContainerRef.current;
+      if (!el) return;
+      if (pressed) el.classList.add('shift-pressed');
+      else el.classList.remove('shift-pressed');
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') setShift(true);
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') setShift(false);
+    };
+    const onBlur = () => setShift(false);
+    // capture phase so we always see Shift first, even if ReactFlow's own
+    // document-level handler stops propagation for other keys
+    window.addEventListener('keydown', onKeyDown, true);
+    window.addEventListener('keyup', onKeyUp, true);
+    window.addEventListener('blur', onBlur);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown, true);
+      window.removeEventListener('keyup', onKeyUp, true);
+      window.removeEventListener('blur', onBlur);
+    };
+  }, []);
+
   // const proOptions = { hideAttribution: true };
   return (
     <div ref={flowContainerRef} style={{ width: '100%', height: '100%' }}>
@@ -993,6 +1092,11 @@ const PluginTR: React.FC<IPluginTRProps> = ({
         fitView={false}
         minZoom={0.3}
         maxZoom={1.5}
+        // Disable ReactFlow's built-in Backspace=delete shortcut. Table nodes
+        // represent real tables; an accidental delete would just be re-created
+        // by reconciliation on next load, but lose user-positioned coordinates.
+        // Text-note deletion still works through the dedicated trash button.
+        deleteKeyCode={null}
         // proOptions={proOptions}
         onMoveEnd={() => {
           const vp = reactFlow.getViewport();

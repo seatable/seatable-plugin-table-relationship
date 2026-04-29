@@ -95,7 +95,8 @@ export function generateDefaultCustomSettings(allTables: TableArray) {
     fontSize
   );
 
-  ns = arrangeNodesOnGrid(ns, lnk, fontSize);
+  const numCols = 5;
+  ns = arrangeNodesOnGrid(ns, lnk, fontSize, numCols);
   const es = generateEdges(lnk, ns, edgeStrokes);
   defaultActivePresetCustomSettings = {
     relationship: {
@@ -121,6 +122,7 @@ export function generateDefaultCustomSettings(allTables: TableArray) {
       isBackground: false,
       tblNoLnk: true,
       tblAllCols: true,
+      numCols: numCols,
     },
     links: lnk,
     nodes: ns,
@@ -173,7 +175,12 @@ export function checkIfColumnsAreEqual(
     customSettings.tableDisplay.selectedViews,
     customSettings.tableDisplay.tblAllCols
   );
-  nodes = arrangeNodesOnGrid(nodes, _links, customSettings.tableDisplay.fontSize);
+  nodes = arrangeNodesOnGrid(
+    nodes,
+    _links,
+    customSettings.tableDisplay.fontSize,
+    customSettings.tableDisplay.numCols ?? 5
+  );
   let newNodes = checkData(nodes, tableNodes); //checkColumnsPosition(nodes, _nodes);
   const _es = generateEdges(_links, newNodes, customSettings.tableDisplay.edgeStrokes);
   newNodes = [...newNodes, ...textNodes];
@@ -295,9 +302,14 @@ function checkData(array1: NodeResultItem[], array2: NodeResultItem[]): NodeResu
           ? item1.position
           : item2.position;
 
-      // Create merged item
+      // Create merged item.
+      // `hidden` must come from the fresh node (item1): it's a computed value
+      // derived from current link presence, displayedTables, tblNoLnk, isAllShown.
+      // Spreading item2 alone would keep the stale `hidden` — so a table that
+      // gained its first link column would stay hidden when tblNoLnk is off.
       const mergedItem: NodeResultItem = {
         ...item2,
+        hidden: item1.hidden,
         position: position,
         data: data,
       };
@@ -628,17 +640,25 @@ export function generateNodes(
 export function arrangeNodesOnGrid(
   nodes: NodeResultItem[],
   links: ILinksData[],
-  fontSize: number
+  fontSize: number,
+  numCols: number = 5
 ): NodeResultItem[] {
-  const numRows: number = 5;
-  const numCols: number = 5;
-  let rowHeights: number[] = [0];
   const gridPositions = optimizeNodePositions(nodes, links, numCols);
   if (!nodes || nodes.length === 0) {
     return nodes;
   }
 
-  for (let r = 0; r < numRows - 1; r++) {
+  // Compute row y-offsets up to the highest row actually used. Previously hardcoded
+  // to 5 rows, which left rowHeights[5+] undefined and produced NaN y-positions on
+  // bases with enough tables to spill past row 4.
+  let maxRow = 0;
+  Array.from(gridPositions.values()).forEach((p) => {
+    if (p.row > maxRow) maxRow = p.row;
+  });
+
+  const gap = 30;
+  const rowHeights: number[] = [0];
+  for (let r = 0; r < maxRow; r++) {
     const rowNodes = nodes.filter((n) => gridPositions.get(n.id)?.row === r);
     // Use actual measured height from ReactFlow when available, fall back to generous estimate
     const tallestHeight =
@@ -652,7 +672,6 @@ export function arrangeNodesOnGrid(
             })
           )
         : 0;
-    const gap = 30;
     rowHeights.push(rowHeights[rowHeights.length - 1] + tallestHeight + gap);
   }
 
@@ -660,12 +679,10 @@ export function arrangeNodesOnGrid(
     SCALE_NODES_WITH_FONTSIZE && fontSize > 14 ? 250 * (1 + (fontSize - 14) / 28) : 250;
 
   for (let i = 0; i < nodes.length; i++) {
-    const rowIndex = Math.floor(i / numCols);
-
     const gridPos = gridPositions.get(nodes[i].id);
     if (gridPos && !nodes[i].data.displaced) {
       nodes[i].position.x = 100 + gridPos.col * colWidth;
-      nodes[i].position.y = 100 + rowHeights[gridPos.row];
+      nodes[i].position.y = 100 + (rowHeights[gridPos.row] ?? 0);
     }
   }
   return nodes;
@@ -715,17 +732,29 @@ function placeWithCenteredConnections(
     if (placed.has(node.id)) return;
 
     const neighbors = Array.from(adjacencyMap.get(node.id) || []).filter((n) => n !== node.id);
-    /*const neighborsNames = neighbors.map((ne) => {
-      return (
-        nodes.filter((n) => n.id === ne)[0]?.data.name +
-        '(' +
-        nodes.filter((n) => n.id === ne)[0]?.id +
-        ')'
-      );
-    });*/
     const unplacedNeighbors = neighbors.filter((id) => !placed.has(id));
 
     const groupSize = 1 + unplacedNeighbors.length;
+
+    // Group too wide for the row: place this hub sequentially and let its neighbors
+    // be placed in their own outer-loop iteration. The previous code centered the hub
+    // and split neighbors left/right, but bounded both leftCol >= groupStart and
+    // rightCol < cols, so excess neighbors were silently dropped from `positions` and
+    // ended up overlapping at their initial generateNodes coordinates.
+    if (groupSize > cols) {
+      if (currentCol >= cols) {
+        currentCol = 0;
+        currentRow++;
+      }
+      positions.set(node.id, { nodeName: node.data.name, row: currentRow, col: currentCol });
+      placed.add(node.id);
+      currentCol++;
+      if (currentCol >= cols) {
+        currentCol = 0;
+        currentRow++;
+      }
+      return;
+    }
 
     if (currentCol + groupSize > cols) {
       currentCol = 0;

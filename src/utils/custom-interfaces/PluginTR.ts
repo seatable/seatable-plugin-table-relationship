@@ -11,6 +11,7 @@ interface IPluginTRProps {
   activeRelationships: RelationshipState;
   activeTableDisplay: TableDisplayState;
   previewHeaderColor?: string | null;
+  resetPositionsToken?: number;
 }
 interface ITableVisualizationProps {
   appActiveState: AppActiveState;
@@ -68,6 +69,7 @@ interface TableDisplayState {
   isBackground: boolean;
   tblNoLnk: boolean;
   tblAllCols: boolean;
+  numCols?: number;
 }
 
 interface PreviewHeaderColorState {

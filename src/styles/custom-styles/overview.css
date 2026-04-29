@@ -1,3 +1,18 @@
+/* When the user holds Shift over the chart, switch the cursor to crosshair to
+   advertise the rubber-band node-selection (shift+drag in ReactFlow).
+   ReactFlow sets `cursor: grab` not just on .react-flow__pane but also on
+   .react-flow__node and .react-flow__nodesselection-rect, so we have to override
+   all of them — otherwise hovering a table node keeps the grab cursor.
+   `!important` is needed to beat ReactFlow's .dragging cursor swap during drag. */
+.shift-pressed .react-flow__pane,
+.shift-pressed .react-flow__pane.selection,
+.shift-pressed .react-flow__pane.dragging,
+.shift-pressed .react-flow__node,
+.shift-pressed .react-flow__node.dragging,
+.shift-pressed .react-flow__nodesselection-rect {
+  cursor: crosshair !important;
+}
+
 .react-flow__node-custom {
   font-size: 10px;
   width: 180px;
