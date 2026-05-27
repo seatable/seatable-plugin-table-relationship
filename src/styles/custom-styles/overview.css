@@ -101,3 +101,50 @@
   height: 14px;
   background: linear-gradient(to bottom, var(--snap-color, rgba(74, 158, 255, 0.35)), transparent);
 }
+
+/* Width-resize handles for table nodes — styled like SeaTable's grid-pane-divider:
+   a 2px grey line + a small blue thumb, both hidden until hover, with a grab cursor.
+   Wider hit area (10px) than v11's default 1px line so it's easier to grab. */
+.react-flow__resize-control.tr-resize-control {
+  width: 10px !important;
+  border-left-width: 0 !important;
+  border-right-width: 0 !important;
+  background: transparent;
+  cursor: grab;
+}
+
+.react-flow__resize-control.tr-resize-control:active {
+  cursor: grabbing;
+}
+
+.tr-resize-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background: #aaa;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  pointer-events: none;
+}
+
+.tr-resize-thumb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 26px;
+  background: #2d7ff9;
+  border-radius: 10px;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  pointer-events: none;
+}
+
+.react-flow__resize-control.tr-resize-control:hover .tr-resize-line,
+.react-flow__resize-control.tr-resize-control:hover .tr-resize-thumb {
+  opacity: 1;
+}

@@ -106,12 +106,19 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       // If nodes are empty, re-trigger the preset load
       if (nodesRef.current.filter((n: any) => n.type === 'custom').length === 0) {
         const { customSettings } = isCustomSettingsFn(pluginDataStore, allTables, fallbackPresetId);
+        const refreshedNodes = updateNodesData(
+          allTables,
+          customSettings.tableDisplay.selectedViews,
+          customSettings.tableDisplay.tblAllCols,
+          customSettings.nodes
+        );
         setStates(
           customSettings.links,
-          customSettings.nodes,
+          refreshedNodes,
           customSettings.edges || [],
           customSettings.relationship,
-          customSettings.tableDisplay
+          customSettings.tableDisplay,
+          false,
         );
       }
     }, 500);
@@ -198,25 +205,14 @@ const PluginTR: React.FC<IPluginTRProps> = ({
 
     // Filtering the nodes based on the tables to display
     const nodesToDisplay = filterNotDisplayedNodes(cs?.nodes, activeTableDisplay);
-    let updatedNodes = nodesToDisplay;
-
-    if (
-      JSON.stringify(activeTableDisplay.selectedViews) !==
-        JSON.stringify(tableDisplay.selectedViews) ||
-      activeTableDisplay.tblAllCols !== tableDisplay.tblAllCols
-    ) {
-      updatedNodes = updateNodesData(
-        allTables,
-        //activeTableDisplay.displayedTables,
-        activeTableDisplay.selectedViews,
-        //activeTableDisplay.isAllShown,
-        //activeTableDisplay.tblNoLnk,
-        activeTableDisplay.tblAllCols,
-        //activeTableDisplay.headerColor,
-        //activeTableDisplay.fontSize,
-        nodesToDisplay
-      );
-    }
+    // Always refresh table/column names from the live SDK tables so that
+    // renames made while the plugin was closed are picked up immediately.
+    let updatedNodes = updateNodesData(
+      allTables,
+      activeTableDisplay.selectedViews,
+      activeTableDisplay.tblAllCols,
+      nodesToDisplay
+    );
 
     // Further filtering the nodes to remove any nodes without a type
     let validNodes =
@@ -276,16 +272,23 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       appActiveState.activePresetId
     );
     const activeCustomSettings = customSettings;
-    const { links, nodes, edges, relationship, tableDisplay } = activeCustomSettings;
+    const { links, edges, relationship, tableDisplay } = activeCustomSettings;
 
-    let _nodes = nodes.map((n: any) => ({
+    // Refresh table/column names from live SDK tables before applying fontSize
+    const refreshedNodes = updateNodesData(
+      allTables, activeTableDisplay.selectedViews, activeTableDisplay.tblAllCols,
+      activeCustomSettings.nodes
+    );
+    let _nodes = refreshedNodes.map((n: any) => ({
       ...n,
       data: {
         ...n.data,
         headerColor: activeTableDisplay.headerColor,
         fontSize: activeTableDisplay.fontSize,
       },
-      style: nodeStyleForFontSize(activeTableDisplay.fontSize),
+      // Preserve existing style.width so a user-resized node doesn't snap back
+      // to the default 180px when fontSize or headerColor changes.
+      style: { ...n.style, fontSize: activeTableDisplay.fontSize + 'px' },
     }));
     // Re-arrange grid positions for non-displaced nodes based on new fontSize
     _nodes = arrangeNodesOnGrid(
@@ -320,8 +323,13 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       allTables,
       appActiveState.activePresetId
     );
+    // Refresh table/column names from live SDK tables before re-arranging
+    const refreshedNodes = updateNodesData(
+      allTables, activeTableDisplay.selectedViews, activeTableDisplay.tblAllCols,
+      customSettings.nodes
+    );
     const arranged = arrangeNodesOnGrid(
-      customSettings.nodes,
+      refreshedNodes,
       customSettings.links,
       activeTableDisplay.fontSize,
       activeTableDisplay.numCols ?? 5
@@ -472,6 +480,9 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       tableListChanged = false;
     }
 
+    // Refresh table/column names from live SDK tables so that renames
+    // made while the plugin was closed are picked up on first load.
+    nodes = updateNodesData(allTables, td.selectedViews, td.tblAllCols, nodes);
     setStates(links, nodes, edges, relationship, tableDisplay, needsForceSave);
 
     // Restore viewport on preset switch or initial load.
@@ -509,7 +520,9 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     const _nodes = customSettings.nodes.map((n: any) => ({
       ...n,
       data: { ...n.data, headerColor: previewHeaderColor },
-      style: nodeStyleForFontSize(activeTableDisplay.fontSize),
+      // Preserve existing style.width so a user-resized node doesn't snap back
+      // to the default 180px when fontSize or headerColor changes.
+      style: { ...n.style, fontSize: activeTableDisplay.fontSize + 'px' },
     }));
     setNodes(injectNodeCallbacks(_nodes));
   }, [previewHeaderColor]);
@@ -523,21 +536,28 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       allTables,
       appActiveState.activePresetId
     );
-    const _nodes = customSettings.nodes.map((n: any) => ({
+    // Refresh table/column names from live SDK tables before applying headerColor
+    const refreshedNodes = updateNodesData(
+      allTables, activeTableDisplay.selectedViews, activeTableDisplay.tblAllCols,
+      customSettings.nodes
+    );
+    const _nodes = refreshedNodes.map((n: any) => ({
       ...n,
       data: {
         ...n.data,
         headerColor: activeTableDisplay.headerColor,
         fontSize: activeTableDisplay.fontSize,
       },
-      style: nodeStyleForFontSize(activeTableDisplay.fontSize),
+      // Preserve existing style.width so a user-resized node doesn't snap back
+      // to the default 180px when fontSize or headerColor changes.
+      style: { ...n.style, fontSize: activeTableDisplay.fontSize + 'px' },
     }));
     setStates(
       customSettings.links,
       _nodes,
       edges,
       customSettings.relationship,
-      customSettings.tableDisplay
+      customSettings.tableDisplay,
     );
   }, [activeTableDisplay.headerColor]);
 
@@ -676,7 +696,26 @@ const PluginTR: React.FC<IPluginTRProps> = ({
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => {
       setNodes((nds) => {
-        const result = applyNodeChanges(changes, nds);
+        // Width-only resize for custom nodes: NodeResizeControl in v11 has no
+        // resizeDirection prop, so its 'left'/'right' handles still emit a
+        // height delta on vertical pointer movement. Pin height to current
+        // measured height before applying the change.
+        const filteredChanges = changes.map((c: any) => {
+          if (c.type === 'dimensions' && c.updateStyle && c.dimensions) {
+            const node = nds.find((n) => n.id === c.id);
+            if (node?.type === 'custom') {
+              return {
+                ...c,
+                dimensions: {
+                  width: c.dimensions.width,
+                  height: node.height ?? c.dimensions.height,
+                },
+              };
+            }
+          }
+          return c;
+        });
+        const result = applyNodeChanges(filteredChanges, nds);
 
         // Only snap during drag (position changes)
         const posChanges = changes.filter(
@@ -929,19 +968,54 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     [pluginDataStore, activeRelationships, activeTableDisplay, appActiveState.activePresetId, links]
   );
 
+  // Resize-end handler for custom (table) nodes. NodeResizeControl has already
+  // updated React state via the dimensions change in onNodesChange (which we
+  // filter to be width-only). Here we just strip style.height (left over from
+  // ReactFlow's updateStyle) and persist to the SDK.
+  const handleNodeResizeEnd = useCallback(
+    (nodeId: string) => {
+      const currentNodes = reactFlow.getNodes();
+      const updated = currentNodes.map((n: any) => {
+        if (n.id === nodeId && n.type === 'custom' && n.style && 'height' in n.style) {
+          const { height: _h, ...rest } = n.style;
+          return { ...n, style: rest };
+        }
+        return n;
+      });
+      setNodes(updated);
+      setPluginDataStoreFn(
+        pluginDataStore,
+        activeRelationships,
+        activeTableDisplay,
+        appActiveState.activePresetId,
+        updated,
+        links
+      );
+    },
+    [pluginDataStore, activeRelationships, activeTableDisplay, appActiveState.activePresetId, links]
+  );
+
   function injectNodeCallbacks(nodes: any[]) {
     return nodes.map((n) => {
-      if (n.type !== 'textnode') return n;
-      return {
-        ...n,
-        selected: n.selected ?? false,
-        data: {
-          ...n.data,
-          onUpdate: updateNodeData,
-          onSave: saveNodeData,
-          onDelete: deleteNode,
-        },
-      };
+      if (n.type === 'textnode') {
+        return {
+          ...n,
+          selected: n.selected ?? false,
+          data: {
+            ...n.data,
+            onUpdate: updateNodeData,
+            onSave: saveNodeData,
+            onDelete: deleteNode,
+          },
+        };
+      }
+      if (n.type === 'custom') {
+        return {
+          ...n,
+          data: { ...n.data, onResizeEnd: handleNodeResizeEnd },
+        };
+      }
+      return n;
     });
   }
 

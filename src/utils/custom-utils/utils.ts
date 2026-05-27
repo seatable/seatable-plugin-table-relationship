@@ -262,6 +262,7 @@ export function checkNodesData(
           ? correspondingNode.data.name
           : currentNode.data.name;
 
+      currentNode.data.columns = correspondingNode.data.columns;
       currentNode.data.hasHiddenLinks = correspondingNode.data.hasHiddenLinks;
 
       /*currentNode.data.position =
@@ -515,6 +516,7 @@ export function updateNodesData(
         ...n,
         data: {
           ...n.data,
+          name: table.name.toString(),
           columns: info,
           hasHiddenLinks: tableHasLinks && !visibleHasLinks,
         },

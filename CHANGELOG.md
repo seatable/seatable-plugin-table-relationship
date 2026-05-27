@@ -1,10 +1,12 @@
 # Changelog
 
-## Version 1.2.6 (XX.XX.2026)
+## Version 1.2.6 (27.05.2026)
 
 - Allows to configure layout (maximum tables per row and resetting nodes positions)
 - Displays icon to notify that existing links are hidden in the current chart
 - Fixes the "Duplicate chart" action
+- Allow to adjust nodes' width
+- Dependency updates and depreciation fixes
 
 ## Version 1.2.5 (16.04.2026)
 
