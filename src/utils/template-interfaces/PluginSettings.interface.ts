@@ -23,6 +23,7 @@ interface IPluginSettingsProps {
   activeComponents: IActiveComponents;
   previewHeaderColor?: string | null;
   onPreviewHeaderColor: (t: any) => void;
+  onResetPositions?: () => void;
 }
 
 interface SelectOption {

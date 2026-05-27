@@ -11,8 +11,7 @@ interface IPluginTRProps {
   activeRelationships: RelationshipState;
   activeTableDisplay: TableDisplayState;
   previewHeaderColor?: string | null;
-  setPluginDataStore: (t: any) => void;
-  // onPreviewHeaderColor: (t: any) => void;
+  resetPositionsToken?: number;
 }
 interface ITableVisualizationProps {
   appActiveState: AppActiveState;
@@ -32,7 +31,7 @@ interface RelationshipState {
   recSelfRel: boolean;
   // Link formula relationship
   lkRel: boolean;
-  lk2Rel: boolean;
+  lk2Rel: boolean; // TODO: wire up to filterRelationshipLinks and add UI toggle in PluginSettings
   countLinks: boolean;
   rollup: boolean;
   findmax: boolean;
@@ -70,6 +69,7 @@ interface TableDisplayState {
   isBackground: boolean;
   tblNoLnk: boolean;
   tblAllCols: boolean;
+  numCols?: number;
 }
 
 interface PreviewHeaderColorState {

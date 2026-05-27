@@ -156,7 +156,7 @@ const PluginPresets: React.FC<IPresetsProps> = ({
   const addPreset = (
     type: string,
     presetName: string,
-    option?: { pId: string; pSettings: PresetSettings }
+    option?: { pId: string; pSettings: PresetSettings; pCustomSettings?: any }
   ) => {
     let _presetSettings: PresetSettings =
       type === PresetHandleAction.new
@@ -174,6 +174,11 @@ const PluginPresets: React.FC<IPresetsProps> = ({
     newPresetsArray.push(newPreset);
     let initUpdated = initPresetSetting();
     newPresetsArray[_activePresetIdx].settings = Object.assign(_presetSettings, initUpdated);
+    if (type === PresetHandleAction.duplicate && option?.pCustomSettings) {
+      newPresetsArray[_activePresetIdx].customSettings = deepCopy(option.pCustomSettings);
+    } else if (type === PresetHandleAction.new) {
+      newPresetsArray[_activePresetIdx].customSettings = generateDefaultCustomSettings(allTables);
+    }
     const updatedPluginDataStore = { ...pluginDataStore, presets: newPresetsArray };
     updatePresets(_activePresetIdx, newPresetsArray, updatedPluginDataStore, _id);
     const _activeTableAndView: IActiveTableAndView = getActiveTableAndActiveView(
@@ -197,25 +202,26 @@ const PluginPresets: React.FC<IPresetsProps> = ({
 
   // Duplicate a preset
   const duplicatePreset = (p: any) => {
-    // anytofix
-    const { name, _id, settings } = p;
+    const { name, _id, settings, customSettings } = p;
     let _presetNames = _pluginPresets.map((p) => p.name);
     let _presetName = appendPresetSuffix(name, _presetNames, 'copy');
-    addPreset(PresetHandleAction.duplicate, _presetName, { pId: _id, pSettings: settings });
+    addPreset(PresetHandleAction.duplicate, _presetName, {
+      pId: _id,
+      pSettings: settings,
+      pCustomSettings: customSettings,
+    });
   };
 
   // edit preset name
   const editPreset = (presetName: string) => {
     let newPluginPresets = deepCopy(pluginPresets);
     let oldPreset = pluginPresets[activePresetIdx];
-    let _id: string = generatorPresetId(pluginPresets) || '';
-    let updatedPreset = new Preset({ ...oldPreset, _id, name: presetName });
-    localStorage.setItem(ACTIVE_PRESET_ID, _id);
+    let updatedPreset = new Preset({ ...oldPreset, name: presetName });
 
     newPluginPresets.splice(activePresetIdx, 1, updatedPreset);
     const updatedPluginDataStore = { ...pluginDataStore, presets: newPluginPresets };
 
-    updatePresets(activePresetIdx, newPluginPresets, updatedPluginDataStore, _id);
+    updatePresets(activePresetIdx, newPluginPresets, updatedPluginDataStore, oldPreset._id);
   };
 
   // Delete the selected Preset

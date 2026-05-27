@@ -1,5 +1,5 @@
-@import '../abstracts/_media.scss';
-@import '../constants.scss';
+@use '../abstracts/media' as *;
+@use '../constants' as *;
 
 // STYLE FOR PLUGIN SETTINGS COMPONENT
 .settings,

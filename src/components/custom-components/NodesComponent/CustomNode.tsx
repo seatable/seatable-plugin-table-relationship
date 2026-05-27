@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Handle, Position } from 'reactflow';
+import { Handle, Position, NodeResizeControl, ResizeControlVariant } from 'reactflow';
 import { CellType, COLUMNS_ICON_CONFIG } from 'dtable-utils';
 import { FaLinkSlash } from 'react-icons/fa6';
 import intl from 'react-intl-universal';
@@ -50,7 +50,7 @@ function getIconByType(ct: any, t: any) {
   return i;
 }
 
-function CustomNode({ id, data }: { id: string; data: any }) {
+function CustomNode({ id, data, selected }: { id: string; data: any; selected?: boolean }) {
   const parsed = parseColor(data.headerColor);
   const validHeaderColor = parsed ? data.headerColor : DEFAULT_COLOR;
 
@@ -65,8 +65,33 @@ function CustomNode({ id, data }: { id: string; data: any }) {
     const lumaYIQ = Math.round((r * 299 + g * 587 + b * 114) / 1000);
     textColor = lumaYIQ > 160 ? 'black' : 'white'; // limit value should be 125, but set to 160 to keep the white text color with the default orange (lumaYIQ = 151)
   }
+  // Approximate header height: padding (8+8) + content (~1.2 * fontSize) + 1px border.
+  // Used to shift the resize thumb down so it's centered on the body, not the whole node.
+  const fs = data.fontSize ?? 14;
+  const headerHeightPx = 17 + 1.2 * fs;
+  const thumbTop = `calc(50% + ${headerHeightPx / 2}px)`;
   return (
     <>
+      <NodeResizeControl
+        className="tr-resize-control"
+        position="left"
+        variant={ResizeControlVariant.Line}
+        minWidth={120}
+        maxWidth={500}
+        onResizeEnd={() => data.onResizeEnd?.(id)}>
+        <div className="tr-resize-line" />
+        <div className="tr-resize-thumb" style={{ top: thumbTop }} />
+      </NodeResizeControl>
+      <NodeResizeControl
+        className="tr-resize-control"
+        position="right"
+        variant={ResizeControlVariant.Line}
+        minWidth={120}
+        maxWidth={500}
+        onResizeEnd={() => data.onResizeEnd?.(id)}>
+        <div className="tr-resize-line" />
+        <div className="tr-resize-thumb" style={{ top: thumbTop }} />
+      </NodeResizeControl>
       <div
         className={stylesCustom.custom_node_header}
         style={{ backgroundColor: validHeaderColor, color: textColor }}>

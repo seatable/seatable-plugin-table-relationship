@@ -1,4 +1,4 @@
-@import '../abstracts/_media.scss';
+@use '../abstracts/media' as *;
 // STYLE FOR NEW VIEW POPUP COMPONENT
 
 .presetPopUp {

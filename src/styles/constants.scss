@@ -37,17 +37,17 @@ $toggle-after-bgColor: #fff;
 $toggle-after-boxShadow: rgba(0, 0, 0, 0.4);
 $toggle-active-bgColor: #ff8001;
 
+@use 'sass:color';
+
 // Function to calculate contrast color based on brightness
-@function colorContrast($color) {
-  // Convert RGB color to HSL
-  $r: calc(red($color) / 255);
-  $g: calc(green($color) / 255);
-  $b: calc(blue($color) / 255);
+@function colorContrast($c) {
+  $r: calc(color.channel($c, 'red', $space: rgb) / 255);
+  $g: calc(color.channel($c, 'green', $space: rgb) / 255);
+  $b: calc(color.channel($c, 'blue', $space: rgb) / 255);
   $min: min($r, $g, $b);
   $max: max($r, $g, $b);
   $l: calc(($min + $max) / 2);
 
-  // Choose black or white as the contrasting color
   @if $l > 0.5 {
     @return $preset-text2;
   } @else {

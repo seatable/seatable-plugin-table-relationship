@@ -60,7 +60,6 @@ import {
 } from './utils/custom-interfaces/PluginTR';
 import { AVAILABLE_LOCALES, DEFAULT_LOCALE } from './locale';
 import { generateDefaultCustomSettings } from './utils/custom-utils/utils';
-import { visitParameterList } from 'typescript';
 
 // Normalize strokeDasharray values that were corrupted by old generateEdges mutation.
 // Maps computed values like '3 3' back to canonical '5 5' (dashed), '1 3' to '1 5' (dotted).
@@ -103,6 +102,7 @@ function normalizeTableDisplay(td: TableDisplayState): TableDisplayState {
     headerColor: td.headerColor ?? '#ED7109',
     fontSize: td.fontSize ?? 14,
     backgroundColor: td.backgroundColor ?? '#F5F5F5',
+    numCols: td.numCols ?? 5,
     edgeStrokes: td.edgeStrokes ?? {
       link: { stroke: '#212529', strokeWidth: 1, strokeDasharray: '0' },
       formula: { stroke: '#212529', strokeWidth: 1, strokeDasharray: '5 5' },
@@ -160,6 +160,7 @@ const App: React.FC<IAppProps> = (props) => {
     backgroundColor: '#F5F5F5',
     tblNoLnk: true,
     tblAllCols: true,
+    numCols: 5,
     edgeStrokes: {
       link: {
         stroke: '#212529',
@@ -179,6 +180,10 @@ const App: React.FC<IAppProps> = (props) => {
     },
   });
   const [previewHeaderColor, setPreviewHeaderColor] = useState<string | null>(null);
+  // Incrementing counter that signals PluginTR to clear `displaced` flags on table
+  // nodes and re-run the grid layout. Stored only in React state — not persisted —
+  // because it represents a one-shot user action, not a setting.
+  const [resetPositionsToken, setResetPositionsToken] = useState<number>(0);
   // const [previewHeaderColor, setPreviewHeaderColor] = useState<PreviewHeaderColorState>({previewHeaderColor: '#ED7109'});
   // Destructure properties from the app's active state for easier access
   const { activeTable, activePresetId, activePresetIdx } = appActiveState;
@@ -632,6 +637,10 @@ const App: React.FC<IAppProps> = (props) => {
     });
   }
 
+  function handleResetPositions() {
+    setResetPositionsToken((n) => n + 1);
+  }
+
   if (!isShowPlugin) {
     return null;
   }
@@ -688,9 +697,8 @@ const App: React.FC<IAppProps> = (props) => {
                 pluginDataStore={pluginDataStore}
                 activeRelationships={activeRelationships}
                 activeTableDisplay={activeTableDisplay}
-                setPluginDataStore={setPluginDataStore}
-                // onPreviewHeaderColor={setPreviewHeaderColor}
                 previewHeaderColor={previewHeaderColor}
+                resetPositionsToken={resetPositionsToken}
               />
             </div>
 
@@ -709,6 +717,7 @@ const App: React.FC<IAppProps> = (props) => {
               handleTableDisplays={handleTableDisplays}
               onPreviewHeaderColor={setPreviewHeaderColor}
               previewHeaderColor={previewHeaderColor}
+              onResetPositions={handleResetPositions}
             />
           </div>
         </div>

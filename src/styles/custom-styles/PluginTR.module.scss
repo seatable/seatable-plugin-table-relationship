@@ -1,5 +1,5 @@
 // Import any necessary SCSS files or define variables if needed
-@import '../abstracts/_media.scss';
+@use '../abstracts/media' as *;
 
 // Define your styles for the CustomPlugin component
 .custom {
