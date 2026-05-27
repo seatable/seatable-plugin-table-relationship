@@ -169,9 +169,10 @@ module.exports = function (webpackEnv) {
         },
         {
           loader: require.resolve(preProcessor),
-          options: {
-            sourceMap: true,
-          },
+          options: Object.assign(
+            { sourceMap: true },
+            preProcessor === 'sass-loader' ? { api: 'modern-compiler' } : {}
+          ),
         }
       );
     }
@@ -530,27 +531,6 @@ module.exports = function (webpackEnv) {
                   loader: 'less-loader',
                   options: {
                     javascriptEnabled: true,
-                  },
-                },
-              ],
-            },
-            {
-              test: /\.svg$/,
-              use: [
-                {
-                  loader: 'svg-sprite-loader',
-                  options: {},
-                },
-                {
-                  loader: 'svgo-loader',
-                  options: {
-                    plugins: [
-                      'removeTitle',
-                      'removeStyleElement',
-                      'cleanupIDs',
-                      'inlineStyles',
-                      'removeXMLProcInst',
-                    ],
                   },
                 },
               ],

@@ -1,5 +1,5 @@
-@import '../abstracts/_media.scss';
-@import '../constants.scss';
+@use '../abstracts/media' as *;
+@use '../constants' as *;
 
 .presets {
   height: 100vh;

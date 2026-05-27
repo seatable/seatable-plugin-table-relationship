@@ -1,4 +1,4 @@
-@import '../constants.scss';
+@use '../constants' as *;
 
 .toggle_switch {
   width: 22px;
