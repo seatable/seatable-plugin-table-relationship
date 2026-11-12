@@ -118,7 +118,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
           customSettings.edges || [],
           customSettings.relationship,
           customSettings.tableDisplay,
-          false,
+          false
         );
       }
     }, 500);
@@ -276,7 +276,9 @@ const PluginTR: React.FC<IPluginTRProps> = ({
 
     // Refresh table/column names from live SDK tables before applying fontSize
     const refreshedNodes = updateNodesData(
-      allTables, activeTableDisplay.selectedViews, activeTableDisplay.tblAllCols,
+      allTables,
+      activeTableDisplay.selectedViews,
+      activeTableDisplay.tblAllCols,
       activeCustomSettings.nodes
     );
     let _nodes = refreshedNodes.map((n: any) => ({
@@ -325,7 +327,9 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     );
     // Refresh table/column names from live SDK tables before re-arranging
     const refreshedNodes = updateNodesData(
-      allTables, activeTableDisplay.selectedViews, activeTableDisplay.tblAllCols,
+      allTables,
+      activeTableDisplay.selectedViews,
+      activeTableDisplay.tblAllCols,
       customSettings.nodes
     );
     const arranged = arrangeNodesOnGrid(
@@ -538,7 +542,9 @@ const PluginTR: React.FC<IPluginTRProps> = ({
     );
     // Refresh table/column names from live SDK tables before applying headerColor
     const refreshedNodes = updateNodesData(
-      allTables, activeTableDisplay.selectedViews, activeTableDisplay.tblAllCols,
+      allTables,
+      activeTableDisplay.selectedViews,
+      activeTableDisplay.tblAllCols,
       customSettings.nodes
     );
     const _nodes = refreshedNodes.map((n: any) => ({
@@ -557,7 +563,7 @@ const PluginTR: React.FC<IPluginTRProps> = ({
       _nodes,
       edges,
       customSettings.relationship,
-      customSettings.tableDisplay,
+      customSettings.tableDisplay
     );
   }, [activeTableDisplay.headerColor]);
 
