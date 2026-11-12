@@ -24,7 +24,7 @@ import { generateDefaultCustomSettings } from '../../../utils/custom-utils/utils
 import {
   ACTIVE_PRESET_ID,
   DEFAULT_PLUGIN_DATA,
-  PLUGIN_NAME,
+  pluginDisplayName,
   PresetHandleAction,
   TABLE_NAME,
 } from '../../../utils/template-constants';
@@ -339,7 +339,7 @@ const PluginPresets: React.FC<IPresetsProps> = ({
       <div className="d-flex flex-column">
         <div className={`d-flex align-items-center py-2 pb-4 ${stylesPresets.presets_logo}`}>
           <img src={icon} alt="Plugin Icon" className={stylesPresets.presets_icon} />
-          <div className={stylesPresets.presets_name}>{PLUGIN_NAME}</div>
+          <div className={stylesPresets.presets_name}>{pluginDisplayName()}</div>
         </div>
         {pluginPresets?.map((preset, i) => (
           <div
