@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Shows the plugin name in the interface language in the presets panel
+- French and Chinese: uses SeaTable's terms for tables and bases in the name, the description and the interface
+- Builds without a local `setting.local.js`
+
 ## Version 1.2.6 (27.05.2026)
 
 - Allows to configure layout (maximum tables per row and resetting nodes positions)
