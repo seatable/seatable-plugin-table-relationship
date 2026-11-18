@@ -1,10 +1,11 @@
 # Changelog
 
-## Unreleased
+## Version 1.2.7 (16.11.2026)
 
 - Shows the plugin name in the interface language in the presets panel
 - French and Chinese: uses SeaTable's terms for tables and bases in the name, the description and the interface
 - Builds without a local `setting.local.js`
+- Updates dtable-ui-component to 7.0.20
 
 ## Version 1.2.6 (27.05.2026)
 
